@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.basic.dao.MdMatInfoDAO">
+	<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllMdMatInfoColumns" >
+		<![CDATA[
+		select
+			ROW_ID,
+			UPPER(MATERIAL_NO) MATERIAL_NO,
+			CUSTOMER_MODEL,
+			MATERIAL_DESP,
+			PLANT,
+			WIDTH,
+			HIGTH,
+			LENGTH,
+			EXTERNAL_MAT_GROUP,
+			GROSS_WEIGHT,
+			NET_WEIGHT,
+			SIZE_DIMENSION,
+			BASIC_UNIT,
+			PLANT_STATUS,
+			DIVISION,
+			PRODUCE_ATTRIBUTE,
+			MODIFY_DATE as MODIFY_DATE,
+			VERSION,
+			ACTIVESTATE,
+			CREATED_BY,
+		    CREATED_DATE as CREATED_DATE,
+			MODIFY_BY,
+			REMARK,
+			IN_OUT,
+			MAT_SCAN_TYPE,
+			PRODUCE_MODEL,
+			md_mat_info_.MARKET_STATUS,
+			md_mat_info_.PACKAGE_NO,
+			LOCATION,
+			ORDER_UNIT,
+			ORDER_BASIC_FACTOR,
+			ORDER_FACTOR,
+			ISSUE_UNIT,
+			ISSUE_BASIC_FACTOR,
+			ISSUE_FACTOR,
+			MAT_TYPE,
+			MRP_CODE,
+			PURCHASE_GROUP,
+			OLD_MAT,
+			VOLUME,
+			VOLUME_UNIT,
+			MEASURE_UNIT
+		from 
+			MD_MAT_INFO md_mat_info_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="mdMatInfoMap" type="mdMatInfo">
+		<id property="rowId" column="ROW_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="plant" column="PLANT" />
+		<result property="name" column="NAME" />
+		<result property="externalMatGroup" column="EXTERNAL_MAT_GROUP" />
+		<result property="grossWeight" column="GROSS_WEIGHT" />
+		<result property="netWeight" column="NET_WEIGHT" />
+		<result property="sizeDimension" column="SIZE_DIMENSION" />
+		<result property="basicUnit" column="BASIC_UNIT" />
+		<result property="plantStatus" column="PLANT_STATUS" />
+		<result property="division" column="DIVISION" />
+		<result property="produceAttribute" column="PRODUCE_ATTRIBUTE" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="version" column="VERSION" />
+		<result property="activestate" column="ACTIVESTATE" />
+		<result property="createdBy" column="CREATED_BY" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="remark" column="REMARK" />
+		<result property="inOut" column="IN_OUT" />
+		<result property="produceModel" column="PRODUCE_MODEL" />
+		<result property="matScanType" column="MAT_SCAN_TYPE" />
+		<result property="cbm" column="CBM" />
+		<result property="length" column="LENGTH" />
+		<result property="width" column="WIDTH" />
+		<result property="higth" column="HIGTH" />
+		<result property="marketStatus" column="MARKET_STATUS" />
+		<result property="packageNo" column="PACKAGE_NO" />
+		
+		<result property="location" column="LOCATION" />
+		<result property="orderUnit" column="ORDER_UNIT" />
+		<result property="orderBasicFactor" column="ORDER_BASIC_FACTOR" />
+		<result property="orderFactor" column="ORDER_FACTOR" />
+		<result property="issueUnit" column="ISSUE_UNIT" />
+		<result property="issueBasicFactor" column="ISSUE_BASIC_FACTOR" />
+		<result property="issueFactor" column="ISSUE_FACTOR" />
+		<result property="matType" column="MAT_TYPE" />
+		<result property="mrpCode" column="MRP_CODE" />
+		<result property="purchaseGroup" column="PURCHASE_GROUP" />
+		<result property="oldMat" column="OLD_MAT" />
+		<result property="volume" column="VOLUME" />
+		<result property="volumeUnit" column="VOLUME_UNIT" />
+		<result property="measureUnit" column="MEASURE_UNIT" />
+		
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="mdMatInfoMap">
+		<include refid="selectAllMdMatInfoColumns" />
+	</select>
+	<select id="get" resultMap="mdMatInfoMap" parameterType="long">
+		<include refid="selectAllMdMatInfoColumns" />
+		<![CDATA[
+		where md_mat_info_.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from MD_MAT_INFO where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from MD_MAT_INFO where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="mdMatInfo">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_MD_MAT_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into MD_MAT_INFO
+		  (		ROW_ID
+		  		,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,PLANT
+				,EXTERNAL_MAT_GROUP
+				,GROSS_WEIGHT
+				,NET_WEIGHT
+				,SIZE_DIMENSION
+				,BASIC_UNIT
+				,PLANT_STATUS
+				,DIVISION
+				,PRODUCE_ATTRIBUTE
+				,MODIFY_DATE
+				,VERSION
+				,ACTIVESTATE
+				,CREATED_BY
+				,CREATED_DATE
+				,MODIFY_BY
+				,REMARK
+				,IN_OUT
+				,MAT_SCAN_TYPE
+				,PRODUCE_MODEL
+				,LENGTH
+				,HIGTH
+				,WIDTH
+				,MARKET_STATUS
+				,PACKAGE_NO
+				,LOCATION
+				,ORDER_UNIT
+				,ORDER_BASIC_FACTOR
+				,ORDER_FACTOR
+				,ISSUE_UNIT
+				,ISSUE_BASIC_FACTOR
+				,ISSUE_FACTOR
+				,MAT_TYPE
+				,MRP_CODE
+				,PURCHASE_GROUP
+				,OLD_MAT
+				,VOLUME
+				,VOLUME_UNIT
+				,MEASURE_UNIT
+		   )
+		values
+		  (		#{rowId}
+		  		,#{materialNo}
+				,#{customerModel}
+				,#{materialDesp}
+				,#{plant}
+				,#{externalMatGroup}
+				,#{grossWeight}
+				,#{netWeight}
+				,#{sizeDimension}
+				,#{basicUnit}
+				,#{plantStatus}
+				,#{division}
+				,#{produceAttribute}
+				,#{modifyDate}
+				,#{version}
+				,#{activestate}
+				,#{createdBy}
+				,#{createdDate}
+				,#{modifyBy}
+				,#{remark}
+				,#{inOut}
+				,#{matScanType}
+				,#{produceModel}
+				,#{length}
+			    ,#{higth}
+			    ,#{width}
+			    ,#{marketStatus}
+			    ,#{packageNo}
+			    ,#{location}
+			    ,#{orderUnit}
+			    ,#{orderBasicFactor}
+			    ,#{orderFactor}
+			    ,#{issueUnit}
+			    ,#{issueBasicFactor}
+			    ,#{issueFactor}
+			    ,#{matType}
+			    ,#{mrpCode}
+			    ,#{purchaseGroup}
+			    ,#{oldMat}
+			    ,#{volume}
+			    ,#{volumeUnit}
+			    ,#{measureUnit}
+			)
+	    ]]>
+	</insert>
+	<update id="update" parameterType="mdMatInfo">
+		<![CDATA[
+		update MD_MAT_INFO
+		   set 	MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,PLANT = #{plant}
+				,LENGTH = #{length}
+				,WIDTH = #{width}
+				,HIGTH = #{higth}
+				,EXTERNAL_MAT_GROUP = #{externalMatGroup}
+				,GROSS_WEIGHT = #{grossWeight}
+				,NET_WEIGHT = #{netWeight}
+				,SIZE_DIMENSION = #{sizeDimension}
+				,BASIC_UNIT = #{basicUnit}
+				,PLANT_STATUS = #{plantStatus}
+				,DIVISION = #{division}
+				,MODIFY_DATE = #{modifyDate}
+				,MODIFY_BY = #{modifyBy}
+				,REMARK = #{remark}
+				,MAT_SCAN_TYPE = #{matScanType}
+				,produce_attribute = #{produceAttribute}
+				,activestate = #{activestate}
+				,MARKET_STATUS = #{marketStatus}
+				,PACKAGE_NO = #{packageNo}
+				,LOCATION = #{location}
+			    ,ORDER_UNIT = #{orderUnit}
+			    ,ORDER_BASIC_FACTOR = #{orderBasicFactor}
+			    ,ORDER_FACTOR = #{orderFactor}
+			    ,ISSUE_UNIT = #{issueUnit}
+			    ,ISSUE_BASIC_FACTOR = #{issueBasicFactor}
+			    ,ISSUE_FACTOR = #{issueFactor}
+			    ,MAT_TYPE = #{matType}
+			    ,MRP_CODE = #{mrpCode}
+			    ,PURCHASE_GROUP = #{purchaseGroup}
+			    ,OLD_MAT = #{oldMat}
+			    ,VOLUME = #{volume}
+			    ,VOLUME_UNIT = #{volumeUnit}
+			    ,MEASURE_UNIT = #{measureUnit}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchMdMatInfo_fragement">
+		<include refid="selectAllMdMatInfoColumns" />
+		where 1=1
+		<if test="mdMatInfo.materialNo != null and mdMatInfo.materialNo != ''">
+			and upper(MATERIAL_NO) = upper(#{mdMatInfo.materialNo})
+		</if>
+		<!-- 这个条件特许 标识 一下  请查看sql -->
+		<if test="mdMatInfo.basicUnit != null and  mdMatInfo.basicUnit != ''">
+			and DIVISION != #{mdMatInfo.basicUnit}
+		</if>
+		<if test="mdMatInfo.materialDesp != null and mdMatInfo.materialDesp != ''">
+			and MATERIAL_DESP like '%'||#{mdMatInfo.materialDesp}||'%'
+		</if>
+		<if test="mdMatInfo.plant != null">
+			and PLANT = #{mdMatInfo.plant}
+		</if>
+
+		<if test="mdMatInfo.remark != null and mdMatInfo.remark != ''">
+			and ( MATERIAL_NO like '%'||#{mdMatInfo.remark}||'%' 
+			or CUSTOMER_MODEL like '%'||#{mdMatInfo.remark}||'%'  or
+			MATERIAL_DESP like '%'||#{mdMatInfo.remark}||'%'  )
+		</if>
+	</sql>
+	<select id="searchMdMatInfos" resultMap="mdMatInfoMap">
+		<include refid="pagination_Head" />
+		select
+			md_mat_info_.ROW_ID as ROW_ID,
+			UPPER(MATERIAL_NO) as MATERIAL_NO,
+			CUSTOMER_MODEL,
+			MATERIAL_DESP,
+			PLANT,
+			md_mat_info_.DIVISION as DIVISION,
+			zz.NAME,
+			md_mat_info_.CBM as CBM,
+			WIDTH,
+			HIGTH,
+			LENGTH,
+			EXTERNAL_MAT_GROUP,
+			GROSS_WEIGHT,
+			NET_WEIGHT,
+			SIZE_DIMENSION,
+			BASIC_UNIT,
+			PLANT_STATUS,
+			PRODUCE_ATTRIBUTE,
+			md_mat_info_.MODIFY_DATE as MODIFY_DATE,
+			md_mat_info_.VERSION,
+			ACTIVESTATE,
+			md_mat_info_.CREATED_BY,
+		    md_mat_info_.CREATED_DATE as CREATED_DATE,
+			md_mat_info_.MODIFY_BY,
+			REMARK,
+			IN_OUT,
+			MAT_SCAN_TYPE,
+			PRODUCE_MODEL,
+			md_mat_info_.MARKET_STATUS,
+			md_mat_info_.PACKAGE_NO,
+			1,
+			LOCATION,
+			ORDER_UNIT,
+			ORDER_BASIC_FACTOR,
+			ORDER_FACTOR,
+			ISSUE_UNIT,
+			ISSUE_BASIC_FACTOR,
+			ISSUE_FACTOR,
+			MAT_TYPE,
+			MRP_CODE,
+			PURCHASE_GROUP,
+			OLD_MAT,
+			VOLUME,
+			VOLUME_UNIT,
+			MEASURE_UNIT
+		from 
+			MD_MAT_INFO md_mat_info_ 
+			left JOIN (select z.NAME,z.CODE from cd_factory z) zz on zz.CODE=md_mat_info_.plant
+		<include refid="searchMdMatInfo_fragement2" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchMdMatInfosCount" resultType="long">
+		<include refid="count_Head" />
+		select
+			md_mat_info_.ROW_ID,
+			UPPER(MATERIAL_NO) as MATERIAL_NO,
+			CUSTOMER_MODEL,
+			MATERIAL_DESP,
+			PLANT,
+			zz.NAME,
+			WIDTH,
+			HIGTH,
+			LENGTH,
+			EXTERNAL_MAT_GROUP,
+			GROSS_WEIGHT,
+			NET_WEIGHT,
+			SIZE_DIMENSION,
+			BASIC_UNIT,
+			PLANT_STATUS,
+			PRODUCE_ATTRIBUTE,
+			md_mat_info_.MODIFY_DATE as MODIFY_DATE,
+			md_mat_info_.VERSION,
+			ACTIVESTATE,
+			md_mat_info_.CREATED_BY,
+		    md_mat_info_.CREATED_DATE as CREATED_DATE,
+			md_mat_info_.MODIFY_BY,
+			REMARK,
+			IN_OUT,
+			MAT_SCAN_TYPE,
+			PRODUCE_MODEL,
+			md_mat_info_.MARKET_STATUS,
+			md_mat_info_.PACKAGE_NO,
+			1,
+			LOCATION,
+			ORDER_UNIT,
+			ORDER_BASIC_FACTOR,
+			ORDER_FACTOR,
+			ISSUE_UNIT,
+			ISSUE_BASIC_FACTOR,
+			ISSUE_FACTOR,
+			MAT_TYPE,
+			MRP_CODE,
+			PURCHASE_GROUP,
+			OLD_MAT,
+			VOLUME,
+			VOLUME_UNIT,
+			MEASURE_UNIT
+		from 
+			MD_MAT_INFO md_mat_info_ 
+			left JOIN (select z.NAME,z.CODE from cd_factory z) zz on zz.CODE=md_mat_info_.plant
+			 <!-- left join (select t.material_no as mat_code,sum(t.wms_qty) as wms_qty 
+			 from  ods_inventory_info as t group by  t.material_no) as inve 
+			 on inve.mat_code=md_mat_info_.material_no -->
+		<include refid="searchMdMatInfo_fragement2" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getMdMatInfoByParam" resultMap="mdMatInfoMap">
+		<include refid="searchMdMatInfo_fragement" />
+	</select>
+	<select id="checkMdMatExists" resultType="long">
+		SELECT COUNT(*)
+		FROM MD_MAT_INFO S
+		WHERE S.MATERIAL_NO = #{materialNo}
+	</select>
+	<select id="getMdMatInfoByMaterialNo" resultMap="mdMatInfoMap">
+		<include refid="selectAllMdMatInfoColumns" />
+		where 1=1
+		<if test="materialNo != null and materialNo != ''">
+			and MATERIAL_NO = #{materialNo}
+		</if>
+	</select>
+	<select id="getCountByMaterialNoExceptSelf" resultType="long">
+		select count(*) from md_mat_info t 
+			where 1=1 and t.MATERIAL_NO=#{mdMatInfo.materialNo} 
+						and t.ROW_ID !=#{mdMatInfo.rowId}
+	</select>
+	
+	<sql id="searchMdMatInfo_fragement2">
+		where 1=1
+		<if test="mdMatInfo.materialNo != null and mdMatInfo.materialNo != ''">
+			and MATERIAL_NO = upper(#{mdMatInfo.materialNo})
+		</if>
+		<if test="mdMatInfo.customerModel != null and mdMatInfo.customerModel != ''">
+			and CUSTOMER_MODEL = #{mdMatInfo.customerModel} 
+		</if>
+		<if test="mdMatInfo.matScanType != null and mdMatInfo.matScanType != ''">
+			and MAT_SCAN_TYPE = #{mdMatInfo.matScanType}
+		</if>
+		<if test="mdMatInfo.division != null and mdMatInfo.division != ''">
+			and DIVISION = #{mdMatInfo.division}  
+		</if>
+		<if test="mdMatInfo.basicUnit != null and  mdMatInfo.basicUnit != ''">
+			and BASIC_UNIT != #{mdMatInfo.basicUnit}
+		</if>
+		<if test="mdMatInfo.materialDesp != null and mdMatInfo.materialDesp != ''">
+			and MATERIAL_DESP like '%'||#{mdMatInfo.materialDesp}||'%' 
+		</if>
+		<if test="mdMatInfo.plant != null">
+			and PLANT = #{mdMatInfo.plant}
+		</if>
+		<if test="mdMatInfo.division != null and mdMatInfo.division != '' ">
+			and DIVISION = #{mdMatInfo.division } 
+		</if>
+		<if test="mdMatInfo.externalMatGroup != null">
+			and EXTERNAL_MAT_GROUP = #{mdMatInfo.externalMatGroup}
+		</if>
+		<if test="mdMatInfo.grossWeight != null">
+			and GROSS_WEIGHT = #{mdMatInfo.grossWeight}
+		</if>
+		<if test="mdMatInfo.netWeight != null">
+			and NET_WEIGHT = #{mdMatInfo.netWeight}
+		</if>
+		<if test="mdMatInfo.sizeDimension != null">
+			and SIZE_DIMENSION = #{mdMatInfo.sizeDimension}  
+		</if>
+		<if test="mdMatInfo.plantStatus != null">
+			and PLANT_STATUS = #{mdMatInfo.plantStatus}
+		</if>
+		<if test="mdMatInfo.produceAttribute != null">
+			and PRODUCE_ATTRIBUTE = #{mdMatInfo.produceAttribute}
+		</if>
+		<if test="mdMatInfo.remark != null and mdMatInfo.remark != ''">
+			and ( MATERIAL_NO like '%'||#{mdMatInfo.remark}||'%' 
+			or CUSTOMER_MODEL like '%'||#{mdMatInfo.remark}||'%'  or
+			MATERIAL_DESP like '%'||#{mdMatInfo.remark}||'%'  )
+		</if>
+		<if test="mdMatInfo.inOut != null">
+			and IN_OUT = #{mdMatInfo.inOut} 
+		</if> 
+		
+	</sql>
+	<!--前台material edit时，放入division的是name，而应当存入code  -->
+	<update id="updateWithDivisionName" parameterType="mdMatInfo">
+		<![CDATA[
+		update MD_MAT_INFO
+		   set 	MATERIAL_NO = #{mdMatInfo.materialNo}
+				,CUSTOMER_MODEL = #{mdMatInfo.customerModel}
+				,MATERIAL_DESP = #{mdMatInfo.materialDesp}
+				,PLANT = #{mdMatInfo.plant}
+				,LENGTH = #{mdMatInfo.length}
+				,WIDTH = #{mdMatInfo.width}
+				,HIGTH = #{mdMatInfo.higth}
+				,MEASURE_UNIT = #{mdMatInfo.measureUnit}
+				,MRP_CODE = #{mdMatInfo.mrpCode}
+				,OLd_Mat = #{mdMatInfo.oldMat}
+				,VOLUME = #{mdMatInfo.volume}
+				,VOLUME_UNIT = #{mdMatInfo.volumeUnit}
+				,EXTERNAL_MAT_GROUP = #{mdMatInfo.externalMatGroup}
+				,GROSS_WEIGHT = #{mdMatInfo.grossWeight}
+				,NET_WEIGHT = #{mdMatInfo.netWeight}
+				,SIZE_DIMENSION = #{mdMatInfo.sizeDimension}
+				,BASIC_UNIT = #{mdMatInfo.basicUnit}
+				,PLANT_STATUS = #{mdMatInfo.plantStatus}
+				,MODIFY_DATE = #{mdMatInfo.modifyDate}
+				,MODIFY_BY = #{mdMatInfo.modifyBy}
+				,REMARK = #{mdMatInfo.remark}
+				,MAT_SCAN_TYPE = #{mdMatInfo.matScanType}
+				,PRODUCE_ATTRIBUTE=#{mdMatInfo.produceAttribute}
+				,MARKET_STATUS = #{mdMatInfo.marketStatus}
+				,PACKAGE_NO = #{mdMatInfo.packageNo}
+		 where row_id = #{mdMatInfo.rowId}
+		]]>
+	</update>
+		<insert id="bankupMat" parameterType="mdMatInfo">
+		<!-- SEQ_MD_MAT_INFO_HIS_ID -->
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_MD_MAT_INFO_HIS_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into MD_MAT_INFO_HIS
+		  (		ROW_ID
+		  		,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,PLANT
+				,EXTERNAL_MAT_GROUP
+				,GROSS_WEIGHT
+				,NET_WEIGHT
+				,SIZE_DIMENSION
+				,BASIC_UNIT
+				,PLANT_STATUS
+				,DIVISION
+				,PRODUCE_ATTRIBUTE
+				,MODIFY_DATE
+				,VERSION
+				,CBM
+				,ACTIVESTATE
+				,CREATED_BY
+				,CREATED_DATE
+				,MODIFY_BY
+				,REMARK
+				,IN_OUT
+				,MAT_SCAN_TYPE
+				,PRODUCE_MODEL
+				,LENGTH
+				,HIGTH
+				,WIDTH
+				,MARKET_STATUS
+				,PACKAGE_NO
+				,LOCATION
+				,ORDER_UNIT
+				,ORDER_BASIC_FACTOR
+				,ORDER_FACTOR
+				,ISSUE_UNIT
+				,ISSUE_BASIC_FACTOR
+				,ISSUE_FACTOR
+				,MAT_TYPE
+				,MRP_CODE
+				,PURCHASE_GROUP
+				,OLD_MAT
+				,VOLUME
+				,VOLUME_UNIT
+				,MEASURE_UNIT
+		   )
+		values
+		  (		#{rowId}
+		  		,#{mdMatInfo.materialNo}
+				,#{mdMatInfo.customerModel}
+				,#{mdMatInfo.materialDesp}
+				,#{mdMatInfo.plant}
+				,#{mdMatInfo.externalMatGroup}
+				,#{mdMatInfo.grossWeight}
+				,#{mdMatInfo.netWeight}
+				,#{mdMatInfo.sizeDimension}
+				,#{mdMatInfo.basicUnit}
+				,#{mdMatInfo.plantStatus}
+				,#{mdMatInfo.division}
+				,#{mdMatInfo.produceAttribute}
+				,#{mdMatInfo.modifyDate}
+				,#{mdMatInfo.version}
+				,#{mdMatInfo.cbm}
+				,#{mdMatInfo.activestate}
+				,#{mdMatInfo.createdBy}
+				,#{mdMatInfo.createdDate}
+				,#{mdMatInfo.modifyBy}
+				,#{mdMatInfo.remark}
+				,#{mdMatInfo.inOut}
+				,#{mdMatInfo.matScanType}
+				,#{mdMatInfo.produceModel}
+				,#{mdMatInfo.length}
+			    ,#{mdMatInfo.higth}
+			    ,#{mdMatInfo.width}
+			    ,#{mdMatInfo.marketStatus}
+			    ,#{mdMatInfo.packageNo}
+			    ,#{mdMatInfo.location}
+			    ,#{mdMatInfo.orderUnit}
+			    ,#{mdMatInfo.orderBasicFactor}
+			    ,#{mdMatInfo.orderFactor}
+			    ,#{mdMatInfo.issueUnit}
+			    ,#{mdMatInfo.issueBasicFactor}
+			    ,#{mdMatInfo.issueFactor}
+			    ,#{mdMatInfo.matType}
+			    ,#{mdMatInfo.mrpCode}
+			    ,#{mdMatInfo.purchaseGroup}
+			    ,#{mdMatInfo.oldMat}
+			    ,#{mdMatInfo.volume}
+			    ,#{mdMatInfo.volumeUnit}
+			    ,#{mdMatInfo.measureUnit}
+			)
+	    ]]>
+	</insert>
+</mapper>

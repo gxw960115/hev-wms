@@ -1,0 +1,399 @@
+{{#component "ogipCancel js-comp"}}
+<style type="text/css">
+#searchTabin{
+    display: inline-block;
+    margin-left: 8px;
+    margin-top: 4px;
+    width: 98%;
+}
+#searchTabin tr{
+    height: 35px;
+}
+#searchTabin input{
+    height: 30px;
+    width: 155px;
+}
+.inputCls{
+	border: 1px solid #CCC;
+    border-radius: 3px;
+}
+#orderInfoForm {
+    padding-top: 2px;
+    padding-left: 10px;
+    font-size: 14px;
+    color: #636E7B;
+}
+#orderInfoForm input{ 
+    height: 30px;
+    width: 155px; 
+    border: 0px;
+}
+#orderInfoForm table tr{
+    height: 36px;;
+}
+</style>
+    <div id="oigInfoDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivher" region="north">
+            <table id="searchTabin">
+                <tr>
+                    <td style="text-align: right">OGP/IGP NO:&nbsp;&nbsp;</td> <td class="leftCls"><input class="inputCls" id="orderNo" type="text" /></td>
+                	<td class="rightCls">SAP Order No:&nbsp;&nbsp;</td><td class="leftCls"><input class="inputCls" id="sapOrderNo" type="text" /></td>
+                    <td style="text-align: right">SAP Flag: &nbsp;&nbsp;</td><td class="leftCls"><input id="sapFlag" class="easyui-combobox flag" 
+                    	data-options="width:155,height:30,editable:false,panelHeight:'auto'" /></td>
+                </tr>
+                <tr>
+                    <td class="rightCls">Warehouse:&nbsp;&nbsp;</td><td class="leftCls"><input id="plant" type="text" class="easyui-combobox" style="border:0" 
+                    	data-options="border:false,width:155,height:30,editable:true,required:false,panelWidth:180"/></td>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td><td class="leftCls"><input class="inputCls" id="locationP" type="text" /></td>
+                    <td class="rightCls">Document Type:&nbsp;&nbsp;</td><td class="leftCls"><input id="docType" class="easyui-combobox flag" 
+                    	data-options="width:155,height:30,editable:false,panelHeight:'auto'" /></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchOdsOrderInfo()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle deleteBtn" onclick="oigpCancel()">OGP/IGP Cancel</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="odsOrderInfoGrid" style="width:120%;">
+
+            </table>
+        </div>
+        <div id="orderInfoConfirmWin" 
+             data-options="modal:true,closed:true, top:75, left:($(window).width() - 500) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+             style="width: 500px; height: 350px; display:none">
+            <div class="easyui-layout" data-options="fit:true">
+                <div data-options="region:'center',border:false">
+                    <form id="orderInfoForm" method="post">
+                        <table style="border: 0"  width="100%" cellpadding="20">
+                            <tr>
+                                <td align="right" valign="middle">Order No:&nbsp;&nbsp;</td>
+                                <td colspan="3"><input type="text" id="winOrderNo" name="sapOrderNo" readonly="readonly"/>
+                                <input type="hidden" id="ioOrderNo" name="orderNo" readonly="readonly"/>
+                                <input type="hidden" id="ioOrderType" name="orderType" readonly="readonly"/></td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">Document Type:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="winDocType" readonly="readonly"/></td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">Order Type:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="winOrderType" readonly="readonly"/></td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">Sap Flag:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="winSapFlag" readonly="readonly"/></td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">Post Date:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="winPostDate" readonly="readonly"/></td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">Operator:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="winOperator" readonly="readonly"/></td>
+	                        </tr>
+                        </table>
+                    </form>
+                </div>
+              
+                <div data-options="region:'south',border:false"
+                     style="text-align: right; padding: 1px; height: 35px">
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="confirmCancel();">Confirm</a>
+                    <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="closeOrderInfoWin();">Close</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var totalWidth = $('#odsOrderInfoGrid').width();
+    	$(function(){
+        	$('#oigInfoDiv').height(suitHeight);
+            $('#sapFlag').combobox({
+                data:[{"text":"ALL","value":"-1"},{"text":"Generation","value":"0"},{"text":"Posted Success","value":"1"},{"text":"Posted Failed","value":"2"},],
+                value:'-1'
+            });
+
+            $('#docType').combobox({
+                data:[{"text":"All","value":"-1"},{"text":"PO","value":"PO"},{"text":"Inbound","value":"INBOUND"},{"text":"STO","value":"STO"},{"text":"Billing","value":"DN"}],
+                value:'-1'
+            });
+            
+            var date=new Date();
+            var m=date.getMonth()+1;
+            var d=date.getDate();
+            var begin=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+            $('#begin').val(getLastRq(begin,-1));
+            date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+            $('#end').val(date);
+
+            var columns=[[ {
+                field : 'ck',
+                checkbox : true,
+                width: fixWidth(0.01),
+                align : 'center'
+            }, {
+                field : 'orderNo',
+                title : 'OGP/IGP No',
+                align : 'center',
+                width: fixWidth(0.072),
+                sortable : true
+            }, {
+                field : 'orderType',
+                title : 'Order Type',
+                align : 'center',
+                width: fixWidth(0.074),
+                sortable : true,
+                formatter : function(val) {
+                    if (val == '1') {
+                        return 'IN';
+                    } else if (val == '2') {
+                        return 'OUT';
+                    }
+                    return val;
+                }
+            }, {
+                field : 'docTpye',
+                title : 'Doc Type',
+                align : 'center',
+                width: fixWidth(0.074),
+                sortable : true,
+		        formatter : function(val) {
+		                if (val=='DN') {
+		                    return 'Billing';
+		                }else{
+		                    return val;
+		                }
+		        }
+            }, {
+                field : 'materialNo',
+                title : 'Material No',
+                align : 'center',
+                width: fixWidth(0.075),
+                sortable : true
+            }, {
+                field : 'customerModel',
+                title : 'Customer Model',
+                width: fixWidth(0.18),
+                align : 'center',
+                sortable : true
+            }, {
+                field : 'sapOrderNo',
+                title : 'SAP Order No',
+                align : 'center',
+                sortable : true
+            }, {
+                field : 'sapOrderItem',
+                title : 'SAP Order Item',
+                width: fixWidth(0.078),
+                align : 'center',
+                sortable : true
+            }, {
+                field : 'plant',
+                title : 'Warehouse',
+                align : 'center',
+                width: fixWidth(0.06),
+                sortable : true
+            }, {
+                field : 'location',
+                title : 'Location',
+                align : 'center',
+                width: fixWidth(0.06),
+                sortable : true
+            }, {
+                field : 'sapFlag',
+                title : 'Sap Flag',
+                align : 'center',
+                width: fixWidth(0.08),
+                sortable : true,
+                formatter : function(val) {
+                    if (val == '0') {
+                        return 'generation';
+                    } else if (val == '1') {
+                        return 'posted success';
+                    } else if (val == '2') {
+                        return 'posted failed';
+                    } else {
+                        return 'locked';
+                    }
+                    return val;
+                }
+            }, {
+                field : 'postingDate',
+                title : 'Post Date',
+                align : 'center',
+                sortable : true,
+                width: fixWidth(0.07),
+                formatter : formatY_M_D
+            } ]];
+            var grid = $('#odsOrderInfoGrid').datagrid({
+                rownumbers:true,
+                columns:columns,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                fit:true,
+                method:'post',
+                url : '',
+//                 url : '/order/searchOIGPOrder',
+//                 queryParams : {
+//                     'flag' : '0',
+//                     'handFlag' : '0',
+//                     'orderNo' : $('#orderNo').val(),
+//                     'sapFlag' : $('#sapFlag').combobox("getValue"),
+//                     'docTpye' : $('#docType').combobox("getValue"),
+//                     'materialNo' : $('#materialNo').val(),
+//                     'sapOrderNo' : $('#sapOrderNo').val(),
+//                     'location' : $('#locationP').val(),
+//                     'begin' : $('#begin').val(),
+//                     'end' : $('#end').val()
+//                 },
+                onLoadError:function(){
+                         $.messager.alert('System Information','Network Abnormal!','warning');
+                    },
+                onLoadSuccess:function(){
+                	$(this).datagrid("fixRownumber");
+                }
+            });
+            initPagination(grid);
+            gridScroll(grid);
+            if($.session.get("userName").toString().indexOf("admin")>=0){
+                $("#inOutWarehouse").css("display","");
+            }
+            $.ajax({
+                url:'/warehouse/searchAvailableWh',
+                type:'post',
+                dataType:'json',
+                success:function(data){
+                    var dataRes = [];
+                   // dataRes.push({ "text": " ", "value": " " });
+                    if(data!=''||data!=null||data!=undefined){
+                       for(var i=0;i<data.length;i++){
+                           dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                        }           
+                    }
+                    $('#plant').combobox({
+                        data:dataRes
+                    })
+                }
+            });
+        })
+        // set width of column 
+    	function fixWidth(percent) { 
+        	return totalWidth * percent;   
+    	}
+    	
+    	function closeOrderInfoWin(){
+            $('#orderInfoForm').form('clear');
+            $('#orderInfoConfirmWin').window('close');
+        }
+    	
+        /*查询*/
+        function searchOdsOrderInfo() {
+            var grid= $('#odsOrderInfoGrid').datagrid({
+                url : '/order/searchOIGPOrderInfo',
+                queryParams : {
+                    'orderNo' : $('#orderNo').val(),
+                    'sapFlag' : $('#sapFlag').combobox("getValue"),
+                    'docTpye' : $('#docType').combobox("getValue"),
+                    'materialNo' : $('#materialNo').val(),
+                    'sapOrderNo' : $('#sapOrderNo').val(),
+                    'plant' : $('#plant').combobox("getValue"),
+                    'location' : $('#locationP').val()
+                },
+                onLoadSuccess : function(data) {
+                    if (data.total == 0 && data.rows.length == 0) {
+                        $.messager.alert('System Information',
+                                'No records found.',
+                                'warning');
+                        gridScroll(grid);
+                    }
+                	$(this).datagrid("fixRownumber");
+                }
+            });
+            initPagination(grid);
+        }
+        /*取消*/
+		function oigpCancel(){
+			var rows = $('#odsOrderInfoGrid').datagrid('getSelections');
+            if (rows.length != 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return;
+            }
+            /* if (rows[0].sapFlag != '1' && rows[0].sapFlag != '2') {
+            	$.messager.alert('System Information',
+                        'No need to cancel!', 'warning');
+                return;
+            } */
+            if (rows[0].sapFlag == '1') {
+                $.messager.confirm('System Information', 'Please ensure post has been canceled at sap!', 
+	                function(r){
+	                	if(r){
+	                		showOrderInfoWin(rows[0]);
+	                	}else {
+	                		return;
+	                	}
+	                }
+                );
+            } else {
+            	showOrderInfoWin(rows[0]);
+            }
+
+		}
+        
+        function showOrderInfoWin(data){
+        	$('#orderInfoForm').form('clear'); 
+    		$('#winOrderNo').val(data.sapOrderNo);
+    		$('#winDocType').val(data.docTpye);
+    		$('#ioOrderType').val(data.orderType);
+    		$('#winOrderType').val(data.orderType==1?"IGP":"OGP");
+    		$('#winSapFlag').val(data.sapFlag == 1?"Posted Success":"Posted Failed");
+    		$('#winPostDate').val(data.postingDate);
+    		$('#winOperator').val($.session.get("userName"));
+    		
+    		$('#orderInfoConfirmWin').show();
+    	    $('#orderInfoConfirmWin').window({
+    	        title:'Order Infomation',
+    	        iconCls:'icon-remove'
+    	    });
+    	    $('#orderInfoConfirmWin').window('open');
+        }
+        //iogp cancel
+        function confirmCancel(){
+        	$.maskLoading();
+        	$.post('/order/iogpCancel',{
+        		'sapOrderNo':$('#winOrderNo').val(),
+        		'orderType':$('#ioOrderType').val(),
+        		'createBy':$('#winOperator').val()
+        	},function(data){
+        		var result = JSON.parse(data);
+        		if (result.status == '0'){
+        			$.messager
+	                    .alert(
+	                    'System Information',
+	                    'Success!',
+	                    'warning');
+        			$('#odsOrderInfoGrid').datagrid('reload');
+        		}else {
+        			$.messager.alert(
+	                    'System Information',
+	                    'Failed! '+ result.msg,
+	                    'warning');
+	    			$('#odsOrderInfoGrid').datagrid('reload');
+        		}
+        		closeOrderInfoWin();
+        		$.maskEnd();
+        	}).error(
+                function() {
+	                $.messager.alert(
+	                    'System Information',
+	                    'Network Abnormal!',
+	                    'warning');
+	                $.maskEnd();
+                });
+        }
+    </script>
+{{/component}}

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.basic.dao.MdBarcodeDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	<sql id="selectAllMdBarcodeColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			BARCODE,
+			ST_NO,
+			CREATE_BY,
+			to_char(CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATE_DATE
+		from 
+			MD_BARCODE md_barcode_
+		]]>
+	</sql>
+	<sql id="searchMdBarcode_fragement">
+		<include refid="selectAllMdBarcodeColumns" />
+		where 1=1
+		<if test="mdBarcode.rowId != null and mdBarcode.rowId != ''">
+		and ROW_ID like '%'||#{mdBarcode.rowId}||'%' 
+		</if>
+		<if test="mdBarcode.materialNo != null and mdBarcode.materialNo != ''">
+		and MATERIAL_NO like '%'||#{mdBarcode.materialNo}||'%' 
+		</if>
+		<if test="mdBarcode.materialDesp != null and mdBarcode.materialDesp != ''">
+		and MATERIAL_DESP like '%'||#{mdBarcode.materialDesp}||'%' 
+		</if>
+		<if test="mdBarcode.barcode != null and mdBarcode.barcode != ''">
+		and BARCODE like '%'||#{mdBarcode.barcode}||'%' 
+		</if>
+		<if test="mdBarcode.stNo != null and mdBarcode.stNo != ''">
+		and ST_NO = #{mdBarcode.stNo}
+		</if>
+		<if test="mdBarcode.createBy != null and mdBarcode.createBy != ''">
+		and CREATE_BY like '%'||#{mdBarcode.createBy}||'%' 
+		</if>
+		<if test="mdBarcode.createDateB != null and mdBarcode.createDateB != ''">
+			<![CDATA[
+			and CREATE_DATE >= TO_DATE(CONCAT(#{mdBarcode.createDateB},' 00:00:00') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="mdBarcode.createDateE != null and mdBarcode.createDateE != ''">
+			<![CDATA[
+			and CREATE_DATE <= TO_DATE(CONCAT(#{mdBarcode.createDateE},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+	</sql>
+	<sql id="md_barcode_coloumn_list">
+		ROW_ID,MATERIAL_NO,MATERIAL_DESP,BARCODE,ST_NO,CREATE_BY,CREATE_DATE
+	</sql>
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="mdBarcodeMap" type="mdBarcode">
+		<result property="rowId" column="ROW_ID" />
+		<result property="materialNo" column="MATERIAL_NO"  />
+		<result property="materialDesp" column="MATERIAL_DESP"  />
+		<result property="barcode" column="BARCODE"  />
+		<result property="stNo" column="ST_NO" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+	</resultMap>
+	<!-- =========================================================== -->
+    <!-- DAO方法中的基本增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+    <insert id="save" parameterType="mdBarcode">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_MD_BARCODE_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+			INSERT INTO MD_BARCODE 
+				( ROW_ID, MATERIAL_NO, MATERIAL_DESP, BARCODE, ST_NO, CREATE_BY, CREATE_DATE)
+			VALUES
+				( 
+					#{rowId} ,
+					#{materialNo}, 
+					#{materialDesp}, 
+					#{barcode}, 
+					#{stNo}, 
+					#{createBy}, 
+					sysdate
+				)
+	    ]]>	
+	</insert>
+    
+    <select id="selectByOrderId" resultMap="mdBarcodeMap" parameterType="mdBarcode" >
+        select
+        <include refid="md_barcode_coloumn_list" />
+        from md_barcode
+        where  1=1  
+         <if test="userId != null  and userId != ''">
+        and  material_no = #{userId}
+        </if>
+    </select>
+	<select id="selectSeq" resultType="String">
+		<![CDATA[
+			SELECT SEQ_MD_BARCODE_ID.NEXTVAL AS ID FROM DUAL
+		]]>
+	</select>
+	<select id="searchMdBarcodes" resultMap="mdBarcodeMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchMdBarcode_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchMdBarcodesCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchMdBarcode_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	
+	<select id="existBarcode" resultType="int">
+		select count(*) from md_barcode where barcode=#{barcode}
+	</select>
+	
+	<insert id="insertBarcode">
+		INSERT into md_barcode(
+		                ROW_ID
+						,MATERIAL_NO
+						,MATERIAL_DESP
+						,BARCODE
+						,CREATE_BY
+						,CREATE_DATE) 
+			SELECT   SEQ_MD_BARCODE_ID.NEXTVAL
+						,t.MATERIAL_NO
+						,t.MATERIAL_DESP
+						,#{barcode} 
+						,'sys'
+						,SYSDATE 
+			from md_mat_info t 
+			where t.MATERIAL_NO=SUBSTR(#{barcode},1,9);
+	</insert>
+
+	<select id="modifyBarcodeBin" statementType="CALLABLE">
+		<![CDATA[
+		  {call PRC_BARCODE_UPDATE_BIN(
+		  #{in.plant,mode=IN,jdbcType=VARCHAR},
+		  #{in.location,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.bin,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+
+	<select id="initUserPlantAndLoc" statementType="CALLABLE">
+		<![CDATA[
+		  {call PRC_BARCODE_INIT_PLANT_LOC(
+		  #{in.plant,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msgLoc,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msgPlant,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+
+</mapper>

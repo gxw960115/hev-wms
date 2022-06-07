@@ -1,0 +1,303 @@
+{{#component "transferOrder js-comp"}}
+	
+    <div id="transferDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDiv" region="north" style="border:0">
+            <table id="searchTab1">
+                 <tr>
+                    <td style="text-align: right">Trans NO:</td>
+                    <td class="leftCls"><input id="transNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Material No:</td>
+                    <td class="leftCls"><input id="materialNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Plant:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="warehouse" type="text" class="easyui-combobox" style="border:0" data-options="border:false,
+                         width:155, height:30, editable:true,required:false,panelWidth:180"/></td>
+                    <td class="rightCls">Do Flag:</td>
+                    <td class="leftCls"><input style="width:110px;" id="doFlag" class="easyui-combobox flag" data-options="width:100,height:30,editable:false,panelHeight:'auto'" /></td>
+                </tr>
+                <tr>
+                	<td class="rightCls" style="width:120px">GI Location:</td>
+                	<td class="leftCls"><input id="giLocation" class="radiusCls" type="text" /></td>
+                    <td class="rightCls" style="width:120px">GR Location:</td>
+                    <td class="leftCls"><input id="grLocation" class="radiusCls" type="text" /></td>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                   	<td class="leftCls" colspan="3"><input id="begin" class="radiusCls" style="width:120px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/> &nbsp;&nbsp;
+                        -  &nbsp;&nbsp;<input id="end" class="radiusCls" style="width:120px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                    <td></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" onclick="confirmOrder()">Confirm</a>
+					<a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn"  onclick="exportPlan()">Export</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border-top:0px;  overflow-y: hidden;">
+            <table id="dataGrid" style="width:100%;"></table>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+    var totalWidth = $('#dataGrid').width();
+    
+    //set width of column 
+	function fixWidth(percent) { 
+    	return totalWidth * percent;   
+	}
+    $(function(){
+        $("#postTransfer").css("display","");
+    	$('#transferDiv').height(suitHeight);
+    	
+    	//初始化日期
+        var date=new Date();
+        var y=date.getFullYear();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(date,-7));
+        $('#end').val(date);
+        
+        var columns=[[{
+            field : 'ck',
+            checkbox : true,
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'transNo',
+            title : 'Trans No',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        },{            
+        	field : 'transItemNo',
+            title : 'Item No',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'checkFlag',
+            title : 'Check Flag',
+            align : 'center',
+            sortable : true,
+            width: fixWidth(0.12),
+            formatter : function(val) {
+                if (val == '0') {
+                    return "<font color='red'>Not Confirmed</font>";
+                } else if (val == '1') {
+                    return "<font color='green'>Confirmed</font>";
+                }
+                return val;
+            }
+        }, {
+            field : 'qty',
+            title : 'QTY',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Finish Qty',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'UNIT',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'giLocation',
+            title : 'Gi Location',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'grLocation',
+            title : 'Gr Location',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.09),
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description ',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'createBy',
+            title : 'Create By',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field:'sapMsg',
+            title:'Sap Msg',
+            width:fixWidth(0.20), 
+            align:'center',
+            sortable:true
+        }, {
+            field:'sapDocNo',
+            title:'SAP Doc No',
+            width:fixWidth(0.08), 
+            align:'center',
+            sortable:true
+        } ]];
+        var grid2 = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            remoteSort:false,  
+            method:'post',
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+            onLoadSuccess:function(){
+               $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid2);
+        $.ajax({
+        	url:'/plant/list/select',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                var dataRes = [];
+                if(data!=''||data!=null||data!=undefined){
+                   for(var i=0;i<data.length;i++){
+                       dataRes.push({ "text": data[i]['name'], "value": data[i]['code'], "rowId": data[i]['rowId'] });
+                    }           
+                }
+                $('#warehouse').combobox({
+                    data:dataRes
+                })
+                $('#warehouseCode').combobox({
+                    data:dataRes
+                })
+            }
+        });
+        $('#doFlag').combobox({
+                data:[{"text":"ALL","value":"-1"},{"text":"UnDelivered","value":"0"},{"text":"Posting Success","value":"1"},
+                {"text":"Posting Failed","value":"2"}],
+                value:'-1'
+        });
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#exportBtn').on('click',function(){
+            exportData();
+        })
+    });
+    
+    function queryData(){
+       var grid= $('#dataGrid').datagrid({
+            url:'/odsTransferInfo/list',
+            queryParams: {
+                begin:$('#begin').val(),
+                end:$('#end').val(),
+                transNo:$('#transNo').val(),
+                materialNo:$('#materialNo').val(),
+                warehouseCode:$('#warehouse').combobox('getValue'),
+                giLocation:$('#giLocation').val(),
+                grLocation:$('#grLocation').val(),
+                flag:'0',
+                finishFlag:$('#doFlag').combobox("getValue")
+            },
+            onLoadSuccess : function(data) {
+                $("#dataGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information','No records found.','warning');
+                }
+                $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid); 
+    }
+
+	function confirmOrder() {
+        var row = $('#dataGrid').datagrid('getChecked');
+        if (row.length != 1) {
+            $.messager.alert('System Information', 'Please select one data!', 'warning');
+            return;
+        }
+		if (row[0].checkFlag == "1"){
+			$.messager.alert('System Information', 'This Order is Confirmed!', 'warning');
+			return;
+		}
+        $.messager.confirm("System Information", "Are You Sure Confirm Data?", function (data) {
+            if (data) {
+                var codes = new Array();
+                $.post(
+                    "/odsTransferInfo/transferApprove",
+                    {'transNo' : row[0].transNo},
+                    function(data) {
+                        if (data == 'success') {
+                            $.messager.alert('System Information','Approve Success!','warning');
+                            queryData();
+                        } else {
+                            $.messager.alert('System Information','Approve Failure!,' + data, 'warning');
+                        }
+                    }
+                ).error(
+                    function() {
+                        $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                        queryData();
+                    }
+                );
+            }
+        });
+    }
+
+    //Excel导出
+    function exportPlan() {
+    	$.ajax({
+        	url:'/odsTransferInfo/searchTransInfosAmount',
+        	type:'post',
+        	dataType:'json',
+        	data:{
+        		transNo:$('#transNo').val(),
+        		materialNo:$('#materialNo').val(),
+        		giLocation:$('#giLocation').val(),
+        		grLocation:$('#grLocation').val(),
+        		begin:$('#begin').val(),
+        		end:$('#end').val(),
+        		finishFlag:$('#doFlag').combobox("getValue"),
+        		flag:0
+        	},
+        	success:function(data) {
+        		if (data == "success") {
+        			var url = "/odsTransferInfo/export?"
+        		        +'transNo='+$('#transNo').val()
+        		        +'&materialNo='+$('#materialNo').val()
+        		        +'&giLocation='+$('#giLocation').val()
+        		        +'&grLocation='+$('#grLocation').val()
+        		        +'&begin='+$('#begin').val()
+        		        +'&end='+$('#end').val()
+        		        +'&finishFlag='+$('#doFlag').combobox("getValue")
+        		        +'&flag='+'0'
+        		        window.location.href = url;
+        		}else {
+        			$.messager.alert('System Information',data,	'warning');
+        		}
+        	}
+        });
+    }
+    </script>
+{{/component}}

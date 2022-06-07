@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- -->
+<mapper namespace="com.haier.hevwms.order.dao.OdsOrderInfoDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllOdsOrderInfoColumns">
+		<![CDATA[
+		select
+			ods_order_info.ROW_ID,
+			ods_order_info.ORDER_NO,
+			ods_order_info.ORDER_ITEM,
+			ods_order_info.ORDER_TYPE,
+			ods_order_info.DOC_TPYE,
+			ods_order_info.SAP_ORDER_NO,
+			ods_order_info.SAP_ORDER_ITEM,
+			ods_order_info.BATCH_NO,
+			ods_order_info.PLANT,
+			ods_order_info.WAREHOUSE_CODE,
+			ods_order_info.WAREHOUSE_NAME,
+			ods_order_info.LOCATION,
+			ods_order_info.MATERIAL_NO,
+
+			CASE WHEN (ods_order_info.CUSTOMER_MODEL is null or ods_order_info.CUSTOMER_MODEL = '') THEN mat.customer_model
+            ELSE ods_order_info.CUSTOMER_MODEL
+            END AS CUSTOMER_MODEL,
+
+			ods_order_info.MATERIAL_DESP,
+			ods_order_info.SCANNED_QTY,
+			ods_order_info.UNIT,
+			ods_order_info.VENDOR_CODE,
+			ods_order_info.VENDOR_NAME,
+			ods_order_info.DELIVERY_CODE,
+			ods_order_info.DELIVERY_DATE,
+			ods_order_info.CAR_NO,
+			ods_order_info.HAND_FLAG,
+			ods_order_info.CREATE_BY,
+			ods_order_info.CREATE_DATE,
+			ods_order_info.MODIFY_BY,
+			ods_order_info.MODIFY_DATE,
+			ods_order_info.FLAG,
+			ods_order_info.VERSION,
+			ods_order_info.SAP_FLAG,
+			ods_order_info.SAP_MSG,
+			ods_order_info.SAP_DOC_NO,
+			ods_order_info.SAP_SEND_ID,
+			ods_order_info.POSTING_DATE,
+			ods_order_info.IN_OUT_FLAG,
+			ods_order_info.IN_OUT_MSG,
+			ods_order_info.REQUIRE_QTY,
+			ods_order_info.ORDER_CLOSE,
+			ods_order_info.CAR_ID,
+			ods_order_info.PRESACN_FLAG,
+			ods_order_info.car_flag,
+			ods_order_info.hand_Post_Flag,
+			ods_order_info.INVOICE_NO,
+			ods_order_info.LR_NO,
+			ods_order_info.LR_DATE,
+			ods_order_info.TRANSPORTER_CODE,
+			md.NAME AS TRANSPORTER_NAME,
+			mat.division
+		from
+			ODS_ORDER_INFO ods_order_info
+			left join md_mat_info mat on ods_order_info.material_no=mat.material_no
+			LEFT JOIN md_dictionary md ON md.CODE=ods_order_info.TRANSPORTER_CODE
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsOrderInfoMap" type="odsOrderInfo">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="orderItem" column="ORDER_ITEM" />
+		<result property="orderType" column="ORDER_TYPE" />
+		<result property="docTpye" column="DOC_TPYE" />
+		<result property="sapOrderNo" column="SAP_ORDER_NO" />
+		<result property="sapOrderItem" column="SAP_ORDER_ITEM" />
+		<result property="batchNo" column="BATCH_NO" />
+		<result property="plant" column="PLANT" />
+		<result property="warehouseCode" column="WAREHOUSE_CODE" />
+		<result property="warehouseName" column="WAREHOUSE_NAME" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="scannedQty" column="SCANNED_QTY" />
+		<result property="unit" column="UNIT" />
+		<result property="vendorCode" column="VENDOR_CODE" />
+		<result property="vendorName" column="VENDOR_NAME" />
+		<result property="deliveryCode" column="DELIVERY_CODE" />
+		<result property="deliveryName" column="DELIVERY_NAME" />
+		<result property="deliveryDate" column="DELIVERY_DATE" />
+		<result property="carNo" column="CAR_NO" />
+		<result property="handFlag" column="HAND_FLAG" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="sapFlag" column="SAP_FLAG" />
+		<result property="sapMsg" column="SAP_MSG" />
+		<result property="sapDocNo" column="SAP_DOC_NO" />
+		<result property="sapSendId" column="SAP_SEND_ID" />
+		<result property="postingDate" column="POSTING_DATE" />
+		<result property="inOutFlag" column="IN_OUT_FLAG" />
+		<result property="inOutMsg" column="IN_OUT_MSG" />
+		<result property="requireQty" column="REQUIRE_QTY" />
+		<result property="orderClose" column="ORDER_CLOSE" />
+		<result property="carId" column="CAR_ID" />
+		<result property="presacnFlag" column="PRESACN_FLAG" />
+		<result property="checkFlag" column="check_flag" />
+		<result property="carFlag" column="car_flag" />
+		<result property="handPostFlag" column="hand_Post_Flag"/>
+		<result property="invoiceNo" column="INVOICE_NO"/>
+		<result property="lrNo" column="LR_NO"/>
+		<result property="lrDate" column="LR_DATE"/>
+		<result property="transporterCode" column="TRANSPORTER_CODE"/>
+		<result property="transporterName" column="TRANSPORTER_NAME"/>
+		<!-- <result property="division" column="division"/> -->
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="odsOrderInfoMap">
+		<include refid="selectAllOdsOrderInfoColumns" />
+	</select>
+	<select id="get" resultMap="odsOrderInfoMap" parameterType="long">
+		<include refid="selectAllOdsOrderInfoColumns" />
+		<![CDATA[
+		where ods_order_info.row_id = #{rowId}
+		]]>
+	</select>
+	<!-- add by linzx @20151222  -->
+	<select id="getByDn" parameterType="string" resultType="long" >
+		<![CDATA[
+		select count(*) from ods_order_info t where t.SAP_ORDER_NO = #{dnNo}
+		]]>
+	</select>
+	<!-- add by linzx @20151222  -->
+	<select id="getDnByOrderNo" parameterType="string" resultType="string" >
+		<![CDATA[
+		select DISTINCT t.SAP_ORDER_NO from ods_order_info t where t.ORDER_NO=#{orderNo}
+		]]>
+	</select>
+	<delete id="deltByOrderNo" parameterType="long">
+		<![CDATA[
+		delete from ODS_ORDER_INFO where DOC_TPYE = #{docType} and ORDER_NO=#{orderNo}
+		]]>
+	</delete>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_ORDER_INFO where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_ORDER_INFO where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="odsOrderInfo">
+		<![CDATA[
+		insert into ODS_ORDER_INFO
+		  (
+				ORDER_NO
+				,ORDER_ITEM
+				,ORDER_TYPE
+				,DOC_TPYE
+				,SAP_ORDER_NO
+				,SAP_ORDER_ITEM
+				,BATCH_NO
+				,PLANT
+				,WAREHOUSE_CODE
+				,WAREHOUSE_NAME
+				,LOCATION
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,SCANNED_QTY
+				,UNIT
+				,VENDOR_CODE
+				,VENDOR_NAME
+				,DELIVERY_CODE
+				,DELIVERY_NAME
+				,DELIVERY_DATE
+				,CAR_NO
+				,HAND_FLAG
+				,CREATE_BY
+				,CREATE_DATE
+				,SAP_MSG
+				,SAP_DOC_NO
+				,SAP_SEND_ID
+				,POSTING_DATE
+				,IN_OUT_FLAG
+				,IN_OUT_MSG
+				,REQUIRE_QTY
+				,CAR_ID
+				,check_Flag
+		   )
+		values
+		  (
+				#{orderNo}
+				,#{orderItem}
+				,#{orderType}
+				,#{docTpye}
+				,#{sapOrderNo}
+				,#{sapOrderItem}
+				,#{batchNo}
+				,#{plant}
+				,#{warehouseCode}
+				,#{warehouseName}
+				,#{location}
+				,#{materialNo}
+				,#{customerModel}
+				,#{materialDesp}
+				,#{scannedQty}
+				,#{unit}
+				,#{vendorCode}
+				,#{vendorName}
+				,#{deliveryCode}
+				,#{deliveryName}
+				,#{deliveryDate}
+				,#{carNo}
+				,#{handFlag}
+				,#{createBy}
+				,#{createDate}
+				,#{sapMsg}
+				,#{sapDocNo}
+				,#{sapSendId}
+				,#{postingDate}
+				,#{inOutFlag}
+				,#{inOutMsg}
+				,#{requireQty}
+				,#{carId}
+				,#{checkFlag}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+				 ORDER_NO = #{orderNo}
+				,ORDER_ITEM = #{orderItem}
+				,ORDER_TYPE = #{orderType}
+				,DOC_TPYE = #{docTpye}
+				,SAP_ORDER_NO = #{sapOrderNo}
+				,SAP_ORDER_ITEM = #{sapOrderItem}
+				,BATCH_NO = #{batchNo}
+				,PLANT = #{plant}
+				,WAREHOUSE_CODE = #{warehouseCode}
+				,WAREHOUSE_NAME = #{warehouseName}
+				,LOCATION = #{location}
+				,MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,SCANNED_QTY = #{scannedQty}
+				,UNIT = #{unit}
+				,VENDOR_CODE = #{vendorCode}
+				,VENDOR_NAME = #{vendorName}
+				,DELIVERY_CODE = #{deliveryCode}
+				,DELIVERY_NAME = #{deliveryName}
+				,DELIVERY_DATE = #{deliveryDate}
+				,CAR_NO = #{carNo}
+				,SAP_FLAG = #{sapFlag}
+				,SAP_MSG = #{sapMsg}
+				,SAP_DOC_NO = #{sapDocNo}
+				,HAND_FLAG = #{handFlag}
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchOdsOrderInfo_fragement">
+		<include refid="selectAllOdsOrderInfoColumns" />
+		where 1=1
+		<if test="odsOrderInfo.orderNo != null and odsOrderInfo.orderNo !=''">
+			and ods_order_info.ORDER_NO = #{odsOrderInfo.orderNo}
+		</if>
+		<if test="odsOrderInfo.location != null and odsOrderInfo.location !=''">
+			and ods_order_info.LOCATION = #{odsOrderInfo.location}
+		</if>
+		<if test="odsOrderInfo.orderType != null and odsOrderInfo.orderType != '' and odsOrderInfo.orderType != '-1' ">
+			and ods_order_info.ORDER_TYPE = #{odsOrderInfo.orderType}
+		</if>
+		<if test="odsOrderInfo.docTpye != null and odsOrderInfo.docTpye != '-1' and odsOrderInfo.docTpye !='' ">
+			and ods_order_info.DOC_TPYE = #{odsOrderInfo.docTpye}
+		</if>
+		<if	test="odsOrderInfo.sapOrderNo != null and odsOrderInfo.sapOrderNo != ''">
+			and ods_order_info.SAP_ORDER_NO like '%'||#{odsOrderInfo.sapOrderNo}||'%'
+		</if>
+
+		<if test="odsOrderInfo.plant != null and odsOrderInfo.plant != ''">
+			and ods_order_info.PLANT like '%'||#{odsOrderInfo.plant}||'%'
+		</if>
+
+		<if test="odsOrderInfo.userType != null and odsOrderInfo.userType != 1 ">
+		    and ods_order_info.plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w
+			where w.row_id = u.wh_id and u.user_id= #{odsOrderInfo.userId})
+			and ods_order_info.LOCATION in (select loc_code from cd_user_wh_loc where
+			user_id=#{odsOrderInfo.userId})
+		</if>
+		<if
+			test="odsOrderInfo.materialNo != null and odsOrderInfo.materialNo != ''">
+			and ods_order_info.MATERIAL_NO like '%'||#{odsOrderInfo.materialNo}||'%'
+		</if>
+		<if test="odsOrderInfo.customerModel != null and odsOrderInfo.customerModel != '' ">
+			and ods_order_info.CUSTOMER_MODEL like '%'||#{odsOrderInfo.customerModel}||'%'
+		</if>
+		<if test="odsOrderInfo.materialDesp != null and odsOrderInfo.materialDesp != '' ">
+			and ods_order_info.MATERIAL_DESP like '%'||#{odsOrderInfo.materialDesp}||'%'
+		</if>
+
+		<if test="odsOrderInfo.deliveryDate != null and odsOrderInfo.deliveryDate != '' ">
+			and ods_order_info.DELIVERY_DATE like '%'||#{odsOrderInfo.deliveryDate}||'%'
+		</if>
+		<if test="odsOrderInfo.begin != null and odsOrderInfo.begin != ''">
+		<![CDATA[
+			and ods_order_info.create_date >= TO_DATE(concat(#{odsOrderInfo.begin},' 00:00:00') ,'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+
+		<if test="odsOrderInfo.end != null and odsOrderInfo.end != ''">
+		<![CDATA[
+			and ods_order_info.create_date <= TO_DATE(concat(#{odsOrderInfo.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+		<if test="odsOrderInfo.carNo != null and odsOrderInfo.carNo != '' " >
+			and ods_order_info.CAR_NO like '%'||#{odsOrderInfo.carNo}||'%'
+		</if>
+		<if test="odsOrderInfo.handFlag != null and odsOrderInfo.handFlag != '' ">
+			and ods_order_info.HAND_FLAG like '%'||#{odsOrderInfo.handFlag}||'%'
+		</if>
+		<if test="odsOrderInfo.flag != null and odsOrderInfo.flag != '' and odsOrderInfo.flag != -1">
+			and ods_order_info.FLAG like '%'||#{odsOrderInfo.flag}||'%'
+		</if>
+		<if test="odsOrderInfo.sapFlag != null and odsOrderInfo.sapFlag != '' and odsOrderInfo.sapFlag != -1">
+			and ods_order_info.SAP_FLAG = #{odsOrderInfo.sapFlag}
+		</if>
+		<if test="odsOrderInfo.carFlag == 0 ">
+			and (ods_order_info.car_no is null or ods_order_info.car_no =''  or ods_order_info.car_flag= '0')
+		</if>
+		<if test="odsOrderInfo.carFlag == -1 ">
+		<![CDATA[	and ods_order_info.car_flag >= '1' ]]>
+		</if>
+		<if test="odsOrderInfo.carFlag == 1 ">
+		<![CDATA[	and ods_order_info.car_flag = '1' ]]>
+		</if>
+		<if test="odsOrderInfo.carFlag == 2 ">
+		<![CDATA[	and ods_order_info.car_flag = '2' ]]>
+		</if>
+        <if test="odsOrderInfo.division != null and odsOrderInfo.division != ''">
+			and mat.division = #{odsOrderInfo.division}
+		</if>
+
+		order by create_date DESC,MATERIAL_NO
+	</sql>
+	<select id="searchOdsOrderInfos" parameterType="odsOrderInfo" resultMap="odsOrderInfoMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsOrderInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsOrderInfosCount" parameterType="odsOrderInfo" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsOrderInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getAllOdsWithPo" resultMap="odsOrderInfoMap">
+		<include refid="selectAllOdsOrderInfoColumns" />
+		<![CDATA[
+		where 1=1
+			and DOC_TPYE = 'PO'
+			and HAND_FLAG='0'
+			and FLAG='0'
+			and SAP_FLAG='0'
+			]]>
+	</select>
+
+	<update id="updateSapToWms" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+				 SAP_MSG = #{odsOrderInfo.sapMsg}
+				,SAP_DOC_NO=#{odsOrderInfo.sapDocNo}
+				,SAP_FLAG=#{odsOrderInfo.sapFlag}
+		 where ORDER_NO = #{odsOrderInfo.orderNo}
+		]]>
+	</update>
+	<select id="getByRowIds" resultMap="odsOrderInfoMap">
+		<include refid="selectAllOdsOrderInfoColumns" />
+		where 1=1
+		<if test="rowId != null and rowId != '' ">
+			and ROW_ID = #{rowId}
+		</if>
+	</select>
+	<select id="searchOdsOrderInfoByids" resultMap="odsOrderInfoMap">
+		<include refid="selectAllOdsOrderInfoColumns" />
+		where row_id = #{id}
+	</select>
+	<update id="updateSapByBatchNo" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = #{sapFlag}
+				,SAP_MSG = #{sapMsg}
+				,SAP_DOC_NO = #{sapDocNo}
+				,MODIFY_BY=#{modifyBy}
+				,MODIFY_DATE=#{modifyDate}
+		 where SAP_SEND_ID = #{sapSendId}
+		]]>
+	</update>
+	<!-- add by linzx@20151208 STODN Issure过账，根据SAP凭证单号进行更新 -->
+	<update id="updateSapBySAPOrderNo" parameterType="odsOrderInfo">
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = #{odsInfoWms.sapFlag}
+				,SAP_MSG = #{odsInfoWms.sapMsg}
+				,SAP_DOC_NO = #{odsInfoWms.sapDocNo}
+				,MODIFY_BY=#{odsInfoWms.modifyBy}
+				,MODIFY_DATE=#{odsInfoWms.modifyDate}
+				<if test="odsInfoWms.postingDate != null and odsInfoWms.postingDate !='' ">
+				,POSTING_DATE=#{odsInfoWms.postingDate}
+				</if>
+		 where SAP_ORDER_NO = #{odsInfoWms.sapOrderNo} and ORDER_TYPE='2'
+
+	</update>
+	<!-- add by linzx@20151211 STODN Receive过账，根据SAP凭证单号进行更新 -->
+	<update id="updateSapByOrderNo" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = #{odsInfoWms.sapFlag}
+				,SAP_MSG = #{odsInfoWms.sapMsg}
+				,SAP_DOC_NO = #{odsInfoWms.sapDocNo}
+				,MODIFY_BY=#{odsInfoWms.modifyBy}
+				,MODIFY_DATE=#{odsInfoWms.modifyDate}
+		 where ORDER_NO = #{odsInfoWms.orderNo}
+		]]>
+	</update>
+	<!-- dn pc 端过账更新sap 信息 2016-04-13 -->
+	<update id="updateSapBackMsgOfDn" parameterType="odsOrderInfo">
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = #{orderInfo.sapFlag}
+				,SAP_MSG = #{orderInfo.sapMsg}
+				,SAP_DOC_NO = #{orderInfo.sapDocNo}
+				,MODIFY_BY=#{orderInfo.modifyBy}
+				,MODIFY_DATE=#{orderInfo.modifyDate}
+				<if test="orderInfo.postingDate != null and orderInfo.postingDate !='' ">
+				,POSTING_DATE=#{orderInfo.postingDate}
+				</if>
+		 where SAP_ORDER_NO = #{orderInfo.sapOrderNo}
+
+	</update>
+	<update id="updateErrorNo" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = '2'
+		 where ORDER_NO = #{orderNo}
+		]]>
+	</update>
+	<update id="updateErrorNoNotSuc" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = '2',
+		   		 modify_by = #{userName}
+		 where ORDER_NO = #{orderNo} and  SAP_FLAG <> '1'
+		]]>
+	</update>
+	<!-- add by linzx @20151223 -->
+	<update id="updateSAPFlagByOrderNo" parameterType="string">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = '1'
+		 where ORDER_NO = #{orderNo} and  SAP_FLAG <> '1'
+		]]>
+	</update>
+	<update id="updateDocNoOfDN" parameterType="string">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_DOC_NO = #{docNO}
+		 where ORDER_NO = #{orderNo} and  SAP_FLAG = '1'
+		]]>
+	</update>
+	<update id="updateErrorPc" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+		   		 SAP_FLAG = '2'
+		 where ORDER_NO = #{orderNo}
+		 	and	SAP_FLAG ='3'
+		]]>
+	</update>
+
+	<select id="searchByDnNo" resultMap="odsOrderInfoMap">
+		<include refid="selectAllOdsOrderInfoColumns" />
+		where 1=1
+		<if test="orderNo != null">
+			and ORDER_NO = #{orderNo}
+		</if>
+	</select>
+	<update id="updateByDnNo" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+				SAP_FLAG='3'
+		 where ORDER_NO = #{orderNo}
+		]]>
+	</update>
+	<update id="updateForPc" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+				SAP_FLAG='3'
+		 where ORDER_NO = #{orderNo}
+		 	and SAP_FLAG = '2'
+		]]>
+	</update>
+	<update id="updateByRowId" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+				SAP_FLAG='2'
+				,SAP_MSG ='Posting date is illegal'
+		 where ROW_ID = #{rowId}
+		]]>
+	</update>
+	<update id="updateDnSapBackByOrderNo" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+				 SAP_MSG = #{sapMsg}
+				,SAP_FLAG=#{sapFlag}
+				,SAP_DOC_NO=#{sapDocNo}
+				,MODIFY_DATE=#{modifyDate}
+				,MODIFY_BY = #{modifyBy}
+		 where SAP_ORDER_NO = #{sapOrderNo}
+		]]>
+	</update>
+
+	<update id="updateOrderLocation" parameterType="odsOrderInfo">
+		<![CDATA[
+		update ODS_ORDER_INFO
+		   set
+				 LOCATION = #{location},
+				 in_out_flag = '1',
+				 in_out_msg = 'goods transfer success'
+		 where SAP_ORDER_NO = #{sapOrderNo}
+		]]>
+	</update>
+
+	<sql id="searchOrderNo_fragement">
+		select t.order_no,t.sap_order_no,max(t.car_no) as car_no from
+		ods_order_info t where 1=1
+		<if test="odsOrderInfo.sapFlag != null and odsOrderInfo.sapFlag !='' ">
+			and t.sap_flag=#{odsOrderInfo.sapFlag}
+		</if>
+		<if test="odsOrderInfo.inOutFlag != null and odsOrderInfo.inOutFlag !='' ">
+			and t.in_out_flag=#{odsOrderInfo.inOutFlag}
+		</if>
+		<if test="odsOrderInfo.flag != null and odsOrderInfo.flag !='' ">
+			and t.flag=#{odsOrderInfo.flag}
+		</if>
+		<if test="odsOrderInfo.docTpye != null and odsOrderInfo.docTpye !='' ">
+			and t.doc_tpye=#{odsOrderInfo.docTpye}
+		</if>
+		<if test="odsOrderInfo.orderNo != null and odsOrderInfo.orderNo !='' ">
+			and t.order_no= #{odsOrderInfo.orderNo}
+		</if>
+		<if test="odsOrderInfo.presacnFlag != null and odsOrderInfo.presacnFlag !=''">
+			and t.presacn_flag=#{odsOrderInfo.presacnFlag}
+		</if>
+
+		group by t.order_no,t.sap_order_no
+	</sql>
+	<select id="searchOrderNos" resultMap="odsOrderInfoMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOrderNo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOrderNosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOrderNo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getListByParam" resultMap="odsOrderInfoMap">
+		<include refid="searchOdsOrderInfo_fragement" />
+	</select>
+	<select id="getAllByName" resultMap="odsOrderInfoMap">
+		<include refid="searchOdsOrderInfo_fragement" />
+	</select>
+
+ 	<update id="updatePrescanByOrderNo">
+		update ods_order_info t set t.presacn_flag=1 where
+		t.order_no=#{orderNo}
+	</update>
+<!--	<update id="updateSapFlag">
+		update ods_order_info t set t.sap_send_id
+		=SEQ_ODS_ORDER_INFO_ID.NEXTVAL where t.row_id=#{rowId} and
+		t.sap_flag='2'
+	</update>
+-->
+
+	<update id="updateCarNoByOrderNo" parameterType="odsOrderInfo">
+		<![CDATA[
+			update ODS_ORDER_INFO
+				set
+					CAR_NO = #{carNo}
+					,CAR_ID=#{carId}
+					,CAR_FLAG=#{carFlag}
+					,MODIFY_DATE=#{modifyDate}
+					,MODIFY_BY = #{modifyBy}
+			where ORDER_NO = #{orderNo}
+		]]>
+	</update>
+	<!-- 孙艳飞  ogp info add按钮生成OGP/IGP NO: 	 -->
+	<select id="createOrderNo" resultType="long">
+		SELECT (getid('seq_order_no')) as ORDER_NO from dual
+	</select>
+
+	<select id="getOrdersByNo" resultMap="odsOrderInfoMap">
+		select
+		<if test="docTpye == 'INBOUND'">
+
+			t.INBOUND_DELIVERY_NO SAP_ORDER_NO,
+			t.INBOUND_ITEM_NO SAP_ORDER_ITEM,
+			t.MATERIAL_NO,
+			t.UNIT,
+			p.plant,
+			t.INBOUND_LOCATION LOCATION,
+			t.QTY REQUIRE_QTY
+		 from stg_inbound_down t
+			LEFT JOIN (select * from stg_po_down) p
+			on  (t.PO_NO=p.po_no and t.PO_ITEM_NO=p.PO_ITEM_NO)
+			where 1=1 and
+				t.INBOUND_DELIVERY_NO=#{orderNo}
+				and t.FINISH_QTY=0
+		</if>
+		<if	test="docTpye == 'DN'">
+			t.DN_NO SAP_ORDER_NO
+			,t.DN_ITEM_NO SAP_ORDER_ITEM
+			,t.MATERIAL_NO
+			,t.unit
+			,t.PLANT
+			,t.LOCATION
+			,t.QTY REQUIRE_QTY
+		from
+			STG_DN_DOWN t
+			where 1=1 and
+			t.DN_NO=#{orderNo}
+			and t.finish_qty=0
+		</if>
+		<if	test="docTpye =='PO'">
+			t.PO_NO SAP_ORDER_NO
+			,t.PO_ITEM_NO SAP_ORDER_ITEM
+			,t.MATERIAL_NO
+			,t.unit
+			,t.PLANT
+			,t.PO_LOCATION LOCATION
+			,t.QTY REQUIRE_QTY
+			from
+			STG_PO_DOWN t
+			where 1=1 and
+			 	t.PO_NO=#{orderNo}
+			 	and t.finish_qty=0
+		</if>
+		<if	test="docTpye == 'STO' ">
+			t.STODN_NO SAP_ORDER_NO
+			,t.STODN_ITEM_NO SAP_ORDER_ITEM
+			,t.unit
+			,if(#{orderType}='1',s.GR_PLANT,s.GI_PLANT) PLANT
+			,if(#{orderType}='1',s.GR_LOCATION,s.GI_LOCATION) LOCATION
+			,t.MATERIAL_NO
+			,t.QTY REQUIRE_QTY
+		from
+			stg_stodn_down t
+					LEFT JOIN stg_sto_down s
+					on (s.STO_NO=t.STO_NO and s.STO_ITEM_NO=right(t.STO_ITEM_NO,5))
+			where 1=1 and t.STODN_NO=#{orderNo}
+				and if(#{orderType}='1',t.gr_finish_qty,t.gi_finish_qty)=0
+		</if>
+
+	</select>
+
+	<!-- 根绝stodnno 获取相应该单号的相应的sto dn detail -->
+	<select id="searchStoDNDetail" resultMap="odsOrderInfoMap">
+		 select stodn.STODN_NO as ORDER_NO
+				,stodn.STODN_ITEM_NO AS ORDER_ITEM
+				,stodn.MATERIAL_NO
+				,stodn.QTY as REQUIRE_QTY
+				,COUNT(DISTINCT detail.BARCODE) as SCANNED_QTY
+
+	     from stg_stodn_down stodn
+	     left join ods_order_info_dtl  detail
+	     on (stodn.STODN_NO = detail.SAP_ORDER_NO
+	     AND stodn.STODN_ITEM_NO = detail.SAP_ORDER_ITEM
+	     AND detail.ORDER_TYPE = '1'
+	     and detail.DOC_TYPE = 'STO'
+		)
+
+		where  1=1
+		<if test="odsOrderInfo.orderNo != null and odsOrderInfo.orderNo !='' ">
+			<![CDATA[and stodn.STODN_NO= #{odsOrderInfo.orderNo}]]>
+		</if>
+
+		GROUP BY stodn.STODN_NO,
+			stodn.STODN_ITEM_NO,
+			stodn.MATERIAL_NO,
+			stodn.QTY
+	</select>
+
+	<select id="searchStoDNDetailCount" resultType="long">
+		<include refid="count_Head" />
+		<![CDATA[
+		select stodn.STODN_NO as ORDER_NO
+			,stodn.STODN_ITEM_NO AS ORDER_ITEM
+			,stodn.MATERIAL_NO
+			,stodn.QTY as REQUIRE_QTY
+			,COUNT(DISTINCT detail.BARCODE) as SCANNED_QTY
+
+	     from stg_stodn_down stodn
+	     left join ods_order_info_dtl  detail
+	     on (stodn.STODN_NO = detail.SAP_ORDER_NO
+	     AND stodn.STODN_ITEM_NO = detail.SAP_ORDER_ITEM
+	     AND detail.ORDER_TYPE = '1'
+	     and detail.DOC_TYPE = 'STO'
+		)
+
+		where  1=1
+		]]>
+		<if test="odsOrderInfo.orderNo != null and odsOrderInfo.orderNo !='' ">
+			<![CDATA[and stodn.STODN_NO= #{odsOrderInfo.orderNo}]]>
+		</if>
+		<![CDATA[
+		GROUP BY stodn.STODN_NO,
+			stodn.STODN_ITEM_NO,
+			stodn.MATERIAL_NO,
+			stodn.QTY
+		]]>
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="iogpCancel" statementType="CALLABLE" resultType="java.lang.String">
+		<![CDATA[
+		  {call prc_igp_ogp_cancel(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.orderType,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="searchOIGPOrderInfoCount" resultType="long">
+		select count(0) from (
+		select t.* from
+		(select order_no, order_type, doc_tpye, sap_order_no, sap_order_item, plant, location,
+			material_no, customer_model, sap_flag, posting_date from ods_order_info
+			where doc_tpye in ('PO','Inbound','STO','DN')
+		union
+		select distinct "" as order_no, order_type, doc_type, sap_order_no, sap_order_item,
+			plant, location, material_no, customer_model, '0' as sap_flag, '' as posting_date from ods_order_info_dtl
+			where doc_type in ('PO','Inbound','STO','DN') and order_no is null) t
+		where 1 = 1
+		<if test="odsOrderInfo.sapFlag != null and odsOrderInfo.sapFlag !='' and odsOrderInfo.sapFlag !='-1'">
+			and t.sap_flag=#{odsOrderInfo.sapFlag}
+		</if>
+		<if test="odsOrderInfo.plant != null and odsOrderInfo.plant !='' ">
+			and t.plant=#{odsOrderInfo.plant}
+		</if>
+		<if test="odsOrderInfo.location != null and odsOrderInfo.location !='' ">
+			and t.location=#{odsOrderInfo.location}
+		</if>
+		<if test="odsOrderInfo.docTpye != null and odsOrderInfo.docTpye !='' and odsOrderInfo.docTpye != '-1'">
+			and t.doc_tpye=#{odsOrderInfo.docTpye}
+		</if>
+		<if test="odsOrderInfo.orderNo != null and odsOrderInfo.orderNo !='' ">
+			and t.order_no= #{odsOrderInfo.orderNo}
+		</if>
+		<if test="odsOrderInfo.sapOrderNo != null and odsOrderInfo.sapOrderNo !='' ">
+			and t.sap_order_no=#{odsOrderInfo.sapOrderNo}
+		</if>
+		<if test="odsOrderInfo.userType != null and odsOrderInfo.userType != 1 ">
+		    and t.plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w
+			where w.row_id = u.wh_id and u.user_id= #{odsOrderInfo.userId})
+			and t.LOCATION in (select loc_code from cd_user_wh_loc where
+			user_id=#{odsOrderInfo.userId})
+		</if>
+		) a
+	</select>
+	<select id="searchOIGPOrderInfo" resultMap="odsOrderInfoMap">
+		<include refid="pagination_Head" />
+		select t.* from
+		(select order_no, order_type, doc_tpye, sap_order_no, sap_order_item, plant, location,
+			material_no, customer_model, sap_flag, posting_date from ods_order_info
+			where doc_tpye in ('PO','Inbound','STO','DN')
+		union
+		select distinct "" as order_no, order_type, doc_type, sap_order_no, sap_order_item,
+			plant, location, material_no, customer_model, '0' as sap_flag, '' as posting_date from ods_order_info_dtl
+			where doc_type in ('PO','Inbound','STO','DN') and order_no is null) t
+		where 1 = 1
+		<if test="odsOrderInfo.sapFlag != null and odsOrderInfo.sapFlag !='' and odsOrderInfo.sapFlag !='-1'">
+			and t.sap_flag=#{odsOrderInfo.sapFlag}
+		</if>
+		<if test="odsOrderInfo.plant != null and odsOrderInfo.plant !='' ">
+			and t.plant=#{odsOrderInfo.plant}
+		</if>
+		<if test="odsOrderInfo.location != null and odsOrderInfo.location !='' ">
+			and t.location=#{odsOrderInfo.location}
+		</if>
+		<if test="odsOrderInfo.docTpye != null and odsOrderInfo.docTpye !='' and odsOrderInfo.docTpye != '-1'">
+			and t.doc_tpye=#{odsOrderInfo.docTpye}
+		</if>
+		<if test="odsOrderInfo.orderNo != null and odsOrderInfo.orderNo !='' ">
+			and t.order_no= #{odsOrderInfo.orderNo}
+		</if>
+		<if test="odsOrderInfo.sapOrderNo != null and odsOrderInfo.sapOrderNo !='' ">
+			and t.sap_order_no=#{odsOrderInfo.sapOrderNo}
+		</if>
+		<if test="odsOrderInfo.userType != null and odsOrderInfo.userType != 1 ">
+		    and t.plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w
+			where w.row_id = u.wh_id and u.user_id= #{odsOrderInfo.userId})
+			and t.LOCATION in (select loc_code from cd_user_wh_loc where
+			user_id=#{odsOrderInfo.userId})
+		</if>
+		order by t.order_type, t.sap_order_no, t.sap_order_item
+		<include refid="pagination_Tail" />
+	</select>
+	<delete id="deleteOrderBySapOrderNo" parameterType="string">
+		<![CDATA[
+		delete from ODS_ORDER_INFO where sap_order_no=#{sapOrderNo}
+		]]>
+	</delete>
+</mapper>

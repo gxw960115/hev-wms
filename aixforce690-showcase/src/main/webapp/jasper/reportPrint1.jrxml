@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report2" pageWidth="1105" pageHeight="595" orientation="Landscape" columnWidth="1065" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="22b51617-5225-4165-a883-0b9d252e9a6e">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="ORDER_NO" class="java.lang.String"/>
+	<parameter name="FLAG" class="java.lang.String"/>
+	<parameter name="SAP_FLAG" class="java.lang.String"/>
+	<parameter name="HAND_FLAG" class="java.lang.String"/>
+	<parameter name="DOC_TPYE" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select
+			ods_order_info.ROW_ID,
+			ods_order_info.ORDER_NO,
+			ods_order_info.ORDER_ITEM,
+			ods_order_info.ORDER_TYPE,
+			ods_order_info.DOC_TPYE,
+			ods_order_info.SAP_ORDER_NO,
+			ods_order_info.SAP_ORDER_ITEM,
+			ods_order_info.BATCH_NO,
+			ods_order_info.PLANT,
+			ods_order_info.WAREHOUSE_CODE,
+			ods_order_info.WAREHOUSE_NAME,
+			ods_order_info.LOCATION,
+			ods_order_info.MATERIAL_NO,
+			ods_order_info.CUSTOMER_MODEL,
+			ods_order_info.MATERIAL_DESP,
+			ods_order_info.SCANNED_QTY,
+			ods_order_info.UNIT,
+			ods_order_info.VENDOR_CODE,
+			ods_order_info.VENDOR_NAME,
+			ods_order_info.DELIVERY_CODE,
+			ods_order_info.DELIVERY_DATE,
+			ods_order_info.CAR_NO,
+			ods_order_info.HAND_FLAG,
+			ods_order_info.CREATE_BY,
+			ods_order_info.CREATE_DATE,
+			ods_order_info.MODIFY_BY,
+			ods_order_info.MODIFY_DATE,
+			ods_order_info.FLAG,
+			ods_order_info.VERSION,
+			ods_order_info.SAP_FLAG,
+			ods_order_info.SAP_MSG,
+			ods_order_info.SAP_DOC_NO,
+			ods_order_info.SAP_SEND_ID,
+			ods_order_info.POSTING_DATE,
+			ods_order_info.IN_OUT_FLAG,
+			ods_order_info.IN_OUT_MSG,
+			ods_order_info.REQUIRE_QTY,
+			ods_order_info.ORDER_CLOSE,
+			ods_order_info.CAR_ID,
+			ods_order_info.PRESACN_FLAG,
+			ods_order_info.car_flag,
+			ods_order_info.hand_Post_Flag,
+			mat.division
+		from
+			ODS_ORDER_INFO ods_order_info
+			left join md_mat_info mat on ods_order_info.material_no=mat.material_no where 1=1 and ods_order_info.FLAG like concat('%',$P{FLAG},'%') and ods_order_info.car_flag >='1'
+ and ods_order_info.SAP_FLAG =$P{SAP_FLAG}and ods_order_info.HAND_FLAG like concat('%',$P{HAND_FLAG},'%') and  ods_order_info.DOC_TPYE =$P{DOC_TPYE}  and ods_order_info.ORDER_NO=$P{ORDER_NO}  order by create_date DESC,MATERIAL_NO]]>
+	</queryString>
+	<field name="ORDER_TYPE" class="java.lang.String"/>
+	<field name="DOC_TPYE" class="java.lang.String"/>
+	<field name="SAP_ORDER_NO" class="java.lang.String"/>
+	<field name="SAP_ORDER_ITEM" class="java.lang.String"/>
+	<field name="LOCATION" class="java.lang.String"/>
+	<field name="ORDER_NO" class="java.lang.String"/>
+	<field name="DIVISION" class="java.lang.String"/>
+	<field name="MATERIAL_NO" class="java.lang.String"/>
+	<field name="CUSTOMER_MODEL" class="java.lang.String"/>
+	<field name="UNIT" class="java.lang.String"/>
+	<field name="CAR_NO" class="java.lang.String"/>
+	<field name="MATERIAL_DESP" class="java.lang.String"/>
+	<field name="SCANNED_QTY" class="java.lang.String"/>
+	<field name="POSTING_DATE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="50" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="10" width="1063" height="40" uuid="bbfa66dd-3b88-4628-9efe-f5b096e1e8b9"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+			</frame>
+			<staticText>
+				<reportElement x="72" y="30" width="72" height="20" uuid="ec4b2fd7-6c3e-4a63-a74e-f8e381a8de18"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Order Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="10" width="1063" height="20" backcolor="#CCCCCC" uuid="2f778044-91db-4798-859a-33510c00b680"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="14" isBold="true" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[IGP/OGP Order Info]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="144" y="30" width="51" height="20" uuid="d8e76c87-3ea2-450c-a9c0-616b461e7f82"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[DocType]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="195" y="30" width="82" height="20" uuid="f424d38a-9b61-4d5b-82d8-ae2abd52c3de"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[SAP No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="352" y="30" width="68" height="20" uuid="e78c3215-43d7-4422-8689-dd06f0146454"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Location]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="30" width="72" height="20" uuid="d533760f-75a7-4df7-af8c-5f1899df74b6"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Order No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="277" y="30" width="75" height="20" uuid="406a97a1-32b8-4f7e-accb-fc8877f58604"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[SAP Item]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="30" width="68" height="20" uuid="1eb5bdde-25bf-4ae1-9a45-5b8b251ec4ff"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Division]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="488" y="30" width="67" height="20" uuid="dac86768-5306-44e4-883c-a31d65fcf7ad"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Material No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="555" y="30" width="122" height="20" uuid="f31318ed-4cac-4b61-b5f6-936b4589290d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Customer Model]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="677" y="30" width="67" height="20" uuid="f701884d-8aef-4d39-af10-2888890fd1a9"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Unit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="744" y="30" width="67" height="20" uuid="61bf8cfb-023d-49ce-9af0-fa49fd5c6542"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Car No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="811" y="30" width="84" height="20" uuid="0d0eb44c-6570-4b21-9834-d20bfdf50f6c"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Material Desp]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="895" y="30" width="84" height="20" uuid="0c42b2e3-9e0a-475f-945d-1bf4834e6a73"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Scanned Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="979" y="30" width="84" height="20" uuid="f2f464bb-4603-4976-b6d4-dd941fb210f9"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Posting Date]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="72" y="0" width="72" height="20" uuid="735260d1-4c3c-4062-8dff-0a60390e5c1e"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ORDER_TYPE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="144" y="0" width="51" height="20" uuid="7ff17a1d-f46d-41bb-a8e0-0bb9e24ab04b"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOC_TPYE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="195" y="0" width="82" height="20" uuid="e0e7526e-827a-4018-8830-0799a620b95f"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SAP_ORDER_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="277" y="0" width="75" height="20" uuid="1bc5745f-c830-48b3-ae65-2abea8ea44ff"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SAP_ORDER_ITEM}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="352" y="0" width="68" height="20" uuid="dc788edd-b469-4d7f-b2c7-0bc5fd1e9a0d"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LOCATION}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="72" height="20" isPrintWhenDetailOverflows="true" uuid="2308a297-1e0a-43c1-8bb5-22699b15328c"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ORDER_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="420" y="0" width="68" height="20" uuid="3a54c9dd-65c7-44c5-9991-77175460c86a"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DIVISION}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="488" y="0" width="67" height="20" uuid="ccd0e65d-044f-40e9-90ed-c6127d94e601"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MATERIAL_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="555" y="0" width="122" height="20" uuid="3aefb654-9c7e-40a1-b6d8-6c4d9cbee349"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CUSTOMER_MODEL}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="677" y="0" width="67" height="20" uuid="e9dabb2d-ef17-4093-affd-ad3cda73febd"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{UNIT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="744" y="0" width="67" height="20" uuid="16e787a1-0b29-4892-b56c-41d99164727e"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CAR_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="811" y="0" width="84" height="20" uuid="e798abe0-1769-425f-b220-da9f9636b7de"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MATERIAL_DESP}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="895" y="0" width="84" height="20" uuid="b61cf7a8-3fa8-4ce6-8388-9aaf80bbefd3"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SCANNED_QTY}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="979" y="0" width="84" height="20" uuid="93a7ce41-e634-45d2-9a71-d96551944e2f"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POSTING_DATE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

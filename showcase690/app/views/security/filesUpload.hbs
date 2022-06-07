@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/gray/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/icon.css">
+    <script src="/assets/scripts/easyui/jquery.min.js"></script>
+    <script src="/assets/scripts/easyui/jquery.easyui.min.js"></script>
+    <script src="/assets/scripts/jquery.session.js"></script>
+    <script src="/assets/scripts/js/common.js"></script>
+    <link href="/assets/styles/css.css" rel="stylesheet">
+    <script src="/assets/scripts/upload/ajaxfileupload.js"></script>
+</head>
+<script type="text/javascript">
+    $(document).ready(function(){
+        var columns=[[{
+                field:'ck',checkbox:true,align:'center'
+            },{
+                field:'fileName',title:'File Name', width:200, align:'center',sortable:true
+            },{
+                field:'createBy',title:'Uploaded By',width:200, align:'center',sortable:true
+            },{
+                field:'createDate', title:'Uploaded', width:160,align:'center',sortable:true
+            },{
+                field:'filePath1', title:'Storage Path', width:200,align:'center',sortable:true
+            },{
+                field : 'id',title : 'ID',width: 60,align : 'center', hidden : true
+            }]];
+            
+           
+            queryData(columns);
+            $('#queryBtn').on('click',function(){   
+                queryData(columns);
+            })
+            $('#deleteBtn').on('click',function(){   
+                deleteData();
+            })
+            $('#uploadBtn').on('click',function(){   
+            	$("#fileInput").click();
+            })
+            $('#fileInput').on('change', function() {
+            	$.ajaxFileUpload({
+                	url: '/security/fileUploadBySwf',
+                    secureuri: false, 
+                    fileElementId: 'fileInput', 
+                    dataType: 'jsonp',
+                    success: function (data, status){
+                    	$('#fileInput').val("");
+                    	$.messager.alert('System Information','File upload success!.','info');   
+        	        	$('#dataGrid').datagrid('reload');
+                    },
+                    error:function (data, status, e){
+                    	$.messager.alert('System Information','File upload error, please contact with system administrator.','error');
+
+                    }
+            	});
+                return;
+    		});
+            
+        });
+        String.prototype.getQuery = function(name) { 
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");  
+            var r = this.substr(this.indexOf("\?")+1).match(reg);  
+            if (r != null) return unescape(r[2]);   
+            return  '';  
+        }
+ 		function queryData(columns) {
+            $('#dataGrid').datagrid(
+                {
+                    rownumbers:true,
+                    columns:columns,
+                    striped:true,
+                    height:window.location.toString().getQuery('suitHeight')-100,
+                    method:'post',
+                    url : '/security/searchFileUploadBySwf',
+                    onLoadSuccess : function(data) {
+                        $("#dataGrid").datagrid(
+                                'clearChecked');
+                    }
+                });
+              //  initPagination(grid,14);
+        }
+         
+		function deleteData() {
+            
+            var selectedRows = $("#dataGrid").datagrid('getChecked');
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return false;
+            }
+            var ids = "";
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+":"+ row.fileName+",";
+            });
+            $.messager.confirm(
+                    'System Information',
+                    'Are You Sure Delete Data?',
+                    function(r) {
+                        if (r) {
+                            $.post("/security/files/deleteFiles",
+                                    {
+                                        'ids' : ids
+                                    },
+                                    function(data) {
+                                        if (data) {
+                                            $.messager.alert('System Information',data, 'warning');
+                                        }
+                                        queryData();
+                                    })
+                                    .error(
+                                    function() {
+                                        $.messager.alert('System Information','Network Abnormal!','warning');
+                                    });
+                        }
+                    });
+		}
+</script>
+<body class="easyui-layout" >
+	<div region="north" style="width:100%; height:50px; text-align:center">
+    	<h3 style="color:#636E7B">Attachment information upload</h3>
+    </div>
+    <div region="west" style="width:0px; border: 0; color:#636E7B">
+    	<div class="section">
+        	<div class="box">
+                <div class="title">
+                    <span class="hide" style="border:0"></span>
+                </div>
+                <div class="content" align="center">
+	                <table class="form_table" align="center" style="border: 0; margin-left: 5px; margin-top: 200px;">
+	                    <tr>
+	                        <td>
+	                            <div id="fileQueueA" ></div> 
+	                            <table>
+	                                <tr><td colspan=2><input id="fileInput" name="fileInput" type="file" /></td></tr>
+	                                <!--  <tr><td><a id="uploadBtn" href="javascript:void(0)">开始上传</a></td></tr> -->
+	                            </table>
+	                        </td>
+	                    </tr>
+	                </table>
+                </div>
+            </div>
+        </div>
+	</div>
+    <div region="center" class="easyui-layout" style="border-top:0;">
+        <div region="north" style="width:100%;height:37px; border-bottom:0; padding-top:3px; ">
+            <a href="javascript:void(0)" class="btnStyle openBtn" id="uploadBtn">Upload</a>
+            <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Flush</a>
+            <a href="javascript:void(0)" class="btnStyle deleteBtn" id="deleteBtn">Delete</a>
+        </div>   
+        <div region="center">
+            <table id="dataGrid" >
+            </table>
+        </div>
+    </div>       
+</body>
+</html>

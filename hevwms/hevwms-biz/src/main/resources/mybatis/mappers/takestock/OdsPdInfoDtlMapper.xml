@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haier.hevwms.takestock.dao.OdsPdInfoDtlDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+		<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[) t]]>
+	</sql>
+
+	<sql id="selectAllOdsPdInfoDtlColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			ORDER_NO,
+			PLANT,
+			CUSTOMER_MODEL,
+			LOCATION,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			UNIT,
+			BIN,
+			BARCODE,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			VERSION,
+			SUB_LOCATION,
+			QTY,
+			1
+		from 
+			ODS_PD_INFO_DTL ods_pd_info_dtl_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsPdInfoDtlMap" type="odsPdInfoDtl">
+		<id property="rowId" column="row_ID"/>
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="plant" column="PLANT" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="unit" column="UNIT" />
+		<result property="barcode" column="BARCODE" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="subLocation" column="SUB_LOCATION" />
+		<result property="qty" column="QTY" />
+		<result property="locqty" column="locqty" />
+		<result property="wmsqty" column="wmsqty" />
+		<result property="sapqty" column="sapqty" />
+		<result property="pdBin" column="pdBin" />
+		<result property="inveBin" column="inveBin" />
+		<result property="inveQty" column="inveQty" />
+		<result property="inveSub" column="inveSub" />
+		<result property="inveBarcode" column="inveBarcode" />
+		<result property="inveRowId" column="inveRowId" />
+		<result property="status" column="status" />
+		<result property="plantName" column="plantname" />
+
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="odsPdInfoDtlMap">
+		<include refid="selectAllOdsPdInfoDtlColumns" />
+	</select>
+	<select id="get" resultMap="odsPdInfoDtlMap" parameterType="long">
+		<include refid="selectAllOdsPdInfoDtlColumns" />
+		<![CDATA[
+		where ods_pd_info_dtl_.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="deleteInfoDtlByBarcode" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_pd_delete(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.bin,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+	      #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</delete>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_PD_INFO_DTL where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_PD_INFO_DTL where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="odsPdInfoDtl">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_PD_INFO_DTL_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into ODS_PD_INFO_DTL
+		  (ROW_ID,
+		  		 ORDER_NO
+				,PLANT
+				,CUSTOMER_MODEL
+				,LOCATION
+				,MATERIAL_NO
+				,MATERIAL_DESP
+				,UNIT
+				,BARCODE
+				,CREATE_BY
+				,CREATE_DATE
+				,MODIFY_BY
+				,MODIFY_DATE
+				,FLAG
+				,VERSION
+				,SUB_LOCATION
+				,QTY
+				,STATUS
+		   )
+		values
+		  (#{id},
+		  		#{orderNo}
+				,#{plant}
+				,#{customerModel}
+				,#{location}
+				,#{materialNo}
+				,#{materialDesp}
+				,#{unit}
+				,#{barcode}
+				,#{createBy}
+				,#{createDate}
+				,#{modifyBy}
+				,#{modifyDate}
+				,#{flag}
+				,#{version}
+				,#{subLocation}
+				,#{qty}
+				,#{status}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="odsPdInfoDtl">
+		<![CDATA[
+		update ODS_PD_INFO_DTL
+		   set 1=1
+				,ORDER_NO = #{orderNo}
+				,PLANT = #{plant}
+				,CUSTOMER_MODEL = #{customerModel}
+				,LOCATION = #{location}
+				,MATERIAL_NO = #{materialNo}
+				,MATERIAL_DESP = #{materialDesp}
+				,UNIT = #{unit}
+				,BARCODE = #{barcode}
+				,CREATE_BY = #{createBy}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate}
+				,FLAG = #{flag}
+				,VERSION = #{version}
+				,SUB_LOCATION = #{subLocation}
+				,QTY = #{qty}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<update id="updateStatus" parameterType="odsPdInfoDtl">
+		<![CDATA[
+		update ODS_PD_INFO_DTL
+		   set MODIFY_BY = #{odsPdInfoDtl.modifyBy}
+				,MODIFY_DATE = #{odsPdInfoDtl.modifyDate}
+				,STATUS=#{odsPdInfoDtl.status}
+		 where ORDER_NO = #{odsPdInfoDtl.orderNo}
+		]]>
+	</update>
+	
+	<sql id="searchOdsPdInfoDtl_fragement_sum">
+		<![CDATA[
+		select
+		t.order_no,t.plant,t.location,t.sub_location,t.material_no,max(t.customer_model)
+		as customer_model,max(t.material_desp) as
+		material_desp,count(t.barcode) as qty,
+		max(NVL(pd.qty,0)) as locqty,
+		max(NVL(inve.qty,0)) as wmsqty,
+		max(NVL(sap.qty,0)) as sapqty
+
+		from
+		ODS_PD_INFO_DTL t
+		left join (select * from V_INVENTORY_INFO ) inve on
+		(inve.location=t.location and inve.material_no=t.material_no AND inve.plant =t.PLANT)
+		left
+		join (select * from stg_sap_stock ) sap on (sap.location=t.location
+		and sap.material_no=t.material_no AND sap.plant = t.PLANT)
+		left join (select
+		order_no,plant,location,material_no,count(barcode) as
+		qty from
+		ODS_PD_INFO_DTL where NVL(STATUS,0)<>1
+		group by order_no,plant,location,material_no)
+		pd on
+		(pd.location=t.location and pd.material_no=t.material_no AND pd.plant=t.PLANT AND pd.order_no=t.ORDER_NO)
+		where NVL(STATUS,0)<>1
+		]]>
+		<if test="odsPdInfoDtl.orderNo != null and odsPdInfoDtl.orderNo != ''">
+			and t.ORDER_NO like '%'||#{odsPdInfoDtl.orderNo}||'%'  
+		</if>
+		<if test="odsPdInfoDtl.plant != null and odsPdInfoDtl.plant != ''">
+			and t.PLANT like '%'||#{odsPdInfoDtl.plant}||'%' 
+		</if>
+
+		<if test="odsPdInfoDtl.location != null and odsPdInfoDtl.location != ''">
+			and t.LOCATION like '%'||#{odsPdInfoDtl.location}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.materialNo != null and odsPdInfoDtl.materialNo != '' ">
+			and t.MATERIAL_NO like '%'||#{odsPdInfoDtl.materialNo}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.customerModel != null and odsPdInfoDtl.customerModel != ''">
+			and t.CUSTOMER_MODEL like '%'||#{odsPdInfoDtl.customerModel}||'%' 
+		</if>
+
+		<if test="odsPdInfoDtl.flag != null and odsPdInfoDtl.flag != ''">
+			and t.FLAG like '%'||#{odsPdInfoDtl.flag}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.subLocation != null and odsPdInfoDtl.subLocation != '' ">
+			and t.SUB_LOCATION like '%'||#{odsPdInfoDtl.subLocation}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.begin != null and odsPdInfoDtl.begin != ''">
+		<![CDATA[
+			and t.create_date >= TO_DATE(concat(#{odsPdInfoDtl.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+
+		<if test="odsPdInfoDtl.end != null and odsPdInfoDtl.end != ''">
+		<![CDATA[
+			and t.create_date <= TO_DATE(concat(#{odsPdInfoDtl.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+		group by t.order_no,t.plant,t.location,t.sub_location,t.material_no
+	</sql>
+
+	<sql id="searchOdsPdInfoDtl_fragement">
+		<include refid="selectAllOdsPdInfoDtlColumns" />
+		<![CDATA[
+		where NVL(STATUS,0)<>1
+		]]>
+		<if test="odsPdInfoDtl.orderNo != null and odsPdInfoDtl.orderNo != ''">
+			and ORDER_NO like '%'||#{odsPdInfoDtl.orderNo}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.materialNo != null and odsPdInfoDtl.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsPdInfoDtl.materialNo}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.barcode != null and odsPdInfoDtl.barcode != ''">
+			and barcode = #{odsPdInfoDtl.barcode}
+		</if>
+		<if test="odsPdInfoDtl.plant != null">
+			and PLANT like '%'||#{odsPdInfoDtl.plant}||'%'  
+		</if>
+		<if test="odsPdInfoDtl.location != null and odsPdInfoDtl.location != ''">
+			and LOCATION IN (${odsPdInfoDtl.location})
+		</if>
+		<if test="odsPdInfoDtl.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsPdInfoDtl.materialNo}||'%'  
+		</if>
+		<if test="odsPdInfoDtl.flag != null">
+			and FLAG = #{odsPdInfoDtl.flag}
+		</if>
+		<if test="odsPdInfoDtl.customerModel != null and odsPdInfoDtl.customerModel != ''">
+			and CUSTOMER_MODEL = #{odsPdInfoDtl.customerModel}
+		</if>
+
+		<if test="odsPdInfoDtl.subLocation != null">
+			and SUB_LOCATION like '%'||#{odsPdInfoDtl.subLocation}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.userType != null and odsPdInfoDtl.userType != 1">
+		    and plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and u.user_id= #{odsPdInfoDtl.userId})
+			and LOCATION in (select loc_code from
+			cd_user_wh_loc where user_id=#{odsPdInfoDtl.userId})
+		</if>
+		<if test="odsPdInfoDtl.begin != null and odsPdInfoDtl.begin != ''">
+		<![CDATA[
+			and create_date >= TO_DATE(concat(#{odsPdInfoDtl.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+
+		<if test="odsPdInfoDtl.end != null and odsPdInfoDtl.end != ''">
+		<![CDATA[
+			and create_date <= TO_DATE(concat(#{odsPdInfoDtl.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+	</sql>
+	<select id="getListByParams" resultMap="odsPdInfoDtlMap">
+		<include refid="selectAllOdsPdInfoDtlColumns" />
+		<![CDATA[
+		where 1=1 and NVL(STATUS,0)<>1
+		]]>
+		<if test="odsPdInfoDtl.orderNo != null and odsPdInfoDtl.orderNo != ''">
+			and ORDER_NO =#{odsPdInfoDtl.orderNo}
+		</if>
+		<if test="odsPdInfoDtl.materialNo != null and odsPdInfoDtl.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsPdInfoDtl.materialNo}||'%' 
+		</if>
+		<if test="odsPdInfoDtl.barcode != null and odsPdInfoDtl.barcode != ''">
+			and BARCODE =#{odsPdInfoDtl.barcode}
+		</if>
+		<if test="odsPdInfoDtl.location != null and odsPdInfoDtl.location != ''">
+			and LOCATION IN (${odsPdInfoDtl.location})
+		</if>
+		<if test="odsPdInfoDtl.begin != null and odsPdInfoDtl.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{odsPdInfoDtl.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsPdInfoDtl.end != null and odsPdInfoDtl.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsPdInfoDtl.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsPdInfoDtl.createBy != null and odsPdInfoDtl.createBy != ''">
+			and CREATE_BY = #{odsPdInfoDtl.createBy}
+		</if>
+		order by create_date desc 
+	</select>
+
+	<select id="searchOdsPdInfoDtlsBySum" resultMap="odsPdInfoDtlMap">
+		<include refid="pagination_Head" />		
+		<include refid="searchOdsPdInfoDtl_fragement_sum" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsPdInfoDtlsCountBySum" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsPdInfoDtl_fragement_sum" />
+		<include refid="count_Tail" />
+	</select>
+	<!-- stock audit detail sum 导出 add by sunyanfei 2016-2-3 -->
+	<select id="searchOdsPdInfoDtlsBySum2" resultMap="odsPdInfoDtlMap">
+		<include refid="searchOdsPdInfoDtl_fragement_sum" />
+	</select>
+	<select id="searchOdsPdInfoDtls" resultMap="odsPdInfoDtlMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsPdInfoDtl_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsPdInfoDtlsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsPdInfoDtl_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="getDiff" resultMap="odsPdInfoDtlMap">
+		select inve.row_id as inveRowId,pd.row_id,
+			   inve.barcode as inveBarcode, pd.barcode, 
+			   NVL(inve.qty, 0) as inveQty, NVL(pd.qty, 0) as qty,
+			   pd.bin pdBin,inve.bin inveBin
+		from
+		(select * from ods_inventory_info_dtl where location=#{pd.location} and plant=#{pd.plant}
+		<if test="pd.materialNo != null and pd.materialNo != ''and pd.materialNo != 'ALL'">
+			and material_no =#{pd.materialNo}
+		</if>
+		) inve
+		left join (select * from ods_pd_info_dtl
+		<![CDATA[
+		where	NVL(STATUS,0)<>1  and
+		]]>
+		order_no=#{pd.orderNo} and location=#{pd.location} and plant=#{pd.plant}
+		<if test="pd.materialNo != null and pd.materialNo != ''and pd.materialNo != 'ALL'">
+			and material_no =#{pd.materialNo}
+		</if>
+		) pd
+		on (inve.barcode = pd.barcode and
+		inve.location = pd.location
+		and inve.plant = pd.plant)
+		union 
+		select inve.row_id as inveRowId,pd.row_id,
+			   inve.barcode as inveBarcode, pd.barcode, 
+			   NVL(inve.qty, 0) as inveQty, NVL(pd.qty, 0) as qty,
+			   pd.bin pdBin,inve.bin inveBin
+		from
+		(select * from ods_inventory_info_dtl where location=#{pd.location} and plant=#{pd.plant}
+		<if test="pd.materialNo != null and pd.materialNo != ''and pd.materialNo != 'ALL'">
+			and material_no =#{pd.materialNo}
+		</if>
+		) inve
+		right join (select * from ods_pd_info_dtl
+		<![CDATA[
+		where	NVL(STATUS,0)<>1  and
+		]]>
+		order_no=#{pd.orderNo} and location=#{pd.location} and plant=#{pd.plant}
+		<if test="pd.materialNo != null and pd.materialNo != ''and pd.materialNo != 'ALL'">
+			and material_no =#{pd.materialNo}
+		</if>
+		) pd
+		on (inve.barcode = pd.barcode and
+		inve.location = pd.location
+		and inve.plant = pd.plant)
+	</select>
+	<select id="pdQtyDetail" resultMap="odsPdInfoDtlMap">
+				select * from (
+		SELECT
+			t.location,
+			max(NVL(pd.qty, 0)) AS locqty,
+			max(NVL(inve.qty, 0)) AS wmsqty,
+			max(NVL(sap.qty, 0)) AS sapqty
+		FROM
+			ods_pd_info_dtl t
+		LEFT JOIN (
+			SELECT
+				*
+			FROM
+				v_inventory_info
+		) inve ON (
+			t.plant = inve.plant
+			AND t.location = inve.location
+			AND t.material_no = inve.material_no
+		)
+		LEFT JOIN (SELECT * FROM stg_sap_stock) sap ON (
+			t.plant = sap.plant
+			AND t.location = sap.location
+			AND t.material_no = sap.material_no
+		)
+		LEFT JOIN (
+			SELECT
+				order_no,
+				plant,
+				material_no,
+				LOCATION,
+				count(barcode) AS qty
+			FROM
+				ODS_PD_INFO_DTL
+			GROUP BY
+				order_no,
+				plant,
+				material_no,
+				LOCATION
+		) pd ON (
+			pd.material_no = t.material_no
+			AND pd.plant = t.plant
+			AND pd.order_no = t.order_no
+			AND pd.LOCATION = t.LOCATION
+		)
+		WHERE 1=1
+	
+			and t.material_no =#{odsPdInfoDtl.materialNo}
+	
+	
+			and t.ORDER_NO LIKE #{odsPdInfoDtl.orderNo}
+	
+			GROUP BY
+				t.LOCATION
+			UNION
+				SELECT
+					inve.location,
+					max(NVL(pd.qty, 0)) AS locqty,
+					max(NVL(inve.qty, 0)) AS wmsqty,
+					max(NVL(sap.qty, 0)) AS sapqty
+				FROM
+					v_inventory_info inve
+				LEFT JOIN (SELECT * FROM ods_pd_info_dtl) t ON (
+					t.plant = inve.plant
+					AND t.location = inve.location
+					AND t.material_no = inve.material_no
+				)
+				LEFT JOIN (SELECT * FROM stg_sap_stock) sap ON (
+					inve.plant = sap.plant
+					AND inve.location = sap.location
+					AND inve.material_no = sap.material_no
+				)
+				LEFT JOIN (
+					SELECT
+						order_no,
+						plant,
+						material_no,
+						LOCATION,
+						count(barcode) AS qty
+					FROM
+						ODS_PD_INFO_DTL
+					WHERE 1=1
+			and ORDER_NO LIKE #{odsPdInfoDtl.orderNo}
+	
+					GROUP BY
+						order_no,
+						plant,
+						material_no,
+						LOCATION
+				) pd ON (
+					pd.material_no = inve.material_no
+					AND pd.plant = inve.plant
+					AND pd.order_no = t.order_no
+					AND pd.LOCATION = inve.LOCATION
+				)
+				WHERE 1=1 
+			and inve.material_no =#{odsPdInfoDtl.materialNo}
+			and inve.PLANT =#{odsPdInfoDtl.plant}
+				
+				GROUP BY
+					inve.LOCATION
+				UNION
+					SELECT
+						sap.location,
+						max(NVL(pd.qty, 0)) AS locqty,
+						max(NVL(inve.qty, 0)) AS wmsqty,
+						max(NVL(sap.qty, 0)) AS sapqty
+					FROM
+						stg_sap_stock sap
+					LEFT JOIN (SELECT * FROM ods_pd_info_dtl) t ON (
+						t.plant = sap.plant
+						AND t.location = sap.location
+						AND t.material_no = sap.material_no
+					)
+					LEFT JOIN (
+						SELECT
+							*
+						FROM
+							v_inventory_info
+					) inve ON (
+						inve.plant = sap.plant
+						AND inve.location = sap.location
+						AND inve.material_no = sap.material_no
+					)
+					LEFT JOIN (
+						SELECT
+							order_no,
+							plant,
+							material_no,
+							LOCATION,
+							count(barcode) AS qty
+						FROM
+							ODS_PD_INFO_DTL
+						WHERE 1=1
+			and ORDER_NO LIKE #{odsPdInfoDtl.orderNo}
+	
+						GROUP BY
+							order_no,
+							plant,
+							material_no,
+							LOCATION
+					) pd ON (
+						pd.material_no = sap.material_no
+						AND pd.plant = sap.plant
+						AND pd.order_no = t.order_no
+						AND pd.LOCATION = sap.LOCATION
+					)
+					WHERE 1=1
+			and sap.material_no =#{odsPdInfoDtl.materialNo}
+			and sap.PLANT =#{odsPdInfoDtl.plant}
+	
+					GROUP BY
+						sap.LOCATION
+			) ro
+			order BY ro.location
+	</select>
+	<select id="pdQtyDetailCount" resultType="long">
+		select count(*) 
+		from (select  t.ORDER_NO,t.LOCATION ,COUNT(t.BARCODE)  from ods_pd_info_dtl t 
+		where ORDER_NO=#{odsPdInfoDtl.orderNo} and material_no=#{odsPdInfoDtl.materialNo}
+		GROUP BY t.ORDER_NO,t.LOCATION ) row_
+	</select>
+	<select id="getPlantByOrderNo" resultType="string">
+		select DISTINCT plant from ods_pd_info_dtl where ORDER_NO like #{orderNo}
+	</select>
+	
+	<select id="scanStockTaking" statementType="CALLABLE">
+		<![CDATA[
+		  {call PRC_BARCODE_PD_CHECK(
+		  #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.location,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.bin,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.user,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.version,mode=IN,jdbcType=VARCHAR},
+		  #{result.status,mode=OUT,jdbcType=VARCHAR},
+		  #{result.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+	      #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	
+</mapper>

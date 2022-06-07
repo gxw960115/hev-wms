@@ -1,0 +1,836 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.sto.dao.StgStodnDownDAO">
+	<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from (]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+    <resultMap id="BaseResultMap" type="stgStodnDown" >
+      <result column="ROW_ID" property="rowId" jdbcType="DECIMAL" />
+      <result column="STO_NO" property="stoNo" jdbcType="OTHER" />
+      <result column="STO_ITEM_NO" property="stoItemNo" jdbcType="OTHER" />
+      <result column="STODN_NO" property="stodnNo" jdbcType="OTHER" />
+      <result column="STODN_ITEM_NO" property="stodnItemNo" jdbcType="OTHER" />
+      <result column="QTY" property="qty" jdbcType="DECIMAL" />
+      <result column="MATERIAL_NO" property="materialNo" jdbcType="OTHER" />
+      <result column="UNIT" property="unit" jdbcType="OTHER" />
+      <result column="GI_LOCATION" property="giLocation" jdbcType="OTHER" />
+      <result column="MESSAGE" property="message" jdbcType="OTHER" />
+      <result column="GI_FINISH_QTY" property="giFinishQty" jdbcType="DECIMAL" />
+      <result column="GI_FINISH_FLAG" property="giFinishFlag" jdbcType="OTHER" />
+      <result column="GI_FLAG" property="giFlag" jdbcType="OTHER" />
+      <result column="GR_FINISH_QTY" property="grFinishQty" jdbcType="DECIMAL" />
+      <result column="GR_FINISH_FLAG" property="grFinishFlag" jdbcType="OTHER" />
+      <result column="GR_FLAG" property="grFlag" jdbcType="OTHER" />
+      <result column="GI_SAP_FLAG" property="giSapFlag" jdbcType="OTHER" />
+      <result column="GR_SAP_FLAG" property="grSapFlag" jdbcType="OTHER" />
+      <result column="GI_SAP_MSG" property="giSapMsg" jdbcType="OTHER" />
+      <result column="GI_DOC" property="giDoc" jdbcType="OTHER" />
+      <result column="GR_SAP_MSG" property="grSapMsg" jdbcType="OTHER" />
+      <result column="GR_DOC" property="grDoc" jdbcType="OTHER" />
+      <result column="REMARK" property="remark" jdbcType="OTHER" />
+      <result column="FLAG" property="flag" jdbcType="OTHER" />
+      <result column="CREATE_BY" property="createBy" jdbcType="OTHER" />
+      <result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+      <result column="MODIFY_BY" property="modifyBy" jdbcType="OTHER" />
+      <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+      <result column="SAP_FLAG" property="sapFlag" jdbcType="OTHER" />
+      <result column="PRESCAN_FLAG" property="prescanFlag" jdbcType="OTHER" />
+      <result column="GI_PLANT" property="giPlant" jdbcType="OTHER" />
+      <result column="GI_DATE" property="giDate" jdbcType="OTHER" />
+      <result column="GR_DATE" property="grDate" jdbcType="OTHER" />
+      <result column="SUBMIT_BY" property="submitBy" jdbcType="OTHER" />
+      <result column="GR_PLANT" property="grPlant" jdbcType="OTHER" />
+      <result column="GR_LOCATION" property="grLocation" jdbcType="OTHER" />
+      <result column="CUSTOMER_MODEL" property="customerModel" jdbcType="OTHER" />
+      <result column="MATERIAL_DESP" property="materialDesp" jdbcType="OTHER" />
+      <result column="STO_TYPE" property="stoType" jdbcType="OTHER" />
+    </resultMap>
+
+	<!-- TMS 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="stgStoDnMap" type="stgStoDnDTO">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="stoNo" column="STO_NO" />
+		<result property="orderType" column="ORDER_TYPE" />
+		<result property="stodnNo" column="STODN_NO" />
+		<result property="stoDnItem" column="STODN_ITEM" />
+		<result property="plant" column="PLANT" />
+		<result property="location" column="LOCATION" />
+		<result property="qty" column="QTY" />
+		<result property="bin" column="BIN" />
+		<result property="unit" column="UNIT" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="deliveryCode" column="DELIVERY_CODE" />
+		<result property="deliveryName" column="DELIVERY_NAME" />
+		<result property="deliveryAddress" column="DELIVERY_ADDRESS" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="grQty" column="GR_QTY" />
+		<result property="grFlag" column="GR_FLAG" />
+		<result property="grDate" column="GR_DATE" />
+		<result property="giQty" column="GI_QTY" />
+		<result property="giFlag" column="GI_FLAG" />
+		<result property="giDate" column="GI_DATE" />
+		<result property="tmsFlag" column="TMS_FLAG" />
+		<result property="carNo" column="CAR_NO" />
+		<result property="postDate" column="POST_DATE" />
+		<result property="grPlant" column="GR_PLANT" />
+		<result property="grLocation" column="GR_LOCATION" />
+		<result property="stoItem" column="STO_ITEM" />
+		<result property="barcode" column="BARCODE" />
+	</resultMap>
+	<!-- =========================================================== -->
+
+    <sql id="Base_Column_List" >
+		ROW_ID, STO_NO, STO_ITEM_NO, STODN_NO, STODN_ITEM_NO, QTY, MATERIAL_NO, UNIT, GI_LOCATION,
+		MESSAGE, GI_FINISH_QTY, GI_FINISH_FLAG, GI_FLAG, GR_FINISH_QTY, GR_FINISH_FLAG, GR_FLAG,
+		GI_SAP_FLAG, GR_SAP_FLAG, GI_SAP_MSG, GI_DOC, GR_SAP_MSG, GR_DOC, REMARK, FLAG, CREATE_BY,
+		CREATE_DATE, MODIFY_BY, MODIFY_DATE, SAP_FLAG, PRESCAN_FLAG, GI_PLANT, GI_DATE, GR_DATE,
+		SUBMIT_BY, GR_PLANT, GR_LOCATION, CUSTOMER_MODEL, MATERIAL_DESP, STO_TYPE
+    </sql>
+
+    <sql id="selectAllResult" >
+        select
+        <include refid="Base_Column_List" />
+        from STG_STODN_DOWN
+    </sql>
+
+	<select id="getAll" resultMap="BaseResultMap">
+		<include refid="selectAllResult" />
+	</select>
+	<select id="get" resultMap="BaseResultMap" parameterType="long">
+		<include refid="selectAllResult" />
+		where ROW_ID = #{rowId}
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from STG_STODN_DOWN where row_id = #{rowId}
+		]]>
+	</delete>
+
+<!--	<delete id="deleteAll">-->
+<!--		<![CDATA[-->
+<!--		delete from STG_STODN_DOWN where row_id in-->
+<!--		]]>-->
+<!--		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">-->
+<!--			#{item}-->
+<!--		</foreach>-->
+<!--	</delete>-->
+
+    <insert id="save" parameterType="stgStodnDown" >
+        <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+            SELECT SEQ_STODN_DOWN_ID.NEXTVAL AS ID FROM DUAL
+        </selectKey>
+        <![CDATA[
+        insert into STG_STODN_DOWN
+        (
+            ROW_ID, STO_NO, STO_ITEM_NO,
+            STODN_NO, STODN_ITEM_NO, QTY,
+            MATERIAL_NO, UNIT, GI_LOCATION,
+            MESSAGE, GI_FINISH_QTY, GI_FINISH_FLAG,
+            GI_FLAG, GR_FINISH_QTY, GR_FINISH_FLAG,
+            GR_FLAG, GI_SAP_FLAG, GR_SAP_FLAG,
+            GI_SAP_MSG, GI_DOC, GR_SAP_MSG,
+            GR_DOC, REMARK, FLAG, CREATE_BY,
+            CREATE_DATE,
+            SAP_FLAG, GI_PLANT,
+            GI_DATE, GR_DATE, SUBMIT_BY,
+            GR_PLANT, GR_LOCATION,
+            MATERIAL_DESP, STO_TYPE
+        )
+        values
+        (
+            #{rowId}, #{stgStodnDown.stoNo}, #{stgStodnDown.stoItemNo},
+            #{stgStodnDown.stodnNo}, #{stgStodnDown.stodnItemNo}, #{stgStodnDown.qty},
+            #{stgStodnDown.materialNo}, #{stgStodnDown.unit}, #{stgStodnDown.giLocation},
+            #{stgStodnDown.message}, #{stgStodnDown.giFinishQty}, #{stgStodnDown.giFinishFlag},
+            #{stgStodnDown.giFlag}, #{stgStodnDown.grFinishQty}, #{stgStodnDown.grFinishFlag},
+            #{stgStodnDown.grFlag}, #{stgStodnDown.giSapFlag}, #{stgStodnDown.grSapFlag},
+            #{stgStodnDown.giSapMsg}, #{stgStodnDown.giDoc}, #{stgStodnDown.grSapMsg},
+            #{stgStodnDown.grDoc}, #{stgStodnDown.remark}, #{stgStodnDown.flag}, #{stgStodnDown.createBy},
+            #{stgStodnDown.createDate,jdbcType=DATE},
+            #{stgStodnDown.sapFlag}, #{stgStodnDown.giPlant},
+            #{stgStodnDown.giDate}, #{stgStodnDown.grDate}, #{stgStodnDown.submitBy},
+            #{stgStodnDown.grPlant}, #{stgStodnDown.grLocation},
+            #{stgStodnDown.materialDesp}, #{stgStodnDown.stoType}
+        )
+        ]]>
+    </insert>
+
+	<insert id="saveStoDn" parameterType="stgStoDnDTO" >
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_STODN_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+        insert into STG_STODN_INFO
+        (
+            ROW_ID,
+         	STO_NO,
+         	STO_ITEM,
+         	ORDER_TYPE,
+            STODN_NO,
+            STODN_ITEM,
+            PLANT,
+            LOCATION,
+         	QTY,
+         	UNIT,
+            MATERIAL_NO,
+         	MATERIAL_DESP,
+         	DELIVERY_CODE,
+         	DELIVERY_NAME,
+         	DELIVERY_ADDRESS,
+         	CREATE_DATE,
+			GR_PLANT,
+			GR_LOCATION
+        )
+        values
+        (
+        	#{rowId},
+          	#{stgStoDnDTO.stoNo},
+          	#{stgStoDnDTO.stoItem},
+          	#{stgStoDnDTO.orderType},
+            #{stgStoDnDTO.stodnNo},
+            #{stgStoDnDTO.stoDnItem},
+            #{stgStoDnDTO.plant},
+            #{stgStoDnDTO.location},
+          	#{stgStoDnDTO.qty},
+          	#{stgStoDnDTO.unit},
+            #{stgStoDnDTO.materialNo},
+            #{stgStoDnDTO.materialDesp},
+            #{stgStoDnDTO.deliveryCode},
+            #{stgStoDnDTO.deliveryName},
+            #{stgStoDnDTO.deliveryAddress},
+            SYSDATE,
+			#{stgStoDnDTO.grPlant},
+			#{stgStoDnDTO.grLocation}
+        )
+        ]]>
+	</insert>
+
+	<select id="getMaterialDespByMaterialNo" resultType="java.lang.String">
+		select MATERIAL_DESP from MD_MAT_INFO where MATERIAL_NO = #{materialNo}
+	</select>
+
+	<select id="checkStodn" parameterType="stgStoDnDTO" resultType="Integer">
+		select count(1) from STG_STODN_INFO where STODN_NO = #{stoDnNo}
+	</select>
+
+	<select id="searchStgStodnDowns" parameterType="stgStodnDown" resultMap="BaseResultMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllResult" />
+		<include refid="searchstgStodnDown_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+
+
+	<sql id="searchstgStodnDown_fragement">
+		where 1=1
+		<if test="stgStodnDown.stoNo != null and stgStodnDown.stoNo !=''">
+			and STO_NO like '%'||#{stgStodnDown.stoNo}||'%'
+		</if>
+		<if test="stgStodnDown.stoItemNo != null and stgStodnDown.stoItemNo !=''">
+			and STO_ITEM_NO like '%'||#{stgStodnDown.stoItemNo}||'%'
+		</if>
+		<if test="stgStodnDown.materialNo != null and stgStodnDown.materialNo !=''">
+			and MATERIAL_NO like '%'||#{stgStodnDown.materialNo}||'%'
+		</if>
+		<if test="stgStodnDown.stodnNo != null and stgStodnDown.stodnNo !=''">
+			and STODN_NO like '%'||#{stgStodnDown.stodnNo}||'%'
+		</if>
+		<if test="stgStodnDown.stodnItemNo != null and stgStodnDown.stodnItemNo !=''">
+			and STODN_ITEM_NO LIKE '%'||#{stgStodnDown.stodnItemNo}||'%'
+		</if>
+		<if test="stgStodnDown.giFinishFlag != null and stgStodnDown.giFinishFlag !=''
+					and stgStodnDown.giFinishFlag != '-1'">
+			and GI_FINISH_FLAG = #{stgStodnDown.giFinishFlag}
+		</if>
+		<if test="stgStodnDown.giPlant != null and stgStodnDown.giPlant !=''">
+			and GI_PLANT like '%'||#{stgStodnDown.giPlant}||'%'
+		</if>
+		<if test="stgStodnDown.grPlant != null and stgStodnDown.grPlant !=''">
+			and GR_PLANT like '%'||#{stgStodnDown.grPlant}||'%'
+		</if>
+		<if test="stgStodnDown.giLocation != null and stgStodnDown.giLocation !=''">
+			and GI_LOCATION IN (${stgStodnDown.giLocation})
+		</if>
+		<if test="stgStodnDown.grLocation != null and stgStodnDown.grLocation !=''">
+			and GR_LOCATION IN (${stgStodnDown.grLocation})
+		</if>
+		<if test="stgStodnDown.stoType != null and stgStodnDown.stoType !=''">
+			and STO_TYPE like '%'||#{stgStodnDown.stoType}||'%'
+		</if>
+		<if test="stgStodnDown.begin != null and stgStodnDown.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{stgStodnDown.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="stgStodnDown.end != null and stgStodnDown.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{stgStodnDown.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		ORDER BY CREATE_DATE DESC, STODN_NO, STODN_ITEM_NO
+	</sql>
+
+	<sql id="searchstgStodnInfo_fragement">
+		where 1=1
+		<if test="stgStoDnDTO.stoNo != null and stgStoDnDTO.stoNo !=''">
+			and STO_NO like '%'||#{stgStoDnDTO.stoNo}||'%'
+		</if>
+		<if test="stgStoDnDTO.stodnNo != null and stgStoDnDTO.stodnNo !=''">
+			and STODN_NO like '%'||#{stgStoDnDTO.stodnNo}||'%'
+		</if>
+		<if test="stgStoDnDTO.barcode != null and stgStoDnDTO.barcode !=''">
+			and BARCODE like '%'||#{stgStoDnDTO.barcode}||'%'
+		</if>
+		<if test="stgStoDnDTO.plant != null and stgStoDnDTO.plant !=''">
+			and PLANT like '%'||#{stgStoDnDTO.plant}||'%'
+		</if>
+		<if test="stgStoDnDTO.materialNo != null and stgStoDnDTO.materialNo !=''">
+			and MATERIAL_NO like '%'||#{stgStoDnDTO.materialNo}||'%'
+		</if>
+		<if test="stgStoDnDTO.location != null and stgStoDnDTO.location !=''">
+			and LOCATION IN (${stgStoDnDTO.location})
+		</if>
+		<if test="stgStoDnDTO.orderNo != null and stgStoDnDTO.orderNo !=''">
+			and ORDER_NO like '%'||#{stgStoDnDTO.orderNo}||'%'
+		</if>
+		<if test="stgStoDnDTO.sapFlag != null and stgStoDnDTO.sapFlag !='' and stgStoDnDTO.sapFlag !='-1'">
+			and TMS_FLAG = #{stgStoDnDTO.sapFlag}
+		</if>
+		<if test="stgStoDnDTO.bin != null and stgStoDnDTO.bin !=''">
+			and BIN like '%'||#{stgStoDnDTO.bin}||'%'
+		</if>
+		<if test="stgStoDnDTO.begin != null and stgStoDnDTO.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{stgStoDnDTO.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="stgStoDnDTO.end != null and stgStoDnDTO.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{stgStoDnDTO.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		ORDER BY CREATE_DATE DESC, STODN_NO, STODN_ITEM
+	</sql>
+
+	<select id="searchStgStoDn" parameterType="stgStoDnDTO" resultMap="stgStoDnMap">
+		<include refid="pagination_Head" />
+		select
+		STO_NO, STODN_NO, STODN_ITEM, PLANT, LOCATION, QTY, UNIT, MATERIAL_NO, MATERIAL_DESP, DELIVERY_CODE,
+		DELIVERY_NAME, DELIVERY_ADDRESS, GR_QTY, GR_FLAG, GR_DATE, GI_QTY, GI_DATE, GI_FLAG, GR_PLANT, GR_LOCATION
+		from STG_STODN_INFO
+		<include refid="searchstgStodnInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+
+	<select id="searchStgStoDnCount" resultType="long">
+		<include refid="count_Head" />
+		select
+		STO_NO, STODN_NO, STODN_ITEM, PLANT, LOCATION, QTY, UNIT, MATERIAL_NO, MATERIAL_DESP, DELIVERY_CODE,
+		DELIVERY_NAME, DELIVERY_ADDRESS, GR_QTY, GR_FLAG, GR_DATE, GI_QTY, GI_DATE, GI_FLAG, GR_PLANT, GR_LOCATION
+		from STG_STODN_INFO
+		<include refid="searchstgStodnInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="searchStoDnScan" parameterType="stgStoDnDTO" resultMap="stgStoDnMap">
+		<include refid="pagination_Head" />
+		select
+		ORDER_NO, ORDER_TYPE, STO_NO, BIN, STODN_NO, STODN_ITEM, PLANT, LOCATION, QTY,
+		MATERIAL_NO, MATERIAL_DESP, UNIT, BARCODE, CREATE_BY, CREATE_DATE
+		from ODS_STODN_SCAN_INFO
+		<include refid="searchstgStodnInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+
+	<select id="searchStoDnScanCount" resultType="long">
+		<include refid="count_Head" />
+		select
+		ORDER_NO, ORDER_TYPE, STO_NO, BIN, STODN_NO, STODN_ITEM, PLANT, LOCATION, QTY,
+		MATERIAL_NO, MATERIAL_DESP, UNIT, BARCODE, CREATE_BY, CREATE_DATE
+		from ODS_STODN_SCAN_INFO
+		<include refid="searchstgStodnInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="searchPostDetail" parameterType="stgStoDnDTO" resultMap="stgStoDnMap">
+		<include refid="pagination_Head" />
+		select
+		ORDER_NO, ORDER_TYPE, STO_NO, STODN_NO, STODN_ITEM, PLANT, LOCATION, QTY, MATERIAL_NO,
+	    MATERIAL_DESP, UNIT, TMS_FLAG, POST_DATE, CAR_NO, TRANSPORTER, MODIFY_BY, MODIFY_DATE, CREATE_BY, CREATE_DATE
+		from ODS_STODN_GIGR_INFO
+		<include refid="searchstgStodnInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+
+	<select id="searchPostDetailCount" resultType="long">
+		<include refid="count_Head" />
+		select
+		ORDER_NO, ORDER_TYPE, STO_NO, STODN_NO, STODN_ITEM, PLANT, LOCATION, QTY, MATERIAL_NO,
+		MATERIAL_DESP, UNIT, TMS_FLAG, POST_DATE, CAR_NO, TRANSPORTER, MODIFY_BY, MODIFY_DATE
+		from ODS_STODN_GIGR_INFO
+		<include refid="searchstgStodnInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="stoDnGoodsDelivery" statementType="CALLABLE">
+        <![CDATA[
+		{call PRC_GOODS_STODN_DELIVERY(
+				#{in.orderNo,mode=IN,jdbcType=VARCHAR},
+				#{in.createBy,mode=IN,jdbcType=VARCHAR},
+				#{in.orderType,mode=IN,jdbcType=VARCHAR},
+				#{out.status,mode=OUT,jdbcType=VARCHAR},
+				#{out.msg,mode=OUT,jdbcType=VARCHAR}
+			)}
+		]]>
+    </select>
+
+	<select id="stoDnGoodsReceive" statementType="CALLABLE">
+        <![CDATA[
+		{call PRC_GOODS_STODN_RECEIVE(
+				#{in.orderNo,mode=IN,jdbcType=VARCHAR},
+				#{in.createBy,mode=IN,jdbcType=VARCHAR},
+				#{in.orderType,mode=IN,jdbcType=VARCHAR},
+				#{out.status,mode=OUT,jdbcType=VARCHAR},
+				#{out.msg,mode=OUT,jdbcType=VARCHAR}
+			)}
+		]]>
+    </select>
+
+	<select id="saveStodnGiGrInfo" statementType="CALLABLE">
+        <![CDATA[
+		{call PRC_BARCODE_STODN_COLLECT(
+			#{in.orderNo,mode=IN,jdbcType=VARCHAR},
+			#{in.createBy,mode=IN,jdbcType=VARCHAR},
+			#{in.postDate,mode=IN,jdbcType=VARCHAR},
+			#{in.carNo,mode=IN,jdbcType=VARCHAR},
+			#{in.orderType,mode=IN,jdbcType=VARCHAR},
+			#{in.transporter,mode=IN,jdbcType=VARCHAR},
+			#{out.status,mode=OUT,jdbcType=VARCHAR},
+			#{out.msg,mode=OUT,jdbcType=VARCHAR},
+			#{out.orderNo,mode=OUT,jdbcType=VARCHAR}
+			)}
+		]]>
+    </select>
+
+	<select id="searchStgStodnDownsCount" parameterType="stgStodnDown" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllResult" />
+		<include refid="searchstgStodnDown_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getStgStodnDownListByParm" parameterType="stgStodnDown" resultMap="BaseResultMap">
+		<include refid="selectAllResult" />
+		<include refid="searchstgStodnDown_fragement" />
+	</select>
+
+	<!-- 下载的时候判断是否存在stg_dn_down表中 -->
+	<select id="getStgStodnDowns2" parameterType="stgStodnDown" resultMap="BaseResultMap">
+		<include refid="selectAllResult" />
+			where 1=1
+		<if test="stgStodnDown.stoNo != null and stgStodnDown.stoNo !=''">
+			and sto.STO_NO = #{stgStodnDown.stoNo}
+		</if>
+
+		<if test="stgStodnDown.stoItemNo != null and stgStodnDown.stoItemNo !=''">
+			and sto.STO_ITEM_NO = #{stgStodnDown.stoItemNo}
+		</if>
+
+		<if test="stgStodnDown.stodnNo != null and stgStodnDown.stodnNo !=''">
+			and sto.STODN_NO = #{stgStodnDown.stodnNo}
+		</if>
+
+		<if test="stgStodnDown.stodnItemNo != null and stgStodnDown.stodnItemNo !=''">
+			and sto.STODN_ITEM_NO = #{stgStodnDown.stodnItemNo}
+		</if>
+	</select>
+
+	<select id="getStodnItems" resultType="string">
+		select DISTINCT t.STODN_ITEM_NO from stg_stodn_down t where t.STODN_NO = #{stgStodnDown.stodnNo}
+	</select>
+
+	<select id="getStodnNos" resultType="string">
+		select DISTINCT t.STODN_NO from stg_stodn_down t where t.STO_NO = #{stgStodnDown.stoNo}
+	</select>
+	<select id="getListByParam" resultMap="BaseResultMap">
+		<include refid="selectAllResult" />
+		<include refid="searchstgStodnDown_fragement" />
+	</select>
+
+	<update id="updateFinishQty">
+		update stg_stodn_down t set
+		t.gi_finish_qty=t.qty,t.gi_finish_flag=1 where
+		t.stodn_no= #{stodnNo}
+	</update>
+
+	<update id="cleanFinishQty">
+		update stg_stodn_down t set
+		t.gi_finish_qty=0,t.gi_finish_flag=0 where
+		t.stodn_no= #{stodnNo}
+	</update>
+
+	<update id="updatePrescanByStoNo">
+		update stg_stodn_down  set prescan_flag=1 where
+		stodn_no= #{stodnNo}
+	</update>
+
+	<update id="updateErrorNoNotSuc" parameterType="stgStodnDown">
+		<![CDATA[
+		update stg_stodn_down
+		   set
+		   		 SAP_FLAG = '2'
+		 where STODN_NO = #{stodnNo} and  SAP_FLAG <> '1'
+		]]>
+	</update>
+
+	<!-- edit by linzx @20151210  -->
+	<update id="updateStodnDown" parameterType="stgStodnDown">
+		<![CDATA[
+		update STG_STODN_DOWN
+		   set
+		   		QTY = #{stgStodnDown.qty},
+		   		MATERIAL_NO = #{stgStodnDown.materialNo},
+		   		UNIT = #{stgStodnDown.unit},
+		   		GR_LOCATION = #{stgStodnDown.grLocation},
+		   		GR_PLANT = #{stgStodnDown.grPlant},
+		   		MODIFY_BY=#{stgStodnDown.modifyBy},
+		   		MODIFY_DATE=#{stgStodnDown.modifyDate}		]]>
+		 <if test="stgStodnDown.giFinishFlag != null and stgStodnDown.giFinishFlag !=''">
+			, GI_FINISH_FLAG = #{stgStodnDown.giFinishFlag}
+		</if>
+		<if test="stgStodnDown.grFinishFlag != null and stgStodnDown.grFinishFlag !=''">
+			, GR_FINISH_FLAG = #{stgStodnDown.grFinishFlag}
+		</if>
+		<![CDATA[
+		 where STODN_NO = #{stgStodnDown.stodnNo} and STODN_ITEM_NO= #{stgStodnDown.stodnItemNo}
+		]]>
+	</update>
+
+	<select id="getStoDnCountByParam" resultType="int">
+		<![CDATA[
+			SELECT
+				count(1)
+			FROM
+				stg_stodn_down d
+			LEFT JOIN stg_sto_down s ON (
+				d.STO_NO = s.STO_NO
+				AND RIGHT (d.STO_ITEM_NO, 5) = s.STO_ITEM_NO
+			)
+			WHERE
+				d.STODN_NO = #{stodnNo}
+			AND d.MATERIAL_NO = #{materialNo}
+		]]>
+		<!-- AND s.GI_PLANT = '9990' -->
+	</select>
+
+	<insert id="insertToStoDnDelete" parameterType="stgStodnDown">
+		<![CDATA[
+		insert into STG_STODN_DOWN_DELETE
+		  (
+			STO_NO,
+			STO_ITEM_NO,
+			STODN_NO,
+			STODN_ITEM_NO,
+			QTY,
+			MATERIAL_NO,
+			UNIT,
+			LOCATION,
+			MESSAGE,
+			GI_FINISH_QTY,
+			GR_FINISH_QTY,
+			GI_SAP_FLAG,
+			GR_SAP_FLAG,
+			GI_SAP_MSG,
+			GI_DOC,
+			GR_SAP_MSG,
+			GR_DOC,
+			REMARK,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			PLANT,
+			MODIFY_DATE,
+			SAP_FLAG,
+			PRESCAN_FLAG
+		   )
+		values
+		  (
+	  		#{stgStodnDown.stoNo}
+			,#{stgStodnDown.stoItemNo}
+			,#{stgStodnDown.stodnNo}
+			,#{stgStodnDown.stodnItemNo}
+			,#{stgStodnDown.qty}
+			,#{stgStodnDown.materialNo}
+			,#{stgStodnDown.unit}
+			,#{stgStodnDown.location}
+			,#{stgStodnDown.message}
+			,#{stgStodnDown.giFinishQty}
+			,#{stgStodnDown.grFinishQty}
+			,#{stgStodnDown.giSapFlag}
+			,#{stgStodnDown.grSapFlag}
+			,#{stgStodnDown.giSapMsg}
+			,#{stgStodnDown.giDoc}
+			,#{stgStodnDown.grSapMsg}
+			,#{stgStodnDown.grDoc}
+			,#{stgStodnDown.remark}
+			,#{stgStodnDown.createBy}
+			,#{stgStodnDown.createDate}
+			,#{stgStodnDown.modifyBy}
+			,#{stgStodnDown.plant}
+			,#{stgStodnDown.modifyDate}
+			,#{stgStodnDown.sapFlag}
+			,#{stgStodnDown.prescanFlag}
+		   )
+	    ]]>
+	</insert>
+
+	<insert id="insertstodnDeleteBystodn">
+			INSERT INTO stg_stodn_down_delete (
+					STO_NO,
+					STO_ITEM_NO,
+					STODN_NO,
+					STODN_ITEM_NO,
+					QTY,
+					MATERIAL_NO,
+					UNIT,
+					LOCATION,
+					MESSAGE,
+					GI_FINISH_QTY,
+					GR_FINISH_QTY,
+					GI_SAP_FLAG,
+					GR_SAP_FLAG,
+					GI_SAP_MSG,
+					GI_DOC,
+					GR_SAP_MSG,
+					GR_DOC,
+					REMARK,
+					CREATE_BY,
+					CREATE_DATE,
+					MODIFY_BY,
+					PLANT,
+					MODIFY_DATE,
+					SAP_FLAG,
+					PRESCAN_FLAG
+				) SELECT
+					STO_NO,
+					STO_ITEM_NO,
+					STODN_NO,
+					STODN_ITEM_NO,
+					QTY,
+					MATERIAL_NO,
+					UNIT,
+					LOCATION,
+					MESSAGE,
+					GI_FINISH_QTY,
+					GR_FINISH_QTY,
+					GI_SAP_FLAG,
+					GR_SAP_FLAG,
+					GI_SAP_MSG,
+					GI_DOC,
+					GR_SAP_MSG,
+					GR_DOC,
+					REMARK,
+					CREATE_BY,
+					CREATE_DATE,
+					MODIFY_BY,
+					PLANT,
+					MODIFY_DATE,
+					SAP_FLAG,
+					PRESCAN_FLAG
+				FROM
+					stg_stodn_down t
+				WHERE
+					t.STODN_NO = #{stodnNo}
+				AND t.STODN_ITEM_NO = #{stodnItemNo}
+
+	</insert>
+	<delete id="deleteByStodnAndStodnItem">
+		delete from stg_stodn_down
+		where stodn_no = #{stodnNo} and stodn_item_no = #{stodnItemNo}
+	</delete>
+
+	<select id="ifStartScan" resultType="int">
+		SELECT
+			count(1)
+		FROM
+			stg_stodn_down t
+		WHERE
+			t.STODN_NO = #{stodnNo}
+		AND t.STODN_ITEM_NO = #{stodnItemNo}
+		AND GR_FINISH_QTY > 0
+	</select>
+
+	<select id="getGrLocationNameListByStodnNo" resultType="string">
+<!-- 		SELECT DISTINCT CODE FROM CD_LOC_INFO WHERE CODE IN ( -->
+<!-- 			SELECT GR_LOCATION FROM STG_STODN_DOWN WHERE STODN_NO = #{stodnNo} -->
+<!-- 		) -->
+		SELECT DISTINCT GR_LOCATION FROM STG_STODN_DOWN WHERE STODN_NO = #{stodnNo}
+	</select>
+
+	<sql id="selectAllstgStodnDownColumns">
+		<![CDATA[
+		SELECT
+			sto.ROW_ID,
+			sto.STO_NO,
+			sto.STO_ITEM_NO,
+			sto.STODN_NO,
+			sto.STODN_ITEM_NO,
+			sto.QTY,
+			sto.MATERIAL_NO,
+			sto.UNIT,
+			sto.LOCATION,
+			sto.MESSAGE,
+			sto.GI_FINISH_QTY,
+			sto.GI_FINISH_FLAG,
+			sto.GI_FLAG,
+			sto.GR_FINISH_QTY,
+			sto.GR_FINISH_FLAG,
+			sto.GR_FLAG,
+			sto.GI_SAP_FLAG,
+			sto.GR_SAP_FLAG,
+			sto.GI_SAP_MSG,
+			sto.GI_DOC,
+			sto.GR_SAP_MSG,
+			sto.GR_DOC,
+			sto.REMARK,
+			sto.FLAG,
+			sto.PLANT,
+			sto.CREATE_BY,
+			sto.CREATE_DATE,
+			sto.MODIFY_BY,
+			sto.MODIFY_DATE,
+			"1" as SAP_FLAG,
+			sto.PRESCAN_FLAG,
+			st.GR_LOCATION,
+			st.GR_PLANT
+		FROM
+			STG_STODN_DOWN sto
+		LEFT JOIN stg_sto_down st ON (
+			st.STO_NO = sto.STO_NO
+			AND st.STO_ITEM_NO = RIGHT (sto.STO_ITEM_NO, 5)
+		)
+		]]>
+	</sql>
+
+
+	<select id="searchStgStoDnDownsFromFactory" parameterType="stgStodnDown" resultMap="BaseResultMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllstgStodnDownColumns" />
+		where 1=1 and sto.plant like '664%' and sto.gr_finish_qty = 0 and sto.gr_flag = '0'
+		<if test="stgStodnDown.stoNo != null and stgStodnDown.stoNo !=''">
+			and sto.STO_NO = #{stgStodnDown.stoNo}
+		</if>
+		<!-- stodn location与sto关联 -->
+		<if test="stgStodnDown.userType != null and stgStodnDown.userType != 1">
+			and (sto.plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w
+			where w.row_id = u.wh_id and
+			u.user_id= #{stgStodnDown.userId})
+			or st.gr_plant in(
+			select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w
+			where w.row_id = u.wh_id and
+			u.user_id= #{stgStodnDown.userId}))
+			and (sto.LOCATION in  (select loc_code from
+			cd_user_wh_loc where user_id=#{stgStodnDown.userId}) or
+			st.GR_LOCATION in  (select loc_code from
+			cd_user_wh_loc
+			where user_id=#{stgStodnDown.userId}))
+		</if>
+		<if test="stgStodnDown.materialNo != null and stgStodnDown.materialNo !=''">
+			and sto.MATERIAL_NO like concat('%',#{stgStodnDown.materialNo},'%')
+		</if>
+
+		<if test="stgStodnDown.stoDnNo != null and stgStodnDown.stoDnNo !=''">
+			and sto.STODN_NO like concat('%',#{stgStodnDown.stoDnNo},'%')
+		</if>
+		<if test="stgStodnDown.plant != null and stgStodnDown.plant !=''">
+			and sto.plant = #{stgStodnDown.plant}
+		</if>
+		<if test="stgStodnDown.grPlant != null and stgStodnDown.grPlant !=''">
+			and st.GR_PLANT = #{stgStodnDown.grPlant}
+		</if>
+		<if test="stgStodnDown.begin != null and stgStodnDown.begin != ''">
+			<![CDATA[
+			and sto.create_date >= concat(#{stgStodnDown.begin},' 00:00:00')
+		]]>
+		</if>
+		<if test="stgStodnDown.end != null and stgStodnDown.end != ''">
+			<![CDATA[
+			and sto.create_date <= concat(#{stgStodnDown.end},' 23:59:59')
+		]]>
+		</if>
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchStgStoDnDownsFromFactoryCount" parameterType="stgStodnDown" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllstgStodnDownColumns" />
+		where 1=1 and sto.plant like '664%' and sto.gr_finish_qty = 0 and sto.gr_flag = '0'
+		<if test="stgStodnDown.stoNo != null and stgStodnDown.stoNo !=''">
+			and sto.STO_NO = #{stgStodnDown.stoNo}
+		</if>
+		<!-- stodn location与sto关联 -->
+		<if test="stgStodnDown.userType != null and stgStodnDown.userType != 1">
+			and (sto.plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w
+			where w.row_id = u.wh_id and
+			u.user_id= #{stgStodnDown.userId})
+			or st.gr_plant in(
+			select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w
+			where w.row_id = u.wh_id and
+			u.user_id= #{stgStodnDown.userId}))
+			and (sto.LOCATION in  (select loc_code from
+			cd_user_wh_loc where user_id=#{stgStodnDown.userId}) or
+			st.GR_LOCATION in  (select loc_code from
+			cd_user_wh_loc
+			where user_id=#{stgStodnDown.userId}))
+		</if>
+		<if test="stgStodnDown.materialNo != null and stgStodnDown.materialNo !=''">
+			and sto.MATERIAL_NO like concat('%',#{stgStodnDown.materialNo},'%')
+		</if>
+
+		<if test="stgStodnDown.stoDnNo != null and stgStodnDown.stoDnNo !=''">
+			and sto.STODN_NO like concat('%',#{stgStodnDown.stoDnNo},'%')
+		</if>
+
+		<if test="stgStodnDown.plant != null and stgStodnDown.plant !=''">
+			and sto.plant = #{stgStodnDown.plant}
+		</if>
+		<if test="stgStodnDown.grPlant != null and stgStodnDown.grPlant !=''">
+			and st.GR_PLANT = #{stgStodnDown.grPlant}
+		</if>
+		<if test="stgStodnDown.begin != null and stgStodnDown.begin != ''">
+			<![CDATA[
+			and sto.create_date >= concat(#{stgStodnDown.begin},' 00:00:00')
+		]]>
+		</if>
+		<if test="stgStodnDown.end != null and stgStodnDown.end != ''">
+			<![CDATA[
+			and sto.create_date <= concat(#{stgStodnDown.end},' 23:59:59')
+		]]>
+		</if>
+		<include refid="count_Tail" />
+	</select>
+</mapper>

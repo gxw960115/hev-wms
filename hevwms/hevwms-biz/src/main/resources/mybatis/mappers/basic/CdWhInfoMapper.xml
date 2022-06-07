@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <typeAlias alias="cdWhInfo" type="com.haier.hevwms.basic.domain.CdWhInfo" 
+	/> -->
+<mapper namespace="com.haier.hevwms.basic.dao.CdWhInfoDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllCdWhInfoColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			NAME,
+			CODE,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			VERSION,
+			remark
+		from 
+			cd_wh_info cd_wh_info_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="cdWhInfoMap" type="cdWhInfo">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="name" column="NAME" />
+		<result property="code" column="CODE" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="remark" column="remark" />
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="cdWhInfoMap">
+		<include refid="selectAllCdWhInfoColumns" />
+		order by cd_wh_info_.name asc
+	</select>
+	
+	<select id="getAllPhysicalWh" resultMap="cdWhInfoMap">
+		select
+			w.ROW_ID,
+			w.NAME,
+			w.CODE,
+			w.CREATE_BY,
+			w.CREATE_DATE,
+			w.MODIFY_BY,
+			w.MODIFY_DATE,
+			w.FLAG,
+			w.VERSION,
+			w.remark
+		from 
+			cd_wh_info w
+		order by w.name asc
+	</select>
+	<select id="get" resultMap="cdWhInfoMap" parameterType="long">
+		<include refid="selectAllCdWhInfoColumns" />
+		<![CDATA[
+		where cd_wh_info_.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from CD_WH_INFO where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from CD_WH_INFO where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="cdWhInfo">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_CD_WH_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into CD_WH_INFO
+		  (		row_id
+				,NAME
+				,CODE
+				,CREATE_BY
+				,CREATE_DATE
+				,MODIFY_BY
+				,MODIFY_DATE
+				,remark
+		   )
+		values
+		  (		#{rowId}
+				,#{name}
+				,#{code}
+				,#{createBy}
+				,#{createDate}
+				,#{modifyBy}
+				,#{modifyDate}
+				,#{remark}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="cdWhInfo">
+		<![CDATA[
+		update CD_WH_INFO
+		   set  NAME = #{name}
+				,CODE = #{code} 
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate} 
+				,remark = #{remark}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchCdWhInfo_fragement">
+		<include refid="selectAllCdWhInfoColumns" />
+		where 1=1
+		<if test="cdWhInfo.name != null and cdWhInfo.name != ''">
+			and NAME like '%'||#{cdWhInfo.name}||'%' 
+		</if>
+		<if test="cdWhInfo.code != null and cdWhInfo.code != ''">
+			and CODE like '%'||#{cdWhInfo.code}||'%' 
+		</if>
+        order by name asc
+	</sql>
+	
+	<select id="searchCdWhInfos" resultMap="cdWhInfoMap">
+		<include refid="pagination_Head" />
+		<include refid="searchCdWhInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchCdWhInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchCdWhInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="findCdUserWh" resultType="long">
+		select distinct(t.wh_id) 
+		from CD_USER_WH_LOC t 
+		where t.user_id = #{userId} and t.user_type = #{userType}
+	</select>
+	
+	<select id="findCdUserLoc" resultType="long">
+		select t.loc_id 
+		from CD_USER_WH_LOC t 
+		where t.user_id=#{userId} and t.user_type=#{userType}
+	</select>
+	
+	<select id="searchCdWh" resultMap="cdWhInfoMap">
+		<include refid="searchCdWhInfo_fragement" />
+	</select>
+	
+	<!-- 查询 -->
+	<select id="searchCdWhByCode" resultMap="cdWhInfoMap">
+		<include refid="selectAllCdWhInfoColumns" />
+		where 1=1
+		<if test="cdWhInfo.code != null and cdWhInfo.code != ''">
+			and CODE = #{cdWhInfo.code}
+		</if>
+	</select>
+	
+	<update id="updateWhFlag">
+		<![CDATA[
+		update CD_WH_INFO set flag = '1' where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="getMaxRowId" resultType="long">
+		select MAX(ROW_ID) from  cd_wh_info 
+	</select>
+	
+	<select id="findAvailableWhInfos" resultMap="cdWhInfoMap">
+		select
+			ROW_ID,
+			NAME,
+			CODE,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			VERSION,
+			remark
+		from 
+			cd_wh_info cd_wh_info_
+		where cd_wh_info_.row_id in (select distinct t.wh_id from cd_user_wh_loc t where t.user_id = #{userId} )
+	</select>
+	<select id="findAvailablePhyWhInfos" resultMap="cdWhInfoMap">
+		select
+			w.ROW_ID,
+			w.NAME,
+			w.CODE,
+			w.CREATE_BY,
+			w.CREATE_DATE,
+			w.MODIFY_BY,
+			w.MODIFY_DATE,
+			w.FLAG,
+			w.VERSION,
+			w.remark
+		from 
+			cd_wh_info w
+		where 1 = 1 
+		and w.row_id in (select distinct t.wh_id from cd_user_wh_loc t where t.user_id = #{userId} )
+		order by w.name asc
+	</select>
+</mapper>

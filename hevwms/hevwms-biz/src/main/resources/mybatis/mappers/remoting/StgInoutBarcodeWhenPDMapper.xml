@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.StgInoutBarcodeWhenPDDAO">
+	
+	<resultMap id="stgInoutBarcodeWhenPDMap" type="stgInoutBarcodeWhenPDDTO" >
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="order_no"/>
+		<result property="orderItem" column="order_item"/>
+		<result property="orderType" column="order_type"/>
+		<result property="docTpye" column="doc_tpye"/>
+		<result property="materialNo" column="material_no"/>
+		<result property="plant" column="plant"/>
+		<result property="location" column="location"/>
+		<result property="barcode" column="barcode"/>
+		<result property="scanQty" column="scan_qty"/>
+		<result property="unit" column="unit"/>
+	</resultMap>
+	<select id="getAllBarcodeOut" resultMap="stgInoutBarcodeWhenPDMap">
+		SELECT t.* FROM stg_inout_barcodes_when_pd t WHERE 1=1 and t.order_type='2' and t.in_out_flag='1' 
+	</select>
+	
+	<select id="getAllBarcodeIn" resultMap="stgInoutBarcodeWhenPDMap">
+		SELECT t.* FROM stg_inout_barcodes_when_pd t WHERE 1=1 and t.order_type='1' and t.in_out_flag='1' 
+	</select>
+	
+	<select id="getByOrderNoAndType" resultMap="stgInoutBarcodeWhenPDMap">
+		select * from stg_inout_barcodes_when_pd t
+			where t.order_no=#{orderNo}
+				and t.order_type=#{orderType}
+	</select>
+ 
+	<update id="updateInoutFlag">
+		update stg_inout_barcodes_when_pd t
+			set t.in_out_flag='1'
+			where t.order_no=#{in.orno}
+				and t.order_type=#{in.ordertype}
+				and t.doc_tpye=#{in.doctype}
+	</update>
+	
+
+</mapper>

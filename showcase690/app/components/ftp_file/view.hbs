@@ -1,0 +1,118 @@
+{{#component "create_hac_app js-comp"}}
+    <div id="breadcrumbs" style="background-color:#F6FBFF;min-height:490px">
+        <div class="row-fluid">
+            <div class="">
+                <h1><div class="icons-search">
+                    <span style="color: #ffffff;font-weight:bold;font-size:15px;position: relative;left:20px;top:-7px">文件上传</span>
+                </div></h1>
+                <div style="position: relative;left: 15%">
+                    <form action="/exportExcel" method="post" enctype="multipart/form-data">
+                    <table style="width: 100%">
+                        <tr>
+                            <td style="width: 10%">ftp文件<span class="starRed">*</span></td>
+                            <td style="width: 50%"> <input type="file" id="houseMaps" name="houseMaps"/>
+                            <input type="button" value="ftp上传" onclick="ftpfileupload()">
+                            </td>
+                            <td style="width: 20%">
+                            <input type="button" value="ftp删除" onclick="deleteFileFromFtp()">
+                        </td>
+                            <td style="width: 20%">
+                                <!--<input type="button" value="下载" onclick="downloadFile()">-->
+                                <a href="/downLoadFileFromFtp?ftpAddress=10.135.16.64&userName=ftptest&password=ftptest&savePath=/home/ftptest&fileUUID=dec4a295-82b1-401e-a59b-23958da34908.chm">ftp下载</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" align="right">
+                                <a href="/exportExcel">导出参与用户数据</a>
+                                <!--<input type="submit" value="导出参与用户数据" />&nbsp;&nbsp;-->
+                            </td>
+                            <td>
+                                <a href="/importExcel">导入参与用户数据</a>
+                            </td>
+                        </tr>
+                    </table>
+                    </form>
+                    <!--<form action="/exportExcel" method="post">
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0"
+                               bgcolor="b5d6e6">
+                            <tr>
+                                <td width="10%" align="right">
+                                    <input type="submit" value="导出参与用户数据" />&nbsp;&nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                    </form>-->
+                </div>
+                <div style="position: relative;left: 15%">
+                    <form action="/importExcel" method="post" enctype="multipart/form-data">
+                        <table style="width: 100%">
+                            <tr>
+                                <td style="width: 10%">ftp文件<span class="starRed">*</span></td>
+                                <td style="width: 50%"> <input type="file" id="abc" name="abc"/>
+                                    <input type="button" value="导入Excel" onclick="importExcel()">
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                    <!--<form action="/exportExcel" method="post">
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0"
+                               bgcolor="b5d6e6">
+                            <tr>
+                                <td width="10%" align="right">
+                                    <input type="submit" value="导出参与用户数据" />&nbsp;&nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                    </form>-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function deleteFileFromFtp(){
+            $.get("/deleteFileFromFtp?ftpAddress=10.135.16.64&userName=ftptest" +
+                    "&password=ftptest&savePath=/home/ftptest&fileUUID=dec4a295-82b1-401e-a59b-23958da34908.chm",function(data){
+                var dataObj=eval("("+data+")");
+                if(dataObj.success){
+                    alert("删除成功!");
+                }else{
+                    alert(dataObj.msg);
+                }
+            });
+        }
+        function ftpfileupload(){
+            $.ajaxFileUpload(
+                    {
+                        url:'/uploadToFtp?ftpAddress=10.135.16.64&userName=ftptest&' +
+                                'password=ftptest&savePath=/home/ftptest',            //需要链接到服务器地址
+                        secureuri:false,
+                        fileElementId:'houseMaps',                        //文件选择框的id属性
+                        dataType: 'json',                                     //服务器返回的格式，可以是json
+                        success: function (data, status){
+                            alert(data.fileUUID);
+                        },
+                        error: function(data, status, e){
+                            alert("上传失败!");
+                        }
+                    }
+            );
+        }
+        function importExcel(){
+            $.ajaxFileUpload(
+                    {
+                        url:'/importExcel',            //需要链接到服务器地址
+                        secureuri:false,
+                        fileElementId:'abc',                        //文件选择框的id属性
+                        dataType: 'json',                                     //服务器返回的格式，可以是json
+                        success: function (data, status){
+                            alert("导入成功");
+                        },
+                        error: function(data, status, e){
+                            alert("上传失败!");
+                        }
+                    }
+            );
+        }
+
+    </script>
+{{/component}}

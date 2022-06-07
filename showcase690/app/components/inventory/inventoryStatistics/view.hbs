@@ -1,0 +1,213 @@
+{{#component "inventoryStatistics js-comp"}}
+    <div id="invenDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab">
+                <tr>
+                    <td style="text-align: right">Plant:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="plant" type="text" class="easyui-combobox" style="border:0" 
+                    	data-options="border:false,width:155,height:30,editable:true,required:false"/></td>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="location" type="text" class="easyui-combobox" style="width:155px;height:30px"
+                    	data-options="editable:false,multiple:true,multiline:true,valueField:'id',textField:'id'"/></td>
+                    <td class="rightCls">Material No:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="materialNo" class="radiusCls"  type="text" /></td>
+                    <td class="rightCls">Bin:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="bin" class="radiusCls"  type="text" /></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <input value="3" id="statisticsFlag" type="text" class="easyui-combobox" style="border:0" 
+                    	data-options="border:false,width:100,height:30,editable:false"/>
+
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" id="exportBtn">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div id="dataDiv" region="center" style="border:0px; overflow-y: hidden; margin-top: -2px; width:100%;">
+            <table id="dataGrid" style="width:100%;"></table>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    	var totalWidth = $('#dataGrid').width();
+        $(function(){
+        	$('#invenDiv').height(suitHeight);
+            var columns=[[
+            {
+                field:'ck',checkbox:true, width: fixWidth(0.01)
+            },{
+                field:'plant',title:'Plant', align:'center',sortable:true, width: fixWidth(0.08)
+            },{
+                field:'location', title:'Location', align:'center',sortable:true, width: fixWidth(0.08)
+            },{
+                field:'bin',title:'Bin',align:'center',sortable:true, width: fixWidth(0.08)
+            },{
+                field:'materialNo',title:'Material No',align:'center',sortable:true, width: fixWidth(0.15)
+            },{
+                field:'materialDesp',title:'Material Description',align:'center',sortable:true, width: fixWidth(0.28)
+            },{
+                field:'qty',title:'Qty',align:'center',sortable:true, width: fixWidth(0.08)
+            },{
+                field:'useQty',title:'Use Qty',align:'center',sortable:true, width: fixWidth(0.08)
+            },{
+                field:'unit',title:'Unit',align:'center',sortable:true, width: fixWidth(0.1)
+            }]];
+            var grid = $('#dataGrid').datagrid({
+                rownumbers:true,
+                columns:columns,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                fit:true,
+                method:'post',
+                onLoadSuccess : function () {
+                   $(this).datagrid("fixRownumber");
+                },
+                onLoadError:function(){
+                   $.messager.alert('System Information','Network Abnormal!','warning');
+                }
+            });
+            initPagination(grid);
+            gridScroll(grid);
+            //初始化仓库
+            $.ajax({
+                url:'/plant/list/select',
+                type:'post',
+                dataType:'json',
+                success:function(data){
+                    var dataRes = [];
+                   // dataRes.push({ "text": " ", "value": " " });
+                    if(data!=''||data!=null||data!=undefined){
+                       for(var i=0;i<data.length;i++){
+                           dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                        }           
+                    }
+                    $('#plant').combobox({
+                        data:dataRes, 
+                        panelWidth:180
+                    })
+                }
+            });
+            $('#statisticsFlag').combobox({
+                data:[
+                    {"text":"Plant","value":"2"},
+                    {"text":"Location","value":"1"},
+                    {"text":"Bin","value":"3"}
+                ], 
+                panelWidth:100
+            })
+
+            // 加载Location数据
+            $(document).ready(function () {
+                $("#plant").combobox({
+                    onChange: function (record) {
+                        $.ajax({
+                            url: '/loc/getLocationList',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                               rowId: record.rowId,
+                               parentId: record.rowId
+                            },
+                            success: function (data) {
+                                $("#location").combobox({
+                                    data:data
+                                });
+                            }
+                        })
+                    }
+                });
+            });
+            $('#queryBtn').on('click',function(){
+                queryData();
+            })
+            $('#exportBtn').on('click',function(){
+                exportData();
+            })
+        })
+        
+        // set width of column 
+        function fixWidth(percent) { 
+        	return totalWidth * percent;   
+    	}
+        
+        // 查询
+        function queryData(){
+            var plant=$('#plant').combobox('getValue');
+            if((plant==undefined||plant=="undefined")&&$('#plant').combobox('getText')!=""){
+           	  $.messager.alert('System Information','Please input the correct plant','warning');
+              return;
+            }
+
+            if(plant==undefined||plant=="undefined"){
+           		 plant="";
+            }
+
+            var locationArr = $('#location').combobox('getValues');
+            var locations = getLocationStr(locationArr);
+
+            var grid= $('#dataGrid').datagrid({
+                url:'/inventory/inventoryStatistics',
+                queryParams: {
+                    'location' : locations,
+                    'materialNo' : $('#materialNo').val(),
+                    'bin' : $('#bin').val(),
+                    'plant' : plant,
+                    'statisticsFlag':$('#statisticsFlag').combobox('getValue')
+                },
+                onLoadSuccess : function(data) {
+                    if (data.total == 0 && data.rows.length == 0) {
+                        $.messager.alert('System Information','No records found.','warning');
+                        gridScroll(grid);
+                    }
+                }
+            });
+            initPagination(grid);
+        }
+
+        // 导出
+        function exportData(){
+            var plant=$('#plant').combobox('getValue');
+            if((plant==undefined||plant=="undefined")&&$('#plant').combobox('getText')!=""){
+           	  $.messager.alert('System Information', 'Please input the correct plant', 'warning');
+              return;
+           }
+
+            if(plant==undefined||plant=="undefined"){
+           		 plant="";
+            }
+
+            var locationArr = $('#location').combobox('getValues');
+            var locations = getLocationStr(locationArr);
+            
+            $.ajax({
+                url:'/inventory/searchInventoryBinAmount',
+                type:'post',
+                dataType:'json',
+                data:{
+                	plant:plant,
+                	location:locations,
+                	materialNo:$('#materialNo').val(),
+                    bin:$('#bin').val(),
+                    statisticsFlag:$('#statisticsFlag').combobox('getValue')
+                },
+                success:function(data) {
+                	if (data == "success") {
+                		var url = "/inventory/exportBin?"
+                        + '&plant=' + plant
+                        + '&location=' + locations
+                        + '&bin=' + $('#bin').val()
+                        + '&statisticsFlag=' + $('#statisticsFlag').combobox('getValue')
+                        + '&materialNo=' + $('#materialNo').val();
+                        window.location.href = url;
+                	}else {
+                		$.messager.alert('System Information',data,	'warning');
+                	}
+                }
+            });
+        }
+    </script>
+{{/component}}

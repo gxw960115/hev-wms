@@ -1,0 +1,614 @@
+{{#component "stoGigr js-comp"}}
+<style type="text/css">
+#searchTabin{
+    display: inline-block;
+    margin-left: 8px;
+    margin-top: 4px;
+    width: 98%;
+}
+#searchTabin tr{
+    height: 35px;
+}
+#searchTabin input{
+    height: 30px;
+    width: 155px;
+}
+.inputCls{
+	border: 1px solid #CCC;
+    border-radius: 3px;
+}
+</style>
+    <div id="oigInfoDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivher" region="north">
+            <table id="searchTabin">
+                <tr>
+                    <td class="rightCls">STO No:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input class="inputCls" id="stoNo" type="text" /></td>
+                    <td class="rightCls">STO DN No:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input class="inputCls" id="stodnNo" type="text" /></td>
+                    <td class="rightCls">Material NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input class="inputCls" id="materialNo" type="text" /></td>
+                    <td style="text-align: right">SAP Flag: &nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="sapFlag" class="easyui-combobox flag"
+                        data-options="width:155,height:30,editable:false,panelHeight:'auto'" /></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right">OGP/IGP NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input class="inputCls" id="orderNo" type="text" /></td>
+                    <td class="rightCls">Plant:&nbsp;&nbsp;</td>
+                    <td class="leftCls">
+                        <input id="plant" type="text" class="easyui-combobox" style="border:0"
+                    	data-options="border:false,width:155,height:30,editable:true,required:false,panelWidth:180"/></td>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><select id="locationP" class="easyui-combobox" data-options="editable:false,multiple:true,multiline:true,valueField:'id',textField:'id'" style="width:155px;height:30px"></select></td>
+                </tr>
+                <tr>
+                    <td class="rightCls">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3">
+                        <input id="begin" class="inputCls" style="width:155px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/> &nbsp;&nbsp;
+                        -  &nbsp;&nbsp;
+                        <input id="end" class="inputCls" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchOdsOrderInfo()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle paymentReconciliationBtn" onclick="post()">Posting</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn"onclick="exportOdsOrderInfo();">Export</a>
+{{!--                     <a style="display:none" href="javascript:void(0)" class="btnStyle printBtn" onclick="print();">Print</a> --}}
+{{!--                     <a href="javascript:void(0)" class="btnStyle printBtn" id="printBtn" onclick="printOgp();">OGP/IGP Print</a> --}}
+{{!--                     <a href="javascript:void(0)" class="btnStyle printBtn" id="printBtn" onclick="printDn();">DN Print</a> --}}
+{{!--                     <a href="javascript:void(0)" class="btnStyle printBtn" id="printVNPT" onclick="printVNPT();">print VNPT</a> --}}
+                    <a style="display:none" href="javascript:void(0)" class="btnStyle resetBtn" onclick="inOutWarehouse()">InoutWarehouse</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="odsOrderInfoGrid" style="width:120%;">
+
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var totalWidth = $('#odsOrderInfoGrid').width();
+    	$(function(){
+        	$('#oigInfoDiv').height(suitHeight);
+
+            $('#sapFlag').combobox({
+                data:[{"text":"ALL","value":"-1"},
+                {"text":"Generation","value":"0"},
+                {"text":"Posted Success","value":"1"},
+                {"text":"Posted Failed","value":"2"}],
+                value:'-1'
+            });
+
+            //初始化日期
+            var date=new Date();
+            var y=date.getFullYear();
+            var m=date.getMonth()+1;
+            var d=date.getDate();
+            date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+            $('#begin').val(getLastRq(date,-7));
+            $('#end').val(date);
+
+            var columns=[[ {
+                field : 'ck',
+                checkbox : true,
+                width: fixWidth(0.01),
+                align : 'center'
+            }, {
+                field : 'orderNo',
+                title : 'OGP/IGP No',
+                align : 'center',
+                width: fixWidth(0.072),
+                sortable : true
+            }, {
+                field : 'orderItem',
+                title : 'Order Item',
+                align : 'center',
+                hidden : true,
+                sortable : true
+            }, {
+                field : 'orderType',
+                title : 'Order Type',
+                align : 'center',
+                width: fixWidth(0.074),
+                sortable : true,
+                formatter : function(val) {
+                    if (val == '1') {
+                        return 'IN';
+                    } else if (val == '2') {
+                        return 'OUT';
+                    }
+                    return val;
+                }
+            }, {
+                field : 'qty',
+                title : 'Scanned Qty',
+                align : 'center',
+                width: fixWidth(0.074),
+                sortable : true
+            }, {
+                field : 'unit',
+                title : 'Unit',
+                align : 'center',
+                width: fixWidth(0.05),
+                sortable : true
+            }, {
+                field : 'materialNo',
+                title : 'Material No',
+                align : 'center',
+                width: fixWidth(0.075),
+                sortable : true
+            }, {
+                field : 'materialDesp',
+                title : 'Material Description',
+                align : 'center',
+                sortable : true
+            }, {
+                field : 'stoNo',
+                title : 'STO No',
+                align : 'center',
+                sortable : true
+            }, {
+                field : 'stodnNo',
+                title : 'STODN No',
+                width: fixWidth(0.078),
+                align : 'center',
+                sortable : true
+            }, {
+                 field : 'stoDnItem',
+                 title : 'STODN Item',
+                 width: fixWidth(0.078),
+                 align : 'center',
+                 sortable : true
+             }, {
+                field : 'batchNo',
+                title : 'batch No',
+                align : 'center',
+                hidden : true,
+                sortable : true
+            },{
+                 field : 'vnptNo',
+                 title : 'VNPT No',
+                 align : 'center',
+                 width: fixWidth(0.06),
+                 sortable : true
+            }, {
+                field : 'plant',
+                title : 'Plant',
+                align : 'center',
+                width: fixWidth(0.06),
+                sortable : true
+            }, {
+                field : 'location',
+                title : 'Location',
+                align : 'center',
+                width: fixWidth(0.06),
+                sortable : true
+            }, {
+                field : 'tmsFlag',
+                title : 'TMS Flag',
+                align : 'center',
+                width: fixWidth(0.08),
+                sortable : true,
+                formatter : function(val) {
+                    if (val == '0') {
+                        return 'generation';
+                    } else if (val == '1') {
+                        return 'posted success';
+                    } else if (val == '2') {
+                        return 'posted failed';
+                    } else {
+                        return 'locked';
+                    }
+                    return val;
+                }
+            }, {
+            	field : 'createBy',
+                title : 'Post By',
+                align : 'center',
+                sortable : true,
+                width: fixWidth(0.07),
+                formatter: function(value,row,index){
+            		if (row.modifyBy == null || row.modifyBy == ""){
+            			return row.createBy;
+            		}else{
+            			return row.modifyBy;
+            		}
+                }
+            }, {
+                field : 'postDate',
+                title : 'Post Date',
+                align : 'center',
+                sortable : true,
+                width: fixWidth(0.07),
+                formatter : formatY_M_D
+            }, {
+                field : 'carNo',
+                title : 'Car No',
+                align : 'center',
+                width: fixWidth(0.08),
+                sortable : true
+            }, {
+                field : 'transporter',
+                title : 'Transporter Name',
+                align : 'center',
+                sortable : true,
+                width: fixWidth(0.10)
+            }, {
+                field : 'createDate',
+                title : 'Create Dt',
+                align : 'center',
+                sortable : true,
+                width: fixWidth(0.08),
+                formatter : formatY_M_D
+            } ]];
+            var grid = $('#odsOrderInfoGrid').datagrid({
+                rownumbers: true,
+                columns: columns,
+                pagination: true,
+                striped: true,
+                pageNumber : 1,
+                fit: true,
+                method: 'post',
+                url : '',
+                onLoadError:function(){
+                         $.messager.alert('System Information','Network Abnormal!','warning');
+                    },
+                onLoadSuccess:function(){
+                	$(this).datagrid("fixRownumber");
+                }
+            });
+            initPagination(grid);
+            gridScroll(grid);
+            $.ajax({
+                url:'/plant/list/select',
+                type:'post',
+                dataType:'json',
+                success:function(data){
+                    var dataRes = [];
+                   // dataRes.push({ "text": " ", "value": " " });
+                    if(data!=''||data!=null||data!=undefined){
+                       for(var i=0;i<data.length;i++){
+                           dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                        }
+                    }
+                    $('#plant').combobox({
+                        data:dataRes
+                    })
+                }
+            });
+            // 加载Location数据
+            $(document).ready(function () {
+                $("#plant").combobox({
+                    onChange: function (record) {
+                        $.ajax({
+                            url: '/loc/getLocationList',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                               rowId: record.rowId,
+                               locationType: 0,
+                               parentId: record.rowId
+                            },
+                            success: function (data) {
+                                $("#locationP").combobox({
+                                    data:data
+                                });
+                            }
+                        })
+                    }
+                });
+            });
+
+        })
+        // set width of column
+    	function fixWidth(percent) {
+        	return totalWidth * percent;
+    	}
+
+        /** 查询 */
+        function searchOdsOrderInfo() {
+            var locationArr = $('#locationP').combobox('getValues');
+            var locations = getLocationStr(locationArr);
+            var grid = $('#odsOrderInfoGrid').datagrid({
+                url : '/stodn/searchPoatDetail',
+                queryParams : {
+                    'orderNo' : $('#orderNo').val(),
+                    'sapFlag' : $('#sapFlag').combobox("getValue"),// sap返回标志 默认0 成功1 失败2 锁定状态3
+                    'materialNo' : $('#materialNo').val(),
+                    'stoNo' : $('#stoNo').val(),
+                    'stodnNo' : $('#stodnNo').val(),
+                    'plant' : $('#plant').combobox("getValue"),
+                    'location' : locations,
+                    'begin' : $('#begin').val(),
+                    'end' : $('#end').val(),
+                },
+                onLoadSuccess : function(data) {
+                    if (data.total == 0 && data.rows.length == 0) {
+                        $.messager.alert('System Information', 'No records found.', 'warning');
+                        gridScroll(grid);
+                    }
+                	$(this).datagrid("fixRownumber");
+                }
+            });
+            initPagination(grid);
+        }
+
+        // 导出
+        function exportOdsOrderInfo() {
+            var locationArr = $('#locationP').combobox('getValues');
+            var locations = getLocationStr(locationArr);
+            $.ajax({
+                url:'/stoDn/searchOdsStoDnGigrInfoAmount',
+                type:'post',
+                dataType:'json',
+                data:{
+                		a:1,
+                		flag: 0,
+	            		orderNo: $('#orderNo').val(),
+	            		tmsFlag: $('#sapFlag').combobox("getValue"),
+	            		materialNo:$('#materialNo').val(),
+	            		stoNo:$('#stoNo').val(),
+                        stodnNo:$('#stodnNo').val(),
+	            		plant:$('#plant').combobox("getValue"),
+	            		location:locations,
+	            		begin:$('#begin').val(),
+	            		end:$('#end').val(),
+	            	},
+                success:function(data){
+                	if(data == "success") {
+                		var url = '/stoDn/exportOdsStoDnGigrInfoExcel?a=1'
+		                    + '&flag=' + '0'
+		                    + '&orderNo=' + $('#orderNo').val()
+		                    + '&tmsFlag=' + $('#sapFlag').combobox("getValue")
+		                    + '&materialNo=' + $('#materialNo').val()
+		                    + '&stoNo=' + $('#stoNo').val()
+                            + '&stodnNo=' + $('#stodnNo').val()
+		                    + '&plant=' + $('#plant').combobox("getValue")
+		                    + '&location=' + locations
+		                    + '&begin=' + $('#begin').val()
+		                    + '&end=' + $('#end').val();
+		            	window.location.href = url;
+                	}else {
+                		$.messager.alert('System Information',data,	'warning');
+                	}
+                }
+            });
+        }
+
+        function inOutWarehouse(){
+            var rows = $('#odsOrderInfoGrid').datagrid('getSelections');
+            if (rows.length != 1) {
+                $.messager.alert('System Information','Please select one data!', 'warning');
+                return;
+            }
+            if(rows[0].inOutFlag == '1'){
+                $.messager.alert('System Information','This order has delivery Success!', 'warning');
+                return;
+            }
+            $.messager.confirm('System Information',
+                    'Before In/Out Warehouse,You Should Be Sure The Order is  Posting Success But Out Of Storage Failed !',
+            function(r) {
+                        if (r) {
+                            $.maskLoading();
+                            $.post(
+                                    "/sto/inoutWarehouse",
+                                    {
+                                        'orderNo' : rows[0].orderNo,
+                                        'orderType':rows[0].orderType
+                                    },
+                                    function(data) {
+                                        var result=data.substring (0,1);
+                                        if (result == '"S"') {
+                                            $.messager.alert('System Information','In/Out Success!','warning');
+                                            $('#odsOrderInfoGrid').datagrid('reload');
+                                        } else {
+                                            result=data.substring (1,data.length);
+                                            $.messager.alert('System Information','Failed!'+(result==undefined?"":result),'warning');
+                                        }
+                                        $.maskEnd();
+                                    })
+                                    .error(function() {
+                                        $.messager.alert('System Information','Network Abnormal!','warning');
+                                        $.maskEnd();
+                                    });
+                        }
+                    });
+        }
+        function post() {
+            var rows = $('#odsOrderInfoGrid').datagrid('getSelections');
+            if (rows.length != 1) {
+                $.messager.alert('System Information', 'Please select one data!', 'warning');
+                return;
+            }
+            if (rows[0].sapFlag == '1') {
+                $.messager.alert('System Information', 'You must select which is failure to post to TMS!', 'warning');
+                return;
+            }
+
+            $.messager.confirm('System Information',
+                    'Please confirm the order has been failed posting on PDA before Reposting to TMS.',
+                    function(r) {
+                        if (r) {
+                            $.maskLoading();
+                            $.post(
+                                "/stodn/postStodn",
+                                {
+                                    'orderNo' : rows[0].orderNo ,
+                                    'stodnNo':rows[0].stodnNo,
+                                    'orderType' : rows[0].orderType ,
+                                    'sapFlag': rows[0].sapFlag  //失败
+                                },
+                                function(data) {
+                                    var jsonObj = JSON.parse(data);
+                                    if (jsonObj.status == "S") {
+                                        $.messager.alert('System Information', jsonObj.msg,'warning');
+                                        $('#odsOrderInfoGrid').datagrid('reload');
+                                    } else {
+                                        $.messager.alert('System Information', jsonObj.msg,'error');
+                                        $('#odsOrderInfoGrid').datagrid('reload');
+                                    }
+                                    $.maskEnd();
+                                })
+                                .error(
+                                function() {
+                                    $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                                    $.maskEnd();
+                                });
+                        }
+                    });
+        }
+
+        function print() {
+
+            var selectedRows = $("#odsOrderInfoGrid").datagrid('getChecked');
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information', 'Please select at least one data!', 'warning');
+                return false;
+            }
+            var codes = new Array();
+            for ( var i = 0; i < selectedRows.length; i++) {
+                codes.push(selectedRows[i].orderNo);
+            }
+            var url='/order/printOgpIgpInfo?orderNos='+codes.join();
+            window.open(url);
+        }
+
+        function printOgp() {
+            var rows = $('#odsOrderInfoGrid').datagrid('getSelections');
+            if (rows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select the data to print!', 'warning');
+                return;
+            }
+            if (rows.length > 8) {
+                $.messager.alert('System Information',
+                        'Please print 8 items at most!', 'warning');
+                return;
+            }
+            for (var i = 1; i<rows.length; i++){
+            	if (rows[i].orderNo != rows[0].orderNo){
+            		$.messager.alert('System Information',
+                            'The ogp order no. should be same!', 'warning');
+                    return;
+            	}
+            }
+            var arr = new Array();
+            for (var i = 0; i<rows.length; i++){
+                var row = rows[i];
+                var info = {};
+                info.stoNo = row.stoNo;
+                info.stodnNo = row.stodnNo;
+                info.plant = row.plant;
+                info.transporterCode = row.transporterCode;
+                info.invoiceNo = row.invoiceNo;
+                info.carNo = row.carNo;
+                info.materialDesp = row.materialDesp;
+                info.unit = row.unit;
+                info.scannedQty = row.scannedQty;
+                arr[i] = info;
+            }
+            var url='/sto/printOgp?msg='+JSON.stringify(arr);
+            url = url.replace("&","%26");
+            window.open(url);
+        }
+
+        function printDn() {
+            var rows = $('#odsOrderInfoGrid').datagrid('getSelections');
+            if (rows.length < 1) {
+                $.messager.alert('System Information','Please select the data to print!', 'warning');
+                return;
+            }
+            if (rows.length > 12) {
+                $.messager.alert('System Information','Please print 12 items at most!', 'warning');
+                return;
+            }
+            for (var i = 1; i<rows.length; i++){
+            	if (rows[i].orderNo != rows[0].orderNo){
+            		$.messager.alert('System Information','The ogp order no. should be same!', 'warning');
+                    return;
+            	}
+            }
+            var arr = new Array();
+            for (var i = 0; i<rows.length; i++){
+                var row = rows[i];
+            	var info = {};
+                info.stoNo = row.stoNo;
+                info.stodnNo = row.stodnNo;
+                info.plantName = row.plantName;
+                info.transporterCode = row.transporterCode;
+                info.carNo = row.carNo;
+                info.orderType = row.orderType;
+                info.locationName = row.locationName;
+                info.materialDesp = row.materialDesp;
+                info.unit = row.unit;
+                info.scannedQty = row.scannedQty;
+                arr[i] = info;
+            }
+            var url='/sto/printDn?msg='+JSON.stringify(arr);
+            window.open(url);
+        }
+
+        function printVNPT() {
+            var rows = $('#odsOrderInfoGrid').datagrid('getSelections');
+            if (rows.length < 1) {
+                $.messager.alert('System Information','Please select the data to print!', 'warning');
+                return;
+            }
+            {{!-- if (rows.length > 12) {
+                $.messager.alert('System Information','Please print 12 item at most!', 'warning');
+                return;
+            } --}}
+            for (var i = 1; i<rows.length; i++){
+            	if (rows[i].orderNo != rows[0].orderNo){
+            		$.messager.alert('System Information','The ogp order no. should be same!', 'warning');
+                    return;
+            	}
+            }
+            var arr = new Array();
+            for (var i = 0; i<rows.length; i++){
+                var row = rows[i];
+            	var info = {};
+                info.stoNo = row.stoNo;
+                info.stodnNo = row.stodnNo;
+                info.plantName = row.plantName;
+                info.transporterCode = row.transporterCode;
+                info.carNo = row.carNo;//Doc Vehicle
+                info.orderType = row.orderType;
+                info.locationName = row.locationName;
+                info.materialDesp = row.materialDesp;
+                info.unit = row.unit;
+                info.scannedQty = row.scannedQty;
+
+                info.location = row.location; // Doc Import
+                info.transporterCode = row.transporterCode;//Doc Shiper
+                arr[i] = info;
+            }
+            var url='/sto/printVNPT?msg='+JSON.stringify(arr);
+            //window.open(url);
+            $.maskLoading();
+            $.get(
+                url,
+                {{!-- {
+                'msg' :JSON.stringify(arr)
+                }, --}}
+                function(data) {
+                    var jsonObj = JSON.parse(data);
+                    if (jsonObj.status == "S") {
+                        $.messager.alert('System Information', 'operate success!','warning');
+                    } else {
+                        $.messager.alert('System Information', jsonObj.msg,'error');
+                    }
+                    $.maskEnd();
+                })
+                .error(
+                function() {
+                    $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                    $.maskEnd();
+                });
+        }
+    </script>
+{{/component}}

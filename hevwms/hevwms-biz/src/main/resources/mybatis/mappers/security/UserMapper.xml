@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.security.dao.UserDAO">
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<resultMap id="userResultMap" type="user">
+	    <id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="name" column="NAME" />
+		<result property="password" column="PASSWORD" />
+		<result property="status" column="STATUS" />
+		<result property="email" column="EMAIL" />
+		<result property="type" column="TYPE" />
+		<result property="nickName" column="NICK_NAME" />
+		<result property="lastLoginIp" column="LAST_LOGIN_IP" />
+		<result property="currentLoginIp" column="CURRENT_LOGIN_IP" />
+		<result property="lastLoginTime" column="LAST_LOGIN_TIME" />
+		<result property="loginAttemptTimes" column="LOGIN_ATTEMPT_TIMES" />
+		<result property="loginFaildTime" column="LOGIN_FAILD_TIME" />
+		<result property="passwordModifiedFlag" column="PASSWORD_FIRST_MODIFIED_FLAG" />
+		<result property="passwordExpireTime" column="PASSWORD_EXPIRE_TIME" />
+		<result property="gmtCreate" column="GMT_CREATE" />
+		<result property="gmtModified" column="GMT_MODIFIED" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="lastModifiedBy" column="LAST_MODIFIED_BY" />
+		<result property="encode" column="ENCODE" />
+		<result property="expiredTime" column="EXPIRED_TIME" />
+		<result property="dutyType" column="DUTY_TYPE" />
+		<result property="productDivision" column="PRODUCT_DIVISION" />
+		<result property="groupName" column="GROUP_NAME" />
+	</resultMap>
+
+	<!-- 查询OPERATION_LOG表的所有字段 -->
+    <sql id="selectAllUserInfoColumns">
+		<![CDATA[
+	    select user_.id,
+	           user_.name,
+	           user_.password,
+	           user_.status,
+	           user_.email,
+	           user_.type,
+	           user_.nick_name,
+	           user_.last_login_ip,
+	           user_.current_login_ip,
+	           user_.last_login_time,
+	           user_.login_attempt_times,
+	           user_.login_faild_time,
+	           user_.password_first_modified_flag,
+	           user_.password_expire_time,
+	           user_.gmt_create,
+	           user_.gmt_modified,
+	           user_.create_by,
+	           user_.last_modified_by,
+	           user_.encode,
+	           user_.expired_time,
+			   user_.duty_type,
+			   user_.product_division,
+			   (select nvl(max(i.name),'') from group_info i,user_group u where i.id=u.group_id	and u.user_id=user_.id) as group_name
+	     	 from user_info user_ 
+		  ]]>
+	</sql>
+
+	<!-- 根据ID查询用户记录 -->
+	 <select id="get" parameterType="long" resultMap="userResultMap">
+		<include refid="selectAllUserInfoColumns" />
+		<![CDATA[
+		where   user_.ID = #{id}
+		 
+		]]>
+	</select>
+
+	<!-- 根据ID删除用户记录 -->
+	 <delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from user_info where ID = #{id}
+		]]>
+	</delete>
+
+	<!-- 更行信息 -->
+	 <update id="update" parameterType="user">
+		<![CDATA[
+		update user_info
+		   set name                         = #{name},
+		       password                     = #{password},
+		       status                       = #{status},
+		       email                        = #{email},
+		       type                         = #{type},
+		       nick_name                    = #{nickName},
+		       last_login_ip                = #{lastLoginIp},
+		       current_login_ip             = #{currentLoginIp},
+		       last_login_time              = #{lastLoginTime},
+		       login_attempt_times          = #{loginAttemptTimes},
+		       login_faild_time             = #{loginFaildTime},
+		       password_first_modified_flag = #{passwordModifiedFlag},
+		       password_expire_time         = #{passwordExpireTime},
+		       gmt_create                   = #{gmtCreate},
+		       gmt_modified                 = sysdate,
+		       last_modified_by             = #{lastModifiedBy},
+		       encode                       = #{encode},
+		       expired_time                 = #{expiredTime},
+			   duty_type                    = #{dutyType},
+		       product_division             = #{productDivision}
+		 where id = #{id}
+		]]>
+	</update>
+
+	<!-- 根据用户名查询用户记录 -->
+	 <select id="getUserByName" parameterType="string" resultMap="userResultMap">
+		<include refid="selectAllUserInfoColumns" />
+		<![CDATA[
+		where  
+		   user_.NAME = #{name}
+		]]>
+	</select>
+
+	<!-- 查询某个部门下的员工列表 -->
+	 <select id="getDepartmentUsers" parameterType="long" resultMap="userResultMap">
+		<include refid="selectAllUserInfoColumns" />
+		<![CDATA[
+		 , user_department ud_
+	     where user_.id = ud_.user_id	       
+	       and ud_.department_id = #{departmentId}	       
+	    ]]>
+	</select>
+
+	<!-- 创建用户 -->
+	<insert id="save" parameterType="user">
+	    <selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_USER_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into user_info
+		  (id, 
+		   name,
+		   password,
+		   status,
+		   email,
+		   type,
+		   nick_name,
+		   last_login_ip,
+		   current_login_ip,
+		   last_login_time,
+		   login_attempt_times,
+		   login_faild_time,
+		   password_first_modified_flag,
+		   password_expire_time,
+		   gmt_create,
+		   gmt_modified,
+		   create_by,
+		   last_modified_by,
+		   encode,
+		   expired_time,
+		   duty_type,
+		   product_division    
+		   )
+		values
+		  (#{id},
+		   #{name},
+		   #{password},
+		   #{status},
+		   #{email},
+		   #{type},
+		   #{nickName},
+		   #{lastLoginIp},
+		   #{currentLoginIp},
+		   sysdate,
+		   #{loginAttemptTimes},
+		   sysdate,
+		   #{passwordModifiedFlag},
+		   #{passwordExpireTime},
+		   sysdate,
+		   sysdate,
+		   #{createBy},
+		   #{lastModifiedBy},
+		   #{encode},
+		   #{expiredTime},
+		   #{dutyType},
+		   #{productDivision}
+		   )
+		]]>
+	</insert>
+
+	<!-- 分页查询业务日志 -->
+    <sql id="searchUser_fragement">
+		<include refid="selectAllUserInfoColumns" />
+		where  1=1
+		<include refid="searchUserConditions" />
+	</sql>
+	<sql id="searchUserConditions">
+		<if test="user.name != null and user.name != '' ">
+			and user_.name like '%'||#{user.name}||'%'
+		</if>
+		<if test="user.nickName != null and user.nickName != '' ">
+			and user_.nick_Name like '%'||#{user.nickName}||'%'
+		</if>
+		<if test="user.email != null and user.email != '' ">
+			and user_.email like '%'||#{user.email}||'%'
+		</if>
+		<if test="user.status != null and user.status != -1">
+			and user_.status = #{user.status}
+		</if>
+	</sql>
+	<select id="searchUser" resultMap="userResultMap">
+		<include refid="pagination_Head" />
+		<include refid="searchUser_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchUserCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchUser_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<!-- 根据组ID获取组内的用户 -->
+    <select id="getUsersByGroupId" resultMap="userResultMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllUserInfoColumns" />
+		,user_group ug
+		where user_.id = ug.user_id		 
+		and ug.group_id=#{user.groupId}
+		 
+		<include refid="searchUserConditions" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="getUsersByGroupIdCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllUserInfoColumns" />
+		,user_group ug
+		where user_.id = ug.user_id
+		and ug.group_id=#{user.groupId} 
+		<include refid="searchUserConditions" />
+		<include refid="count_Tail" />
+	</select>
+	<!-- 删除用户对应的部门 -->
+	 <delete id="delUserDepartment" parameterType="long">
+		<![CDATA[
+		delete from USER_DEPARTMENT where user_id = #{userId}
+		]]>
+	</delete>
+	<!-- 保存用户对应的部门 -->
+    <insert id="saveUserDepartment">
+		<![CDATA[
+		insert into USER_DEPARTMENT
+		  (user_id,
+		   department_id)
+		values
+		  (#{userId},
+		   #{departmentId})
+	    ]]>
+	</insert>
+	<insert id="saveUserWhLoc">
+		<![CDATA[
+		insert into CD_USER_WH_LOC
+		  (user_id,
+		   loc_id,
+		   user_type,
+		   loc_code,
+		   wh_id)
+		values
+		  (#{userId},
+		   #{locId},
+		   #{userType},
+		   #{locCode},
+		   #{whId})
+	    ]]>
+	</insert>
+	<delete id="deleteUserWhLoc">
+		<![CDATA[
+		delete from CD_USER_WH_LOC where user_id = #{userId}
+		]]>
+	</delete>
+	<select id="mergeUserLogin" resultMap="userResultMap">
+		<include refid="selectAllUserInfoColumns" />
+		where user_.name=#{name} and user_.password=#{password}
+		 and user_.status=1
+	</select>
+	<select id="getExpiredList" resultMap="userResultMap">
+		<include refid="selectAllUserInfoColumns" />
+		<!-- 		where user_.last_login_time <= date_sub(NOW(), interval 2 MONTH) -->
+		<![CDATA[
+			where user_.last_login_time <= add_months(sysdate, -2)
+		]]>
+	</select>
+</mapper>

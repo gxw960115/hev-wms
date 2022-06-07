@@ -1,0 +1,94 @@
+{{#component "right_body js-comp"}}
+    <div id="breadcrumbs" style="background-color:#F6FBFF;min-height:490px">
+        <div class="row-fluid">
+            <div class="">
+                <input name="userId" id="userId" value="8" type="hidden"/>
+
+                <h1>
+                    <div class="icons-search">
+                        <span style="color: #ffffff;font-weight:bold;font-size:15px;position: relative;left:20px;top:-7px">修改应用</span>
+                    </div>
+                </h1>
+                <input type="hidden" id="id" name="id" value="{{_DATA_.result.id}}">
+
+                <div style="position: relative;left: 15%">
+                    <table style="width: 100%">
+                        <tr>
+                            <td style="width: 10%">应用名称<span class="starRed">*</span></td>
+                            <td style="width: 90%"><input value="{{_DATA_.result.name}}" style="width:40%;" name="name"
+                                                          id="name" type="text" size="54"/></td>
+                        </tr>
+                        <tr>
+                            <td>标示码<span class="starRed">*</span></td>
+                            <td><input name="code" id="code" type="text" style="width: 40%;"
+                                       value="{{_DATA_.result.code}}" disabled/></td>
+                        </tr>
+                        <tr>
+                            <td>版本<span class="starRed">*</span></td>
+                            <td><input name="version" id="version" type="text" style="width: 40%;"
+                                       value="{{_DATA_.result.version}}" disabled/></td>
+                        </tr>
+                        <tr>
+                            <td>是否有效<span class="starRed">*</span></td>
+                            <td><select name="status" id="status">
+                                <option value="1" {{#equals _DATA_.result.status 1}}selected="selected" {{/equals}}>是
+                                </option>
+                                <option value="0" {{#equals _DATA_.result.status 0}}selected="selected" {{/equals}}>否
+                                </option>
+                            </select></td>
+                        </tr>
+                        <tr>
+                            <td>描述<span class="starRed">*</span></td>
+                            <td><input id="description" name="description" type="text" style="width: 40%;"
+                                       value="{{_DATA_.result.description}}"/></td>
+                        </tr>
+                        <tr>
+                            <td>访问链接</td>
+                            <td><input name="baseUrl" id="baseUrl" type="text" style="width: 40%;"
+                                       value="{{_DATA_.result.baseUrl}}"/></td>
+                        </tr>
+                        <tr>
+                            <td>配置项</td>
+                            <td><input id="configuration" name="configuration" type="text" style="width: 40%;"
+                                       value="{{_DATA_.result.configuration}}"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button type="button" class="btn btn-primary" onclick="update()"
+                                        style="height: 40px;width: 60px"><span>修改</span></button>
+                                &nbsp&nbsp&nbsp&nbsp
+                                <button type="button" class="btn btn-primary" style="height: 40px;width: 60px" onclick="resetIt()">
+                                    <span>重置</span></button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function resetIt(){
+            $('#name').val('');
+
+            $('#description').val('');
+            $('#baseUrl').val('');
+            $('#configuration').val('');
+        }
+        function update() {
+            $.get("api/updateHacApp?id=" + $('#id').val()
+                    + "&name=" + $('#name').val()
+                    + "&code=" + $('#code').val()
+                    + "&appVersion=" + $('#version').val()
+                    + "&status=" + $('#status').val()
+                    + "&description=" + $('#description').val()
+                    + "&baseUrl=" + $('#baseUrl').val()
+                    + "&configuration=" + $('#configuration').val()
+                    + "&userId=8"
+                    , function (data) {
+                        if (data.success) {
+                            window.location.href = "/search_hac_app1?userId=8";
+                        }
+                    })
+        }
+    </script>
+{{/component}}

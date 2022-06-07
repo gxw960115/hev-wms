@@ -1,0 +1,132 @@
+{{#component "login js-comp"}}
+    <div id="login">
+        <div id="wrappertop">
+        </div>
+        <div id="wrapper">
+            <div id="content">
+                <div id="header">
+
+                </div>
+                <div id="darkbanner" class="banner320">
+                    <h2>
+                        Login  System
+                    </h2>
+                </div>
+                <div id="darkbannerwrap">
+                </div>
+                <fieldset class="form">
+                    <p>
+                        <label class="loginlabel" for="user_name">Username:</label>
+                        <input class="logininput ui-keyboard-input ui-widget-content ui-corner-all" name="user_name"
+                               id="user_name" type="text" value="" />
+                    </p>
+                    <p>
+                        <label class="loginlabel" for="user_password">
+                            Password:</label>
+                            <span>
+                                <input class="logininput"   name="user_password" id="user_password" type="password"/>
+                                <img id="passwd" class="tooltip-jatt" alt="Click to open the virtual keyboard" title="Click to open the virtual keyboard"
+                                     src="/assets/images/keyboard.png" />
+                            </span>
+                    </p>
+                    <button id="loginbtn" type="button" class="positive" name="Submit">
+                        <img src="/assets/images/key.png" alt="Announcement" />Login
+                    </button>
+                    <ul id="forgottenpassword">
+                        <li class="boldtext">|</li>
+                        <li>
+                            <input id="rmbUser" type="checkbox" name="rmbUser"/>
+                            <label for="rememberMe">Remember me</label>
+                            <div id="prompt-info"></div>
+                        </li>
+                    </ul>
+                </fieldset>
+            </div>
+        </div>
+        <div id="wrapperbottom_branding">
+            <div id="wrapperbottom_branding_text">
+                Language:<a href="#" style='text-decoration: none'>Japanese </a>| <a href="#" style='text-decoration: none'>
+                English</a></div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            //记住用户名、密码相关
+            if ($.cookie('rmbUser') == 'true') {
+                $('#rmbUser').attr('checked', true);
+                $('#user_name').val($.cookie('userName'));
+                $('#user_password').val($.cookie('passWord'));
+            }
+            //保存用户信息
+            function saveUserInfo() {
+                if ($('#rmbUser').attr('checked') == 'checked') {
+                    var userName = $('#user_name').val();
+                    var passWord = $('#user_password').val();
+                    $.cookie('rmbUser', 'true', { expires: 7 }); // 存储一个带7天期限的 cookie
+                    $.cookie('userName', userName, { expires: 7 }); // 存储一个带7天期限的 cookie
+                    $.cookie('passWord', passWord, { expires: 7 }); // 存储一个带7天期限的 cookie
+                }
+                else {
+                    $.cookie('rmbUser', 'false', { expires: -1 });
+                    $.cookie('userName', '', { expires: -1 });
+                    $.cookie('passWord', '', { expires: -1 });
+                }
+            }
+            //回车提交
+            $('#user_password').keydown(function(event){
+                if ( event.which == 13 ) {
+                    $("#loginbtn").click();
+                }
+            });
+            //密码小键盘
+            $('#user_password').keyboard({
+                openOn: null,
+                stayOpen: true,
+                layout: 'qwerty'
+            }).addTyping();
+            $('#passwd').click(function() {
+                $('#user_password').getkeyboard().reveal();
+            })
+            //用户名、密码不输入，输入框变色
+            $(".logininput").blur(function() {
+                if ($(this).val() == "") {
+                    $(this).css("border-color", "red");
+                }
+                else
+                    $(this).css("border-color", "#D9D6C4");
+            })
+            //提交按钮，登录
+            $("#loginbtn").click(function() {
+                var k = 0;
+                $(".logininput").each(function(i, obj) {
+                    if ($.trim($(obj).val()) == "") {
+                        k++;
+                        $(this).css("border-color", "red");
+                        $(this).focus();
+                        return false;
+                    }
+                });
+                if (k != 0) return false;
+                $("#loginbtn").html("Loading....  <img src='/assets/images/loading.gif' alt='Announcement' /> ");
+                $("#loginbtn").attr("disabled", "disabled");
+                $.post("user/login",
+                        {
+                            user_name:$("#user_name").val(),
+                            password:$("#user_password").val()
+                        },
+                        function(data,status){
+                            data = eval("("+data+")");
+                            if(data.result == 'true'){
+                                saveUserInfo();
+                                window.location.href=data.targetUrl;
+                            }else{
+                                $("#prompt-info").html(data.msg);
+                                $("#loginbtn").removeAttr("disabled");
+                                $("#loginbtn").html("<img src='/assets/images/key.png' alt='Announcement' />Login");
+                            }
+                        });
+            })
+        });
+
+    </script>
+{{/component}}

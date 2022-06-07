@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.security.dao.FileUploadDAO">
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<resultMap id="uploadFileMap" type="uploadFile">
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="fileName" column="file_name"/>
+		<result property="saveFileName" column="save_file_name"/>
+		<result property="filePath1" column="file_path_1"/>
+		<result property="filePath2" column="file_path_2"/>
+		<result property="status" column="status"/>
+		<result property="type" column="type"/>
+		<result property="remarks" column="remarks"/>
+		<result property="lastModifiedBy" column="last_upd_by"/>
+		<result property="lastModifiedDt" column="last_upd_dt"/>
+		<result property="createBy" column="created_by"/>
+		<result property="createDt" column="created_dt"/>
+		<result property="createDate" column="created_date"/>
+	</resultMap>
+	
+	<sql id="selectAllColumn">
+		select t.id,
+		       t.file_name,
+		       t.save_file_name,
+		       t.file_path_1,
+		       t.file_path_2,
+		       t.status,
+		       t.type,
+		       t.remarks,
+		       t.last_upd_by,
+		       t.last_upd_dt,
+		       t.created_by,
+		       t.created_dt,
+		       to_char(t.created_dt,'yyyy-MM-dd HH24:mi:ss') created_date,
+		       t.versions
+	</sql>
+	
+	<!-- 根据ID查询文件 -->
+	<select id="get" parameterType="long" resultMap="uploadFileMap">
+		<include refid="selectAllColumn"/>
+		<![CDATA[
+			  from upload_file t
+			  where id = #{id}
+		]]>
+	</select>
+	
+	<!-- 根据状态和类型查询文件 -->
+	<sql id="getFileByStatusAndType_segment">
+		<include refid="selectAllColumn"/>
+		<![CDATA[
+			  from upload_file t
+		  ]]>
+		  <where>
+		  	  <if test="status != null">
+		  	  	<![CDATA[t.status = #{status, jdbcType=INTEGER} ]]>
+		  	  </if>
+		  	  <if test="type != null">
+		  	  	<![CDATA[and t.type = #{type, jdbcType=INTEGER}]]>
+		  	  </if>
+		  </where>
+		<![CDATA[
+			order by t.created_dt desc
+		]]>
+	</sql>
+	
+	<select id="getFileByStatusAndType" resultMap="uploadFileMap">
+		<include refid="getFileByStatusAndType_segment"/>
+	</select>
+	
+	<select id="getFileByStatusAndTypeCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="getFileByStatusAndType_segment"/>
+		<include refid="count_Tail"/>
+	</select>
+	
+	<!-- 新增文件 -->
+	<insert id="save" parameterType="uploadFile">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_UPLOAD_FILE_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into upload_file
+		  (ID, 
+		   file_name,
+		   save_file_name,
+		   file_path_1,
+		   file_path_2,
+		   status,
+		   type,
+		   remarks,
+		   last_upd_by,
+		   last_upd_dt,
+		   created_by,
+		   created_dt)
+		values
+		  (#{id},
+		   #{fileName},
+		   #{saveFileName},
+		   #{filePath1},
+		   #{filePath2},
+		   #{status},
+		   #{type},
+		   #{remarks},
+		   #{lastModifiedBy},
+		   #{lastModifiedDt},
+		   #{createBy},
+		   #{createDt})
+		]]>
+	</insert>
+	
+	<!-- 更行信息 -->
+	<update id="update" parameterType="uploadFile">
+		<![CDATA[
+		update upload_file
+		   set file_name             = #{fileName},
+		       save_file_name        = #{saveFileName},
+		       file_path_1           = #{filePath1},
+		       file_path_2           = #{filePath2},
+		       status                = #{status},
+		       type                  = #{type},
+		       remarks               = #{remarks},
+		       last_upd_by           = #{lastModifiedBy},
+		       last_upd_dt           = #{lastModifiedDt}
+		 where id = #{id}
+		]]>
+	</update>
+	<select id="getfileNameShow" resultMap="uploadFileMap">
+		<include refid="selectAllColumn"/>
+		<![CDATA[
+			  from upload_file t
+			  where t.status = #{status} order by t.created_dt desc
+		]]>
+	</select>
+	<delete id="deleteFileByName" parameterType="uploadFile">
+		delete from upload_file where status = #{status} and file_name=#{fileName}
+	</delete>
+	<select id="getPdaFileInfo" resultMap="uploadFileMap">
+		<include refid="selectAllColumn"/>
+		from upload_file t
+		where t.status=1 and t.file_name like 'asvwms_Android%'
+	</select>
+	
+	<select id="getAppVersion" resultMap="uploadFileMap">
+		<include refid="selectAllColumn"/>
+		from upload_file t
+		where t.status=1 and t.file_name like #{name}||'%' and t.versions = #{version}
+	</select>
+</mapper>

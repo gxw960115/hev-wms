@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/png"/>
+    <title>WMS</title>
+    <link href="/assets/styles/style.default.css" rel="stylesheet" />
+    <link href="/assets/styles/jquery.datatables.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/bootstrap/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/icon.css"/>
+    <link rel="stylesheet" href="/assets/styles/bootstrap/bootstrap-wysihtml5.css"/>
+   	<script src="/assets/scripts/jquery-1.10.2.min.js"></script>
+    <script src="/assets/scripts/handlebars-v3.0.3.js"></script>
+   	<script src="/assets/scripts/jquery.ajaxform.js"></script>
+   	<script src="/assets/scripts/jquery.gridly.js"></script>
+   	<script src="/assets/scripts/easyui/jquery.min.js"></script>
+   	<script src="/assets/scripts/easyui/jquery.easyui.min.js"></script>
+   	<script src="/assets/scripts/easyui/easyloader.js"></script>
+   	<script src="/assets/scripts/easyui/extends/jquery.easyui.function.extends.js"></script>
+   	<script src="/assets/scripts/easyui/extends/jquery.easyui.grid.export.js"></script>
+   	<script src="/assets/scripts/easyui/extends/jquery.easyui.mycard.js"></script>
+   	<script src="/assets/scripts/easyui/extends/jquery.easyui.panel.extends.js"></script>
+   	<script src="/assets/scripts/jquery-migrate-1.2.1.min.js"></script>
+   	<script src="/assets/scripts/bootstrap/bootstrap.min.js"></script>
+   	<script src="/assets/scripts/modernizr.min.js"></script>
+   	<script src="/assets/scripts/jquery.sparkline.min.js"></script>
+   	<script src="/assets/scripts/toggles.min.js"></script>
+   	<script src="/assets/scripts/flot/jquery.flot.min.js"></script>
+   	<script src="/assets/scripts/flot/jquery.flot.resize.min.js"></script>
+   	<script src="/assets/scripts/flot/jquery.flot.spline.min.js"></script>
+   	<script src="/assets/scripts/morris.min.js"></script>
+   	<script src="/assets/scripts/raphael-2.1.0.min.js"></script>
+   	<script src="/assets/scripts/custom.js"></script>
+   	<script src="/assets/scripts/dashboard.js"></script>
+   	<script src="/assets/scripts/jquery.cookie.js"></script>
+   	<script src="/assets/scripts/jquery.session.js"></script>
+   	<script src="/assets/scripts/js/common.js"></script>
+    <!-- custom scrollbar stylesheet -->
+    <link rel="stylesheet" href="/assets/styles/jCustomScrollBar/jquery.mCustomScrollbar.css"/>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            /*border-color: #D3D3D3;*/
+            border: 0px;
+        }
+        .indexcontent{ 
+            -webkit-border-radius: 5px; 
+            -moz-border-radius: 5px; border-radius: 5px; 
+            position: relative;
+            list-style: outside none none;
+            -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;
+            /*原样式*/
+            margin-bottom: 30px;
+        }
+
+    </style>
+    <script type="text/javascript">
+    	/*$(window).resize(function() {
+		  $('#iframeMain').css("overflow","scroll");
+		});*/
+    </script>
+</head>
+<body class="easyui-layout" style="overflow:hidden">
+<div style="display:block;" id="moudle1">
+    <!-- header -->
+    <div region="north" class="headerbar">
+        <div class="header-right">
+            <ul class="headermenu">
+<!-- 	            <li> -->
+<!-- 	            	<button id="hotLine" type="button" style="border:0; margin:5px; background-color:#fff " -->
+<!-- 	            		class="btn btn-default" onclick="window.open('http://www.haier.ethicspoint.com')"> -->
+<!--                     	Haier Complance Hotline -->
+<!--                     </button> -->
+<!-- 	            </li> -->
+                <li>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle">
+                        	<img src="/assets/images/user.png" alt=""/> 
+                        	<span id="userNameSpan"></span>
+                        </button>
+                    </div>
+                </li>
+                <li>
+                    <button id="chatview" class="btn btn-default tp-icon">
+                    <i class="glyphicon">
+                    <img src="/assets/images/img-77_09.png"/></i></button>
+                </li>
+            </ul>
+        </div>
+        <!-- header-right -->
+
+    </div>
+    <!-- header -->
+    <!--左侧菜单栏-->
+    <div region="left" class="leftpanel">
+        <div class="logopanel"><img src="/assets/images/img-99.png"/></div>
+        <!-- logopanel -->
+        <!--新加左侧菜单展开-->
+        <span class="drop-right"></span>
+        <!--新加左侧菜单展开-->
+        <div class="leftpanelinner">
+            <!--新加左侧菜单展开-->
+            <span class="drop-left"></span>
+            <!--新加左侧菜单展开-->
+            <!-- This is only visible to small devices -->
+            <!-- <div class="visible-xs hidden-sm hidden-md hidden-lg">
+                 <div class="media userlogged"> <img alt="" src="/assets/images/photos/loggeduser.png" class="media-object">
+                     <div class="media-body">
+                         <h4>John Doe</h4>
+                         <span>"Life is so..."</span> </div>
+                 </div>
+                 <h5 class="sidebartitle actitle">Account</h5>
+                 <ul class="nav nav-pills nav-stacked nav-bracket mb30">
+                     <li><a href="profile.html"><i class="fa fa-user"></i> <span>Profile</span></a></li>
+                     <li><a href=""><i class="fa fa-cog"></i> <span>Account Settings</span></a></li>
+                     <li><a href=""><i class="fa fa-question-circle"></i> <span>Help</span></a></li>
+                     <li><a href="signout.html"><i class="fa fa-sign-out"></i> <span>Sign Out</span></a></li>
+                 </ul>
+             </div>-->
+            <h5 class="sidebartitle">Navigation</h5>
+            <ul id="menuTree" class="nav nav-pills nav-stacked nav-bracket indexcontent"
+                style="overflow-y: auto; overflow-x: hidden;">
+
+            </ul>
+        </div>
+        <!-- leftpanelinner -->
+    </div>
+    <!--左侧菜单栏-->
+    <!--右侧内容-->
+    <div region="center" class="mainpanel">
+        <div id="centerTab" fit="true" border="false"></div>
+    </div>
+    <!--右侧内容-->
+    <!--footer-->
+    <div region="south" class="signup-footer footerGrid"><span>Copyright©2015 Haier Group</span></div>
+</div>
+</body>
+<!-- custom scrollbar plugin -->
+<script src="/assets/scripts/jCustomScrollBar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script type="text/javascript">
+$(window).load(function(){
+    $.mCustomScrollbar.defaults.scrollButtons.enable=true; //enable scrolling buttons by default
+    $.mCustomScrollbar.defaults.axis="yx"; //enable 2 axis scrollbars by default  
+    $("#menuTree").mCustomScrollbar({theme:"3d"});    
+});
+    $('.leftpanel').height(window.screen.height*0.92);
+    $('#menuTree').height(window.screen.height*0.675);
+    $('#userNameSpan').html($.session.get("userNickname"));
+    $('#hotLine').mouseover(function(){
+    	  $("#hotLine").css("background-color","#ccc");
+    	  $("#hotLine").css("color","#00f");
+    });
+    $('#hotLine').mouseleave(function(){
+	  	  $("#hotLine").css("background-color","#fff");
+	  	  $("#hotLine").css("color","#666");
+	});
+        //菜单
+        $.ajax({
+            url: '/user/getAllMenus',
+            type: 'post',
+            async: false,
+            dataType: 'json',
+            success: function (data) {
+                var menuHtml = "";
+                if (data && data.length > 0) {
+                    for (var i = 0; i < data.length; i++) {
+                        menuHtml += '<li class="nav-parent"><a href=""><i class="fa fa-file-text-o" style="font-size:18px;"></i> <span>' + data[i]["text"] + '</span></a><ul class="children">';
+                        var chlids = data[i]['children'];
+                        if(typeof(chlids) != "undefined" ){
+                            for (var j = 0; j < chlids.length; j++) {
+                                menuHtml += '<li id=' + chlids[j]["id"] + ' text="' + chlids[j]["text"] + '" url=' + chlids[j]["url"] + ' closable=true class="s-target"><a href="javascript:;">' +
+                                        '<i class="fa fa-caret-right"></i>' + chlids[j]["text"] + '</a></li>';
+                            }
+                        }
+                        menuHtml += '</ul></li>';
+                    }
+                }
+                $('#menuTree').html(menuHtml);
+            }
+        });
+
+        $('#centerTab').tabs({
+            tools: [
+                {
+                    iconCls: 'icon-reload',
+                    handler: function () {
+                        refreshPanel();
+                    }
+                },
+                {
+                    iconCls: 'icon-remove',
+                    handler: function () {
+                        closePanel();
+                    }
+                }
+            ]
+        });
+        //菜单赋点击事件
+        $('#menuTree .children >li').each(function () {
+            $(this).click(function () {
+                addTab($(this).attr('id'), $(this).attr('text'), $(this).attr('url'), '', $(this).attr('closable'));
+            });
+        });
+
+        function refreshPanel() {
+            var tabSelect = $('#centerTab').tabs('getSelected');  // get selected panel
+            tabSelect.panel('refresh', tabSelect);
+        }
+
+        function closePanel() {
+            var tab = $('#centerTab').tabs('getSelected');
+            if (tab) {
+                var index = $('#centerTab').tabs('getTabIndex', tab);
+                if (index == 0) {
+                    $.messager.alert('Info', 'HOME can not close!', 'error');
+                } else {
+                    $('#centerTab').tabs('close', index);
+                }
+            }
+        }
+
+        //添加tab页事件
+        function addTab(id, title, url, iconCls, closable) {
+            //需要考虑选项卡过多，需要关闭的情况
+            //判断是否已打开
+            if ($('#centerTab').tabs('exists', title)) {
+                $('#centerTab').tabs('select', title);
+            } else {
+                // 载入遮罩层，避免用户在空白页面中等待
+                $.maskLoading();
+                // 新建iframe节点
+                var iframe = document.createElement("iframe");
+                iframe.scrolling = "auto";
+                iframe.frameborder = "0";
+                iframe.id="iframeMain";
+                iframe.width = "100%";
+                iframe.height = window.screen.availHeight;//"99%""document.body.clientHeight
+                // iframe.style.display = "none"; // 设置这个iframe不可见
+                iframe.src = url+'?suitHeight='+(document.documentElement.clientHeight-98);
+                $('#centerTab').tabs('add', {
+                    title: title,
+                    id: id,
+                    //    iconCls : iconCls,
+                    content: iframe,
+                    closable: closable
+                });
+                window.setTimeout("$.maskEnd();", 1000*2);
+                
+                // 判断iframe的载入状态
+//                 if (iframe.attachEvent) {//IE
+//                     iframe.attachEvent("onload", function () {
+//                         $.maskEnd();
+//                     });
+//                 } else {//非IE
+//                     iframe.onload = function () {
+//                         $.maskEnd();
+//                     };
+//                 }
+            }
+        }
+    //初始化home页
+    addTab('home', 'HOME', 'home', '', false);
+</script>
+</html>

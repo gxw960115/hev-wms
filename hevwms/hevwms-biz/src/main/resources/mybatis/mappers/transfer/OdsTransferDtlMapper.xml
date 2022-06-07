@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haier.hevwms.transfer.dao.OdsTransferDtlDAO">
+
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<resultMap id="odsTransferDtlMap" type="odsTransferDtl">
+		<result column="ROW_ID" property="rowId" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="TRANS_NO" property="transNo" />
+		<result column="TRANS_ITEM_NO" property="transItemNo" />
+		<result column="BATCH_NO" property="batchNo" />
+		<result column="PLANT" property="plant" />
+		<result column="CUSTOMER_MODEL" property="customerModel" />
+		<result column="GI_LOCATION" property="giLocation" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="UNIT" property="unit" />
+		<result column="BARCODE" property="barcode" />
+		<result column="VENDOR_CODE" property="vendorCode" />
+		<result column="VENDOR_NAME" property="vendorName" />
+		<result column="DELIVERY_CODE" property="deliveryCode" />
+		<result column="DELIVERY_NAME" property="deliveryName" />
+		<result column="SCANNED_BY" property="scannedBy" />
+		<result column="SCANNED_DATE" jdbcType="DATE" property="scannedDate" />
+		<result column="DELIVERY_DATE" jdbcType="DATE" property="deliveryDate" />
+		<result column="ORDER_ID" property="orderId" />
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="CAR_NO" property="carNo" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" jdbcType="DATE" property="createDate" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" jdbcType="DATE" property="modifyDate" />
+		<result column="FLAG" property="flag" />
+		<result column="VERSION" property="version" />
+		<result column="QTY" property="qty" />
+		<result column="ORDER_ITEM" property="orderItem" />
+		<result column="SERIAL_NO" property="serialNo" />
+		<result column="FINISH_FLAG" property="finishFlag" />
+		<result column="IN_OUT_FLAG" property="inOutFlag" />
+		<result column="IN_OUT_MSG" property="inOutMsg" />
+		<result column="USED_FLAG" property="usedFlag" />
+		<result column="SUB_LOCATION" property="subLocation" />
+		<result column="GI_BIN" property="giBin" />
+		<result column="GR_BIN" property="grBin" />
+		<result column="REMARK" property="remark" />
+		<result column="GR_LOCATION" property="grLocation" />
+	</resultMap>
+
+	<!-- 数据库中所有字段 -->
+	<sql id="Base_Column_List" >
+		ROW_ID, ORDER_TYPE, TRANS_NO,TRANS_ITEM_NO, BATCH_NO, PLANT,CUSTOMER_MODEL, GI_LOCATION, MATERIAL_NO,
+		MATERIAL_DESP, UNIT, BARCODE,VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE,DELIVERY_NAME, SCANNED_BY, SCANNED_DATE,
+		DELIVERY_DATE, ORDER_ID, ORDER_NO,CAR_NO, CREATE_BY, CREATE_DATE,MODIFY_BY, MODIFY_DATE, FLAG,VERSION, 
+		QTY, ORDER_ITEM,SERIAL_NO, FINISH_FLAG, IN_OUT_FLAG,IN_OUT_MSG, USED_FLAG, SUB_LOCATION,GI_BIN, GR_BIN, REMARK, GR_LOCATION
+	</sql>
+	<sql id="selectAllOdsTransferDtlColumns">
+		<![CDATA[
+			SELECT
+				ROW_ID,
+				ORDER_TYPE,
+				TRANS_NO,
+				TRANS_ITEM_NO,
+				BATCH_NO,
+				PLANT,
+				CUSTOMER_MODEL,
+				GI_LOCATION,
+				MATERIAL_NO,
+				MATERIAL_DESP,
+				UNIT,
+				BARCODE,
+				VENDOR_CODE,
+				VENDOR_NAME,
+				DELIVERY_CODE,
+				DELIVERY_NAME,
+				SCANNED_BY,
+				SCANNED_DATE,
+				DELIVERY_DATE,
+				ORDER_ID,
+				ORDER_NO,
+				CAR_NO,
+				CREATE_BY,
+				CREATE_DATE,
+				MODIFY_BY,
+				MODIFY_DATE,
+				FLAG,
+				VERSION,
+				QTY,
+				ORDER_ITEM,
+				SERIAL_NO,
+				FINISH_FLAG,
+				IN_OUT_FLAG,
+				IN_OUT_MSG,
+				USED_FLAG,
+				SUB_LOCATION,
+				GI_BIN,
+				GR_BIN,
+				REMARK,
+				GR_LOCATION
+			FROM ODS_TRANSFER_DETAIL otd 
+		]]>
+	</sql>
+	<sql id="searchOdsTransferDtl_fragement">
+		<include refid="selectAllOdsTransferDtlColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsTransferDtl.transNo != null">
+			and TRANS_NO like '%'||#{odsTransferDtl.transNo}||'%' 
+		</if>
+		<if test="odsTransferDtl.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsTransferDtl.materialNo}||'%' 
+		</if>
+		<if test="odsTransferDtl.barcode != null">
+			and BARCODE like '%'||#{odsTransferDtl.barcode}||'%' 
+		</if>
+		<if test="odsTransferDtl.giLocation != null and odsTransferDtl.giLocation != ''">
+			and GI_LOCATION IN (${odsTransferDtl.giLocation})
+		</if>
+		<if test="odsTransferDtl.grLocation != null and odsTransferDtl.grLocation != ''">
+			and GR_LOCATION IN (${odsTransferDtl.grLocation})
+		</if>
+		<if test="odsTransferDtl.begin != null and odsTransferDtl.begin != ''">
+			<![CDATA[
+				and CREATE_DATE >= TO_DATE(concat(#{odsTransferDtl.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsTransferDtl.end != null and odsTransferDtl.end != ''">
+			<![CDATA[
+				and CREATE_DATE <= TO_DATE(concat(#{odsTransferDtl.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		order by TRANS_NO DESC
+	</sql>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<insert id="save" parameterType="odsTransferDtl">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+            SELECT SEQ_TRANSFER_DTL_ID.NEXTVAL AS id FROM DUAL
+        </selectKey>
+		<![CDATA[
+			insert into ODS_TRANSFER_DETAIL (
+				ROW_ID, ORDER_TYPE, TRANS_NO,
+				TRANS_ITEM_NO, BATCH_NO, PLANT,
+				CUSTOMER_MODEL, GI_LOCATION, MATERIAL_NO,
+				MATERIAL_DESP, UNIT, BARCODE,
+				VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE,
+				DELIVERY_NAME, SCANNED_BY, SCANNED_DATE,
+				DELIVERY_DATE, ORDER_ID, ORDER_NO,
+				CAR_NO, CREATE_BY, CREATE_DATE,
+				MODIFY_BY, MODIFY_DATE, FLAG,
+				VERSION, QTY, ORDER_ITEM,
+				SERIAL_NO, FINISH_FLAG, IN_OUT_FLAG,
+				IN_OUT_MSG, USED_FLAG, SUB_LOCATION,
+				GI_BIN, GR_BIN, REMARK, GR_LOCATION)
+			values (
+				#{rowId}, #{orderType}, #{transNo},
+				#{transItemNo}, #{batchNo}, #{plant},
+				#{customerModel}, #{giLocation}, #{materialNo},
+				#{materialDesp}, #{unit}, #{barcode},
+				#{vendorCode}, #{vendorName}, #{deliveryCode},
+				#{deliveryName}, #{scannedBy}, #{scannedDate},
+				#{deliveryDate}, #{orderId}, #{orderNo},
+				#{carNo}, #{createBy}, #{createDate},
+				#{modifyBy}, #{modifyDate}, #{flag},
+				#{version}, #{qty}, #{orderItem},
+				#{serialNo}, #{finishFlag}, #{inOutFlag},
+				#{inOutMsg}, #{usedFlag}, #{subLocation},
+				#{giBin}, #{grBin}, #{remark}, #{grLocation})
+		]]>
+	</insert>
+
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+			DELETE FROM ODS_TRANSFER_DETAIL WHERE ROW_ID = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+			DELETE FROM ODS_TRANSFER_DETAIL WHERE ROW_ID IN
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateAll" parameterType="odsTransferDtl">
+		<![CDATA[
+			UPDATE ODS_TRANSFER_DETAIL
+		   	SET 
+				ORDER_TYPE = #{orderType}, 
+				TRANS_NO = #{transNo},
+				TRANS_ITEM_NO = #{transItemNo},
+				BATCH_NO = #{batchNo},
+				PLANT = #{plant},
+				CUSTOMER_MODEL = #{customerModel},
+				GI_LOCATION = #{giLocation},
+				MATERIAL_NO = #{materialNo},
+				MATERIAL_DESP = #{materialDesp},
+				UNIT = #{unit},
+				BARCODE = #{barcode},
+				VENDOR_CODE = #{vendorCode},
+				VENDOR_NAME = #{vendorName},
+				DELIVERY_CODE = #{deliveryCode},
+				DELIVERY_NAME = #{deliveryName},
+				SCANNED_BY = #{scannedBy},
+				SCANNED_DATE = #{scannedDate},
+				DELIVERY_DATE = #{deliveryDate},
+				ORDER_ID = #{orderId},
+				ORDER_NO = #{orderNo},
+				CAR_NO = #{carNo},
+				CREATE_BY = #{createBy},
+				CREATE_DATE = #{createDate},
+				MODIFY_BY = #{modifyBy},
+				MODIFY_DATE = #{modifyDate},
+				FLAG = #{flag},
+				VERSION = #{version},
+				QTY = #{qty},
+				ORDER_ITEM = #{orderItem},
+				SERIAL_NO = #{serialNo},
+				FINISH_FLAG = #{finishFlag},
+				IN_OUT_FLAG = #{inOutFlag},
+				IN_OUT_MSG = #{inOutMsg},
+				USED_FLAG = #{usedFlag},
+				SUB_LOCATION = #{subLocation},
+				GI_BIN = #{giBin},
+				GR_BIN = #{grBin},
+				REMARK = #{remark},
+				GR_LOCATION = #{grLocation}
+		 	WHERE ROW_ID = #{rowId}
+		]]>
+	</update>
+	
+	<select id="get" resultMap="odsTransferDtlMap" parameterType="long">
+		<include refid="selectAllOdsTransferDtlColumns" />
+		<![CDATA[
+			where otd.row_id = #{rowId}
+		]]>
+	</select>
+	<select id="getAll" resultMap="odsTransferDtlMap">
+		<include refid="selectAllOdsTransferDtlColumns" />
+	</select>
+	<select id="searchOdsTransferDtls" resultMap="odsTransferDtlMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsTransferDtl_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsTransferDtlsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsTransferDtl_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getListByParams" resultMap="odsTransferDtlMap">
+		<include refid="selectAllOdsTransferDtlColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsTransferDtl.transNo != null and odsTransferDtl.transNo != ''">
+			and TRANS_NO = #{odsTransferDtl.transNo} 
+		</if>
+		<if test="odsTransferDtl.barcode != null and odsTransferDtl.barcode != ''">
+			and BARCODE like '%'||#{odsTransferDtl.barcode}||'%' 
+		</if>
+		<if test="odsTransferDtl.createBy != null and odsTransferDtl.createBy != ''">
+			and CREATE_BY = #{odsTransferDtl.createBy} 
+		</if>
+		<if test="odsTransferDtl.inOutFlag != null and odsTransferDtl.inOutFlag != ''" >
+			and IN_OUT_FLAG = #{odsTransferDtl.inOutFlag}
+		</if>
+		ORDER BY CREATE_DATE DESC 
+	</select>
+	<select id="scanTransfer" statementType="CALLABLE">
+		<![CDATA[
+		  {call PRC_BARCODE_TRANSFER_CHECK(
+		  #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.user,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.version,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.bin,mode=IN,jdbcType=VARCHAR},
+		  #{result.status,mode=OUT,jdbcType=VARCHAR},
+		  #{result.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{result.location,mode=OUT,jdbcType=VARCHAR},
+		  #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+	      #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	
+	<select id="deleteScanInfoByBarcode" statementType="CALLABLE">
+		<![CDATA[
+		  {call PRC_BARCODE_TRANSFER_DELETE(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{out.location,mode=OUT,jdbcType=VARCHAR},
+		  #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+	      #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+
+
+	<select id="orderOgp" statementType="CALLABLE">
+		<![CDATA[
+		  {call PRC_GOODS_TRANSFER_DELIVERY(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.docType,mode=IN,jdbcType=VARCHAR},
+		  #{in.orderType,mode=IN,jdbcType=VARCHAR},
+		  #{in.version,mode=IN,jdbcType=VARCHAR},
+		  #{in.carNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+		  #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	
+	<select id="scanStatus" resultType="long">
+    	<![CDATA[
+    		SELECT COUNT(*) 
+    		FROM ODS_TRANSFER_INFO S
+    		WHERE S.TRANS_NO = #{orderNo}
+			AND S.FINISH_FLAG = 0
+    	]]>
+    </select>
+    
+    <update id="updateSapInfo">
+		<![CDATA[
+			UPDATE ODS_TRANSFER_INFO S
+			SET S.CAR_NO = #{order.carNo},
+			    S.TRANSPORTER_NAME = #{order.transpoterName},
+			    S.POSTING_DATE = #{order.postingdate}
+			WHERE S.TRANS_NO = #{order.orno}
+	    ]]>
+	</update>
+</mapper>

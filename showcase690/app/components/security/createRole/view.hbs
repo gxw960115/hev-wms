@@ -1,0 +1,114 @@
+{{#component "createRole js-comp"}}
+    <style type="text/css">
+        #searchTab{
+            display: inline-block;
+            margin-left: 8px;
+            margin-top: 10px; 
+        }
+        #searchTab1{
+            display: inline-block;
+            margin-left: 30px;
+            margin-top: 30px;
+            width: 98%;
+        }
+        #searchTab1 tr{
+            height: 35px;
+        }
+        #searchTab1 input{
+            height: 30px;
+            width: 160px;
+        } 
+    </style>
+    
+    <div class="easyui-layout"  style="width:100%;height:500px;">
+    <div class="addDiv">
+        <table class="form_table" id="searchTab1">
+            <tr>
+                <td style="text-align: center">Role Name&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input type="text" class="radiusCls" id="roleName">
+                                    <input type="hidden" class="radiusCls" id="resources"></td>
+            </tr>
+            <tr>
+                <td style="text-align: center">Description&nbsp;&nbsp;</td>
+                <td class="leftCls" style="height:120px"><textarea name = "description" id = "description" rows="4" cols="20"></textarea></td>
+            </tr>
+            <tr>
+               <td style="text-align: center">Resource&nbsp;&nbsp;</td>
+               <td>
+                <div style="height: 220px; border: 1px #ccc solid; width: 200px; overflow-y: scroll; overflow-x: auto; margin-left:10px;">
+                        <ul id="resourceTree"></ul>
+                </div>
+                </td>
+            </tr>
+                </td>
+            </tr>
+            <tr style="height:50px;">
+                <td colspan="2">
+                    <a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn" onclick="savePd();">Add</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" id="addBtn" onclick="resetRole();">reset</a>
+				</td>
+            </tr>
+        </table>
+        </div>
+    </div>
+    
+    <script type="text/javascript">  
+    $(function(){
+    	
+    	$('#resourceTree').tree({
+    		checkbox:true,
+    		url : '/security/resourceTree?status=0'
+    	});
+    });
+    
+    
+function savePd(){
+        
+        if (!$("#roleName").val()) {
+            $.messager.alert('System Information','roleName The Data not null');
+            return false;
+        }
+        
+        var nodes=$('#resourceTree').tree('getChecked');
+		var codes = new Array();
+		for ( var i = 0; i < nodes.length; i++) {
+                 var par=$('#resourceTree').tree('getParent',nodes[i].target);
+                 if(par!=null&&$.inArray(par.id, codes)==-1){
+                      codes.push(par.id);
+                  }
+				  codes.push(nodes[i].id);
+		}
+		$("#resources").val(codes);
+        $.maskLoading();
+        $.post("/security/role/createRole", {
+        	
+            'name' :     $("#roleName").val(),
+            'description':    $("#description").val(),
+            'resourceIds':    $("#resources").val()
+        }, function(data) {
+                $.messager.alert('System Information',data, 'warning');
+                $.maskEnd();
+        }).error(
+                function() {
+                    $.messager.alert('System Information','Network Abnormal!','warning');
+                    $.maskEnd();
+                });
+    }
+    function resetRole(){
+    	$('#roleName').val("");
+    	$('#description').val("");
+    	 var resTrees= $('#resourceTree').tree('getRoots');
+            var resLen=resTrees.length;
+            for(var i=0;i<resLen;i++){
+               var node = $('#resourceTree').tree('find',resTrees[i]["id"]); 
+               if(!$('#resourceTree').tree('isLeaf',node.target)){
+                    var childs=$('#resourceTree').tree('getChildren',node.target);  
+                    for(var j=0;j<childs.length;j++){
+                        $('#resourceTree').tree('uncheck',$('#resourceTree').tree('find',childs[j]["id"]).target);//清除子节点
+                    }
+               }  
+              $('#resourceTree').tree('uncheck',node.target);//清除父节点           
+            }
+    }
+    </script>
+{{/component}}

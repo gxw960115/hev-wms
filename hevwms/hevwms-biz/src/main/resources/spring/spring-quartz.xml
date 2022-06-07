@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:lang="http://www.springframework.org/schema/lang" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/jee 
+     http://www.springframework.org/schema/jee/spring-jee.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/lang
+     http://www.springframework.org/schema/lang/spring-lang.xsd
+     http://www.springframework.org/schema/task
+     http://www.springframework.org/schema/task/spring-task.xsd
+     http://www.springframework.org/schema/util
+     http://www.springframework.org/schema/util/spring-util.xsd">
+		
+	<!-- auto download material from MDM, added 2016-03-15, run at 00:00:00 everyday. -->
+	<bean id="downMaterialFromSapToWmsJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.haier.openplatform.showcase.quartz.DownMaterialFromSapToWmsJob" /> 
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="mdmMaterialReceiver" />
+	</bean>
+	<bean id="downMaterialFromSapToWmsBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
+		<property name="jobDetail" ref="downMaterialFromSapToWmsJob" />
+		<property name="cronExpression" value="0 30 2 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>	
+	
+	<!-- 定时任务每天下载一次SAP的库存  2018/2/24  by yanfengdan -->
+	<bean id="downAllInventoryFromSap" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="com.haier.openplatform.showcase.quartz.DownAllInventoryFromSAPToWMSJob" /> 
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="downAllInventoryFromSap" />
+	</bean>
+	<bean id="downAllInventoryFromSapBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
+		<property name="jobDetail" ref="downAllInventoryFromSap" />
+		<property name="cronExpression" value="0 0 3 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>
+	
+	<!--每天统计库存快照   -->
+	<bean id="otcCaculateInventoryHistoryAuto" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.haier.openplatform.showcase.quartz.OtcCaculateInventoryHistory" /> 
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="统计库存快照" />
+	</bean>
+	<bean id="otcCaculateInventoryHistoryBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
+		<property name="jobDetail" ref="otcCaculateInventoryHistoryAuto" />
+		<property name="cronExpression" value="0 30 3 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>
+	
+	<!--  自动下载po-->
+	<bean id="otcDownOrderFromSAPToWMSAuto" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.haier.openplatform.showcase.quartz.DownOrderFromSAPToWMSJob" /> 
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="po定时下载" />
+	</bean>
+	<bean id="otcDownOrderFromSAPToWMSBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
+		<property name="jobDetail" ref="otcDownOrderFromSAPToWMSAuto" />
+		<property name="cronExpression" value="0 10 0-2,5-23 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>
+	
+	<!-- 自动下载sto -->
+	<bean id="otcTransStoinfoFromSAPToWMSAuto" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.haier.openplatform.showcase.quartz.TransStoinfoFromSAPToWMSJob" /> 
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="sto定时下载" />
+	</bean>
+	<bean id="otcTransStoinfoFromSAPToWMSAutoBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
+		<property name="jobDetail" ref="otcTransStoinfoFromSAPToWMSAuto" />
+		<property name="cronExpression" value="0 30 0-2,5-23 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>
+
+	<!--&lt;!&ndash;自动下载DN&ndash;&gt;
+	<bean id="otcDNDownloadFromSAPToWMSAuto" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.haier.openplatform.showcase.quartz.DNDownloadFromSAPToWMSJob" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="dn定时下载" />
+	</bean>
+	<bean id="otcDNDownloadFromSAPToWMSAutoBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="otcDNDownloadFromSAPToWMSAuto" />
+		<property name="cronExpression" value="0 0/15 0-2,5-23 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>-->
+
+	<!--自动下载SODN-->
+	<bean id="soDNDownloadFromTMSToWMSJobAuto" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+				  value="com.haier.openplatform.showcase.quartz.SoDNDownloadFromTMSToWMSJob" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="sodn定时下载" />
+	</bean>
+	<bean id="soDNDownloadFromTMSToWMSJobBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="soDNDownloadFromTMSToWMSJobAuto" />
+		<property name="cronExpression" value="0 0/15 0-2,5-23 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>
+
+
+	<!-- 每天锁定2个月未登录的用户sjk -->
+	<bean id="lockInactiveAccount" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.haier.openplatform.showcase.quartz.LockInactiveAccountJob" /> 
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_JOB_GROUP" />
+		<property name="durability" value="false" />
+		<property name="description" value="lockInactiveAccount" />
+	</bean>
+	<bean id="lockInactiveAccountBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
+		<property name="jobDetail" ref="lockInactiveAccount" />
+		<property name="cronExpression" value="0 30 4 * * ?" />
+		<property name="group" value="#{quartzProperties['org.quartz.scheduler.instanceName']}_TRIGGER_GROUP" />
+	</bean>
+	
+	<!-- 任务调度管理器 -->
+	<bean id="clusterQuartzScheduler"
+		class="com.haier.openplatform.quartz.SchedulerFactoryBeanProxy">
+		<property name="schedulerName" value="#{quartzProperties['org.quartz.scheduler.instanceName']}"/>
+		<!-- Job接受applicationContext的成员变量名 -->
+		<property name="applicationContextSchedulerContextKey" value="applicationContext" />
+		<!-- 是否覆盖已有的任务 -->
+		<property name="overwriteExistingJobs" value="true" />
+		<property name="quartzProperties" ref="quartzProperties" />
+		<property name="triggers">
+			<list>
+				<ref bean="downMaterialFromSapToWmsBean"/> 
+				<ref bean="downAllInventoryFromSapBean"/>
+				<ref bean="otcCaculateInventoryHistoryBean"/>
+				<ref bean="otcDownOrderFromSAPToWMSBean"/>
+				<ref bean="otcTransStoinfoFromSAPToWMSAutoBean"/>
+				<!--				<ref bean="otcDNDownloadFromSAPToWMSAutoBean"/>-->
+				<ref bean="lockInactiveAccountBean"/>
+				<ref bean="soDNDownloadFromTMSToWMSJobBean"/>
+			</list>
+		</property>
+		<!-- 定时任务是否启动开关,为true则启动,为false则不启动 -->
+		<property name="startFlag" value="${quartz.enable}"/>
+	</bean>
+
+	<!-- quartz属性配置 -->
+	<util:properties id="quartzProperties">
+		<prop key="org.quartz.scheduler.instanceName">${app.name}</prop>
+		<prop key="org.quartz.scheduler.instanceId">AUTO</prop>
+		<prop key="org.quartz.scheduler.skipUpdateCheck">true</prop>
+		<!-- 开发环境用RAMJobStore,可加快启动速度  -->
+<!-- 		<prop key="org.quartz.jobStore.class">org.quartz.simpl.RAMJobStore</prop> -->
+		
+	    <!-- 生产、测试环境要用TerracottaJobStore -->
+		<prop key="org.quartz.jobStore.class">org.terracotta.quartz.TerracottaJobStore</prop>
+		<prop key="org.quartz.jobStore.tcConfigUrl">${quartz.server}</prop>
+		
+		<prop key="org.quartz.scheduler.instanceIdGenerator.class">com.haier.openplatform.quartz.HostNameTimestampInstanceIdGenerator</prop>
+		<prop key="org.quartz.plugin.triggHistory.class">org.quartz.plugins.history.LoggingTriggerHistoryPlugin</prop>
+		<prop key="org.quartz.scheduler.jmx.export">true</prop>
+	</util:properties>
+	
+	<!-- 任务监控
+   	<bean class="com.haier.openplatform.console.audit.quartz.JobHistoryPlugin">
+		<property name="scheduler" ref="clusterQuartzScheduler"/>
+		<property name="jobHistorySenderAdapter" ref="jobHistorySenderAdapter"/>
+	</bean>
+	 -->
+</beans>

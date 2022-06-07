@@ -1,0 +1,859 @@
+{{#component "transferInventory js-comp"}}
+	<style type="text/css">
+        #addTransForm{
+            padding-top:2px;
+            padding-left:30px;
+            font-size:14px;
+            color: #636E7B;
+        }
+        #addTransForm input{
+            height: 28px;
+            width: 140px;
+        }
+        #addTransForm table tr{
+            height: 32px;;
+        }
+        #addTransForm table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+	</style>
+    <div id="transferDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDiv" region="north" style="border:0">
+            <table id="searchTab1">
+                 <tr>
+                    <td class="rightCls"  style="width:120px">Order NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="transferNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls" style="width:150px">Material No:&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="materialNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Warehouse:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="warehouse" type="text" class="easyui-combobox" style="border:0" data-options="border:false,
+                         width:155, height:30, editable:true,required:false,panelWidth:180"/></td>
+                    <td style="text-align: center;width:100px;" class="rightCls"> Do Flag:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input style="width:110px;" id="doFlag" class="easyui-combobox flag" data-options="width:100,height:30,editable:false,panelHeight:'auto'" /></td>
+                </tr>
+                <tr>
+                	<td class="rightCls">GI Location:&nbsp;&nbsp;</td>
+                	<td class="leftCls"><input id="giLocation" class="radiusCls" type="text" /></td>
+                    <td class="rightCls" style="width:120px">GR Location:&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="grLocation" class="radiusCls" type="text" /></td>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                   	<td class="leftCls" colspan="3"><input id="begin" class="radiusCls" style="width:120px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/> &nbsp;&nbsp;
+                        -  &nbsp;&nbsp;<input id="end" class="radiusCls" style="width:120px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                    <td></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn">Add</a>
+                    <a href="javascript:void(0)" class="btnStyle deleteBtn" id="deleteOrder">Delete</a>
+                   <!-- <a href="javascript:void(0)" style="display: none;" id="postTransfer" class="btnStyle paymentReconciliationBtn" onclick="transferPost()">Posting</a> -->
+
+                    <a href="javascript:void(0)" class="btnStyle exportBtn"  onclick="exportPlan()">Export</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border-top:0px;  overflow-y: hidden;">
+            <table id="dataGrid" style="width:100%;"></table>
+        </div>
+    </div>
+    <!-- 添加移库单窗口 -->
+    <div id="addTransWin" title="Add Inventory Transfer Order"
+         data-options="modal:true,closed:true,iconCls:'icon-add', top:10, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+         style="width: 735px; height: 450px; display:none">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style=" height: 210px; border:0">
+                <form id="addTransForm" method="post">
+                    <table  cellpadding="0" cellspacing="0" >
+                        <tr>
+                            <td align="right" valign="middle">Order No:&nbsp;&nbsp;</td>
+                            <td colspan="3"><input id="planNo" type="text" class="radiusCls" style='width:140px' readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td align="right" valign="middle">Warehouse:&nbsp;&nbsp;</td>
+                            <td width="190"><input id="warehouseCode" type="text" class="easyui-combobox" style="padding: 5px" 
+                    				data-options="border:false,width:140,height:30,editable:true,required:false,panelWidth:180"/><font color="red">*</font></td>
+                    		<td width="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>		
+                            <td align="left" valign="middle">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                            <td width="190">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr class="locTr">
+                            <td valign="top" align="right">Gi Location<font color="red">*</font>:</td>
+                            <td >
+                                <div style="height: 135px; border: 1px #ccc solid; width: 100%; overflow-y: scroll; overflow-x: auto;">
+                                    <ul id="locTree" class="easyui-tree"></ul>
+                                </div> <input id="locs" type="hidden" />
+                            </td>
+                        	<td></td>
+                            <td valign="top" align="right">Gr Location<font color="red">*</font>:</td>
+                            <td >
+                                <div style="height: 135px; border: 1px #ccc solid; width: 100%; overflow-y: scroll; overflow-x: auto;">
+                                    <ul id="locTree2" class="easyui-tree"></ul>
+                                </div> <input id="locs2" type="hidden" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div region="center">
+                <table id="selTransGrid" ></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 35px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveTrans();">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="closeTransWin();">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <!--物料选择框-->
+    <div id="showMatWin" class="easyui-window" title="MatInfo"
+         data-options="modal:true,closed:true,iconCls:'icon-search',top:0, left:($(window).width() - 920) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false"
+         style="width: 920px; height: 450px; overflow-y: hidden">
+        <div class="easyui-layout" fit="true">
+            <div region="west" style=" width: 650px;overflow-y: hidden; border-right: 2px #ccc solid; border-left: 0;border-top: 0; border-bottom: 0">
+                <div id="matGridTool">
+                    <input type="text" id="matCodeP" value="">|
+                    <img onclick="searchMat()" src="/assets/images/serch-icon.png" id="serch-icon">
+                </div>
+                <table id="matGrid"></table>
+            </div>
+            <div region="center" style="overflow-y: hidden; ">
+                <table id="selMatGrid"></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 37px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveMat();">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="javascript:closeMat();">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var totalWidth = $('#dataGrid').width();
+    
+    // set width of column 
+	function fixWidth(percent) { 
+    	return totalWidth * percent;   
+	}
+    var selTransColumns="";//添加框中物料列
+    var matColumns="";//物料列
+    var selMatColumns="";//选中的物料列
+    $(function(){
+    	//if($.session.get("userName").toString().indexOf("admin")>=0){
+            $("#postTransfer").css("display","");
+        //}
+    	$('#transferDiv').height(suitHeight);
+    	var date=new Date();
+	    var m=date.getMonth()+1;
+	    var d=date.getDate();
+	    var begin=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+	    $('#begin').val(getLastRq(begin,-2));
+	    date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+	    $('#end').val(date);
+        var columns=[[{
+            field : 'ck',
+            checkbox : true,
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'transOrderNo',
+            title : 'Order No',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'transItemNo',
+            title : 'Item No',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'qty',
+            title : 'QTY',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Finish Qty',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'UNIT',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'warehouseCode',
+            title : 'Warehouse Code',
+            align : 'center',
+            width: fixWidth(0.1),
+            sortable : true
+        }, {
+            field : 'warehouseName',
+            title : 'Warehouse Name',
+            align : 'center',
+            width: fixWidth(0.1),
+            sortable : true
+        }, {
+            field : 'giLocation',
+            title : 'Gi Location',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'grLocation',
+            title : 'Gr Location',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.09),
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description ',
+            align : 'center',
+            hidden : true,
+            sortable : true
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            align : 'center',
+            width: fixWidth(0.15),
+            sortable : true
+        },{
+            field:'sapFlag',title:'Do Flag',width:fixWidth(0.10),align:'center',sortable:true,
+            formatter: function(val){
+                if(val=='1'){
+                    return "<font color='green'>Posting Success</font>";
+                }else if(val=='2'){
+                    return"<font color ='red'>Posting Failed</font>";
+                }else{
+                    return "<font color='red'>UnDelivery</font>";
+                }
+            }
+        }, {
+            field : 'createBy',
+            title : 'Create By',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field:'sapMsg',
+            title:'Sap Msg',
+            width:fixWidth(0.20), 
+            align:'center',
+            sortable:true
+        }, {
+            field:'sapDocNo',
+            title:'SAP Doc No',
+            width:fixWidth(0.08), 
+            align:'center',
+            sortable:true
+        } ]];
+        selTransColumns = [ [ {
+            field : 'giLocation',
+            title : 'Gi Location',
+            align : 'center',
+            width : 100
+        }, {
+            field : 'materialNo',
+            title : 'MaterialNo',
+            align : 'center',
+            width : 120
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            align : 'center',
+            width : 80
+        }, {
+            field : 'basicUnit',
+            title : 'Unit',
+            align : 'center',
+            width : 50
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            align : 'center',
+            width : 160
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            width : 160
+        } ] ];
+        matColumns = [ [ {
+            field : 'materialNo',
+            title : 'Material Code',
+            width : 120,
+            align : 'center'
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            width : 160,
+            align : 'center'
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width: 180,
+            align : 'center'
+        }, {
+            field : 'produceAttribute',
+            title : 'IDU/ODU',
+            width: 60,
+            align : 'center',
+            hidden: true
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            align : 'center',
+            width : 60,
+            editor:{
+                type:'numberbox'
+            },
+            styler: function (value, row, index) {
+                return 'background-color:#ffee00;color:red;';
+            }
+        },  {
+            field : 'basicUnit',
+            title : 'Unit',
+            align : 'center',
+            width : 50
+        } ] ];
+        selMatColumns = [ [ {
+            field : 'materialNo',
+            title : 'Material Code',
+            align : 'center',
+            width : 100
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            width : 100,
+            align : 'center'
+        } ] ];
+        var grid2 = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            remoteSort:false,  
+            url:'/searchTransInventoryOrder/list',
+            method:'post',
+            queryParams: {
+                begin:$('#begin').val(),
+                end:$('#end').val(),
+                flag:'0',
+                finishFlag:'-1'
+            },
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+            onLoadSuccess:function(){
+               $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid2);
+        $.ajax({
+        	url:'/warehouse/searchAvailableWh',  //url:'/inventory/searchFactory',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                var dataRes = [];
+                if(data!=''||data!=null||data!=undefined){
+                   for(var i=0;i<data.length;i++){
+                       dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                    }           
+                }
+                $('#warehouse').combobox({
+                    data:dataRes
+                })
+                $('#warehouseCode').combobox({
+                    data:dataRes
+                })
+            }
+        });
+        $('#doFlag').combobox({
+                data:[{"text":"ALL","value":"-1"},{"text":"UnDelivered","value":"0"},{"text":"Posting Success","value":"1"},
+                {"text":"Posting Failed","value":"2"}],
+                value:'-1'
+        });
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#addBtn').on('click',function(){
+            addData();
+        })
+        $('#exportBtn').on('click',function(){
+            exportData();
+        })
+        $('#deleteOrder').on('click',function(){
+            deleteOrder();
+        })
+        $('#warehouseCode').combobox({
+        	panelWidth:180,
+            onSelect:function(record){
+                $.ajax({
+                    url:'/loc/select/tree',
+                    type:'post',
+                    dataType:'json',
+                    data:{
+                        rowId:record.rowId
+                    },
+                    success:function(data){
+                        $('#locTree').tree({
+                            //checkbox:true,
+                            data:data,
+                            onSelect:function(node){
+                                //进行物料选择
+                                showMatWin();
+                              	//便于辨别正选中的location
+                                $('#locs').val(node.id);
+                            }
+                        });
+                        $('#locTree2').tree({
+                           // checkbox:true,
+                            data:data,
+                            onSelect:function(node){
+                               // if(checked){
+                                   grLocation : node.id,
+                                           
+                                   //便于辨别正选中的location
+                                   $('#locs2').val(node.id);
+                               // }
+                            }
+                        }); 
+                    }
+                });
+
+            }
+        });
+    });
+    
+    var editIndex = undefined;
+    function endEditing() {
+        if (editIndex == undefined) {
+            return true
+        }
+        if ($('#matGrid').datagrid('validateRow', editIndex)) {
+            $('#matGrid').datagrid('endEdit', editIndex);
+            editIndex = undefined;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    function onClickCell(index, field) {
+        if (endEditing()) {
+            if (field == 'qty') {
+                $('#matGrid').datagrid('selectRow', index).datagrid('beginEdit', index);
+                editIndex = index;
+                var ed = $(this).datagrid('getEditor', {index:index,field:field});
+                $(ed.target).focus();
+            }
+            editIndex = index;
+        }
+    }
+    
+    //展示物料窗口
+    function showMatWin(){
+        var matGrid = $('#matGrid').datagrid(
+                {
+                    rownumbers : true,
+                    pagination : true,
+                    striped : true,
+                    singleSelect : false,
+                    height : 345,
+                    url : '/api/search',
+                    idField : 'rowId',
+                    fitColumns : false,
+                    pageNumber : 1,
+                    columns : matColumns,
+                    onClickCell:onClickCell,
+                    onLoadSuccess : function(data) {
+                        if (data.mess != null) {
+                            $.messager.alert('System Information',
+                                    data.mess, 'warning');
+                            return;
+                        }
+                        if (data.total == 0 && data.rows.length == 0) {
+                            $.messager.alert('System Information',
+                                    'No records found.',
+                                    'warning');
+                        }
+                    },
+                    onDblClickRow : matCheck,
+                    onLoadError:function(){
+                       $.messager.alert('System Information','Network Abnormal!','warning');
+                    }
+                });
+        initPagination(matGrid);
+        $('#selMatGrid').datagrid({
+            rownumbers : true,
+            striped : true,
+            singleSelect : false,
+            border:false,
+            height : 370,
+            idField : 'materialNo',
+            fitColumns : true,
+            columns : selMatColumns,
+            data:[]
+
+        });
+        $('#showMatWin').window('open');
+    }
+    function matCheck(index, row) {
+    	if (row.qty == undefined || row.qty == ''){
+    		$.messager.alert('System Information',
+            		'Please input qty first!');
+    		return ;
+    	}
+        var selIndex = $('#selMatGrid').datagrid('getRowIndex', row);
+        if (selIndex == -1) {
+            $('#selMatGrid').datagrid('appendRow', row);
+        } else {
+            $.messager.alert('System Information',
+                    'The Data already exists!');
+        }
+    }
+    function closeMat() {
+        //获得tree选中的location，点击取消触发该事件，则给location赋值all
+       /* var node= $('#locTree').tree('find',$('#locs').val());
+        var row = {
+            giLocation : node.id,
+            materialNo:'ALL'
+        };
+        var selIndex = $('#selTransGrid').datagrid('getRowIndex', row);
+        if (selIndex == -1) {
+            $('#selTransGrid').datagrid('appendRow', row);
+        } else {
+            $.messager.alert('System Information',
+                    'The Data already exists!');
+        } */
+        $('#showMatWin').window('close');
+    }
+    function saveMat() {
+        ////获得tree选中的location，点击取消触发该事件，则给location赋值all
+        var node= $('#locTree').tree('find',$('#locs').val());
+        if (node != null) {
+            var rows = $('#selMatGrid').datagrid('getRows');
+            
+            //必须填写数量，不然不能保存
+            for (var i = 0; i < rows.length; i++) { 
+	        	var plQty = rows[i]['qty'];
+	        	if (plQty == null || plQty == '' || plQty == 'undefined') {
+	        		$.messager.alert('System Information','You must input the Plan Qty!','warning'); 
+	        		return false;
+	        	}
+			}
+            
+            $.each(rows, function(index, value) {
+                value.giLocation = node.id;
+                var selIndex = $('#selTransGrid').datagrid('getRowIndex', value);
+                if (selIndex == -1) {
+                    $('#selTransGrid').datagrid('appendRow', value);
+                }
+            });
+        }
+        $('#showMatWin').window('close');
+    }
+    function queryData(){
+       var grid= $('#dataGrid').datagrid({
+            url:'/searchTransInventoryOrder/list',
+            queryParams: {
+                begin:$('#begin').val(),
+                end:$('#end').val(),
+                transOrderNo:$('#transferNo').val(),
+                materialNo:$('#materialNo').val(),
+                warehouseCode:$('#warehouse').combobox('getValue'),
+                giLocation:$('#giLocation').val(),
+                grLocation:$('#grLocation').val(),
+                flag:'0',
+                finishFlag:$('#doFlag').combobox("getValue")
+            },
+            onLoadSuccess : function(data) {
+                $("#dataGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                }
+                $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid); 
+    }
+
+    function searchMat(){
+        $('#matGrid').datagrid({
+            url:'/api/search',
+            queryParams: {
+                materialNo:$('#matCodeP').val()
+            },
+            onLoadSuccess : function(data) {
+                $("#matGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                }
+            },
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+    }
+
+    function addData(){
+        $.post("/transferInventoryOrderNo/sequence", function(data) {
+             $("#planNo").val(data);
+             $('#warehouseCode').combobox('setValue','');
+             $('#selTransGrid').datagrid({
+                 rownumbers : true,
+                 striped : true,
+                 singleSelect : false,
+                 height : 190,
+                 idField : 'id',
+                 fitColumns : true,
+                 fit : true,
+                 columns : selTransColumns,
+                 data:[]
+             });
+             $('#addTransWin').show();
+             $('#addTransWin').window(); 
+             $('#addTransWin').window('open');
+         }).error(
+                 function() {
+                     $.messager
+                             .alert(
+                                     'System Information',
+                                     'Network Abnormal!',
+                                     'warning');
+                 });
+        $('#locTree').tree('loadData',[]);  
+        $('#locTree2').tree('loadData',[]); 
+    }
+
+    function updateOrderStatus(alert, orderNo, status) {
+        $.messager.confirm('System Information', alert, function(r) {
+            if (r) {
+                $.post('/stocktakingOrder/update', {
+                    'orderNo' : orderNo,
+                    'orderStatus' : status
+                }, function(data) {
+                        $.messager.alert('System Information',
+                                data, 'warning');
+                    queryData();
+                }).error(
+                        function() {
+                            $.messager
+                                    .alert(
+                                            'System Information',
+                                            'Network Abnormal!',
+                                            'warning');
+                        });
+            }
+        });
+    }
+    
+    //PC端手动过账
+   /* function transferPost() {
+        var rows = $('#dataGrid').datagrid('getSelections');
+        if (rows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return;
+        }
+        if (rows[0].sapFlag == '1') {
+            $.messager.alert('System Information',
+                    'The order already post to SAP. Please select the order which has not post.', 'warning');
+            return;
+        }
+      
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            url:'/order/postTransfer',
+            data:{
+                transferNo:rows[0].transOrderNo,
+                userName:$.session.get("userName")
+            },
+            success:function(data){
+                if (data.status == 'S') {
+                    $.messager
+                            .alert(
+                            'System Information',
+                            'Posting Success!',
+                            'warning');
+                } else {
+                    $.messager
+                            .alert(
+                            'System Information',
+                            'Failed Posting ! '+data.msg,
+                            'warning');
+                }
+                //unLoadMask($('#loading'));
+                $('#stgDnDownGrid')
+                        .datagrid('reload');
+            },
+            error: function() {
+                //unLoadMask($('#loading'));
+                $.messager
+                        .alert(
+                        'System Information',
+                        'Network Abnormal!',
+                        'warning');
+            }
+        });
+
+    }*/
+
+    //删除移库单，逻辑删除
+    function deleteOrder(){
+        var selectedRows = $("#dataGrid").datagrid('getChecked');
+        if (selectedRows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return false;
+        }
+        if (selectedRows[0].sapFlag == 1) {
+            $.messager.alert('System Information',
+                    'Order already post success, can not be delete.', 'warning');
+            return false;
+        }
+        $.messager.confirm('System Information', 'Order Delete ?', function(r) {
+            if (r) {
+                $.post('/transferInventoryOrder/delete', {
+                    'transOrderNo' : selectedRows[0].transOrderNo,
+                    'createBy':selectedRows[0].createBy
+                }, function(data) {
+                        $.messager.alert('System Information',
+                                data, 'warning');
+                    queryData();
+                }).error(
+                        function() {
+                            $.messager
+                                    .alert(
+                                            'System Information',
+                                            'Network Abnormal!',
+                                            'warning');
+                        });
+            }
+        });
+    }
+
+    function saveTrans(){
+        if (!$("#warehouseCode").combobox('getValue')) {
+            $.messager.alert('System Information','Warehouse Code can not be null');
+            return false;
+        }
+        if ($('#selTransGrid').datagrid('getRows').length == 0) {
+            $.messager.alert('System Information','Gi Location can not be null');
+            return false;
+        }
+        if ($('#locTree2').tree('find',$('#locs2').val()) == null) {
+        	$.messager.alert('System Information', 'GR Location can not be null');
+            return false;
+        }
+        
+        var grLocation= $('#locTree2').tree('find',$('#locs2').val()).id;
+        
+        $.maskLoading();//遮罩开始，防止重复提交
+        $.ajax({
+        	url:"/transferInventoryOrder/add",
+        	type:'post',
+        	data:{
+        		'transOrderNo' : $('#planNo').val(),
+	            'warehouseCode' : $("#warehouseCode").combobox('getValue'),
+	            'plant' :$("#warehouseCode").combobox('getValue'),
+	            'warehouseName' : $('#warehouseCode').combobox('getText'),
+	            'msg' : JSON.stringify($('#selTransGrid').datagrid('getRows')),
+	            'grLocation' : grLocation
+        	},
+        	success:function(val) {
+			                $.maskEnd();//遮罩关闭
+			                $.messager.alert('System Information',
+			                        val, 'warning');
+			            
+			            closeTransWin();
+			            queryData();
+			        },
+			 error:function() {
+                    $.messager
+                            .alert(
+                                    'System Information',
+                                    'Network Abnormal!',
+                                    'warning');
+                	}
+        });
+    }
+    function closeTransWin(){
+        $("#warehouseCode").combobox('setValue', '')
+        $('#addTransWin').window('close');
+    }
+
+    //Excel导出
+    function exportPlan() {
+        /*var url = "/transInventoryOrder/export?"
+        +'transOrderNo='+$('#transferNo').val()
+        +'&materialNo='+$('#materialNo').val()
+        +'&giLocation='+$('#giLocation').val()
+        +'&grLocation='+$('#grLocation').val()
+        +'&begin='+$('#begin').val()
+        +'&end='+$('#end').val()
+        +'&finishFlag='+$('#doFlag').combobox("getValue")
+        +'&flag='+'0'
+        window.location.href = url;*/
+        
+    	$.ajax({
+        	url:'/order/searchTransInventoryOrderAmount',
+        	type:'post',
+        	dataType:'json',
+        	data:{
+        		transOrderNo:$('#transferNo').val(),
+        		materialNo:$('#materialNo').val(),
+        		giLocation:$('#giLocation').val(),
+        		grLocation:$('#grLocation').val(),
+        		begin:$('#begin').val(),
+        		end:$('#end').val(),
+        		finishFlag:$('#doFlag').combobox("getValue"),
+        		flag:0
+        	},
+        	success:function(data) {
+        		if (data == "success") {
+        			var url = "/transInventoryOrder/export?"
+        		        +'transOrderNo='+$('#transferNo').val()
+        		        +'&materialNo='+$('#materialNo').val()
+        		        +'&giLocation='+$('#giLocation').val()
+        		        +'&grLocation='+$('#grLocation').val()
+        		        +'&begin='+$('#begin').val()
+        		        +'&end='+$('#end').val()
+        		        +'&finishFlag='+$('#doFlag').combobox("getValue")
+        		        +'&flag='+'0'
+        		        window.location.href = url;
+        		}else {
+        			$.messager.alert('System Information',data,	'warning');
+        		}
+        	}
+        });
+    }
+    </script>
+{{/component}}

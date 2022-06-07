@@ -1,0 +1,6 @@
+SELECT
+	*
+FROM
+	role_group
+WHERE
+	COUNTRY_CODE = '6600'

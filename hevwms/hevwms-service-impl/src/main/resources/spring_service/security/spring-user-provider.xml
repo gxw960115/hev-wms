@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+        
+	<!-- 使用dubbo协议暴露服务 -->
+	<bean id="seleceMaterialInfoService"
+		class="com.haier.openplatform.wms.basicdata.impl.MdmathInfoServiceClientImpl">
+		<property name="mdMatInfoService" ref="mdMatInfoService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.basicdata.service.MdmathInfoServiceClient"
+		owner="Hevwms" ref="seleceMaterialInfoService" protocol="dubbo" delay="-1"
+		registry="qingdaoRegistry690" version="5.0" />
+
+	<!-- MdBarcode -->
+	<bean id="mdBarcodeServiceClient"
+		class="com.haier.openplatform.wms.basicdata.impl.MdBarcodeServiceClientImpl">
+		<property name="mdBarcodeService" ref="mdBarcodeService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.basicdata.service.MdBarcodeServiceClient"
+		owner="Hevwms" ref="mdBarcodeServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+	<!-- MD52查询树型资源 -->
+	<bean id="cdWhInfoServiceClient"
+		class=" com.haier.openplatform.wms.basicdata.impl.CdWhInfoServiceCilentImpl">
+		<property name="cdWhInfoService" ref="cdWhInfoService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.basicdata.service.CdWhInfoServiceClient"
+		owner="Hevwms" ref="cdWhInfoServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+	<!-- CdLocation 相关 -->
+	<bean id="cdLocInfoServiceClient"
+		class="com.haier.openplatform.wms.basicdata.impl.CdLocInfoServiceClientImpl">
+		<property name="cdLocInfoService" ref="cdLocInfoService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.basicdata.service.CdLocInfoServiceClient"
+		owner="Hevwms" ref="cdLocInfoServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+
+	<!-- 工厂信息 管理 -->
+	<bean id="plantServiceClient"
+		class="com.haier.openplatform.wms.security.service.impl.PlantServiceClientImpl">
+		<property name="plantService" ref="cdFactoryService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.PlantServiceClient"
+		owner="Hevwms" ref="plantServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+	<!-- 安全 管理 -->
+	<bean id="securityUserServiceClient"
+		class="com.haier.openplatform.wms.security.service.impl.SecurityUserServiceClientImpl">
+		<property name="userService" ref="userService"></property>
+		<property name="resourceService" ref="resourceService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.SecurityUserServiceClient"
+		owner="Hevwms" ref="securityUserServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+	<!-- 安全 管理 组 -->
+	<bean id="groupServiceClient"
+		class="com.haier.openplatform.wms.security.service.impl.GroupServiceClientImpl">
+		<property name="groupService" ref="groupService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.GroupServiceClient"
+		owner="Hevwms" ref="groupServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+	<!-- 安全 管理 角色 -->
+	<bean id="roleServiceClient"
+		class="com.haier.openplatform.wms.security.service.impl.RoleServiceClientImpl">
+		<property name="roleService" ref="roleService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.RoleServiceClient"
+		owner="Hevwms" ref="roleServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+	<!-- 安全 管理 资源 -->
+	<bean id="resourceServiceClient"
+		class="com.haier.openplatform.wms.security.service.impl.ResourceServiceClientImpl">
+		<property name="resourceService" ref="resourceService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.ResourceServiceClient"
+		owner="Hevwms" ref="resourceServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+	<!--下载 -->
+	<bean id="fileUploadServiceClient"
+		class=" com.haier.openplatform.wms.security.service.impl.FileUploadServiceClientImpl">
+		<property name="fileUploadService" ref="fileUploadService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.FileUploadServiceClient"
+		owner="Hevwms" ref="fileUploadServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+</beans>

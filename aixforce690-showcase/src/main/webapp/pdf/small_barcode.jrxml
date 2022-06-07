@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="small_barcode" pageWidth="580" pageHeight="250" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="580" leftMargin="0" rightMargin="0" topMargin="2" bottomMargin="1" uuid="8d84199f-b5cc-444e-98d7-641dab7da721">
+	<property name="ireport.zoom" value="0.75"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="styleStaticField" hAlign="Left" vAlign="Middle" fontName="Arial" fontSize="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="styleMiddle" hAlign="Left" vAlign="Bottom" fontName="Arial"/>
+	<style name="styleV" hAlign="Right" vAlign="Middle" rotation="Left" fontName="Arial"/>
+	<style name="styleSize" fontName="Arial" fontSize="13"/>
+	<subDataset name="Table Dataset 1" uuid="6dc7ea0c-6061-4a0c-bbbe-8551e01f17fb"/>
+	<parameter name="barcode" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT B.BARCODE,substr(b.MATERIAL_DESP,1, instr(b.MATERIAL_DESP,':',-1)-1) MAT_DESC
+ 	 from md_barcode b
+	where b.barcode in  ($P!{barcode})]]>
+	</queryString>
+	<field name="BARCODE" class="java.lang.String"/>
+	<field name="MAT_DESC" class="java.lang.String"/>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="247" splitType="Stretch">
+			<componentElement>
+				<reportElement uuid="684e22e8-f21a-449c-ae13-7a4490a9d5d6" style="styleV" positionType="Float" stretchType="RelativeToTallestObject" x="13" y="38" width="557" height="163"/>
+				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="3.0" textPosition="none" quietZone="30.0">
+					<jr:codeExpression><![CDATA[$F{BARCODE}]]></jr:codeExpression>
+				</jr:Code128>
+			</componentElement>
+			<textField>
+				<reportElement uuid="9dca07a7-1971-4717-a38e-f606096ad079" style="styleMiddle" x="181" y="16" width="372" height="36"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="24" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BARCODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="fc12c1bc-d627-468d-b72a-6ceaf9eeba84" positionType="FixRelativeToBottom" mode="Opaque" x="181" y="185" width="372" height="36"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="24"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MAT_DESC}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="e28e4016-56ce-4e3a-8e76-e407e8e23fac" style="styleStaticField" x="32" y="16" width="123" height="36"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="24" pdfFontName="HeiseiMin-W3" pdfEncoding="UniJIS-UCS2-HW-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Số máy:]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

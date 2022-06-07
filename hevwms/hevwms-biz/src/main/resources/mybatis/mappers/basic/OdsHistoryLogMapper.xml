@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+<typeAlias alias="odsHistoryLog" type="com.haier.hevwms.basic.domain.OdsHistoryLog" />
+ -->
+<mapper namespace="com.haier.hevwms.basic.dao.OdsHistoryLogDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize}+#{pager.firstResult} ) where rownum_ >= #{pager.firstResult}+1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllOdsHistoryLogColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			OPERATION_BY,
+			OPERATION_DATE,
+			OPERATION_CODE,
+			OPERATION_CONTENT,
+			CREATE_BY,
+			CREATE_DATE,
+			1
+		from 
+			ODS_HISTORY_LOG ods_history_log_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="odsHistoryLogMap" type="odsHistoryLog">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="operationBy" column="OPERATION_BY"/>
+		<result property="operationDate" column="OPERATION_DATE"/>
+		<result property="operationCode" column="OPERATION_CODE"/>
+		<result property="operationContent" column="OPERATION_CONTENT"/>
+		<result property="createBy" column="CREATE_BY"/>
+		<result property="createDate" column="CREATE_DATE"/>
+	</resultMap>
+	<!-- =========================================================== -->
+    <!-- DAO方法中的基本增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+    <select id="getAll" resultMap="odsHistoryLogMap">
+		<include refid="selectAllOdsHistoryLogColumns"/>
+	</select>
+	<select id="get" resultMap="odsHistoryLogMap" parameterType="long">
+		<include refid="selectAllOdsHistoryLogColumns"/>
+		<![CDATA[
+		where ods_history_log_.row_id = #{rowId}
+		]]>	
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_HISTORY_LOG where row_id = #{rowId}
+		]]>	
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_HISTORY_LOG where row_id in
+		]]>	
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</delete>
+    <insert id="save" parameterType="odsHistoryLog">
+		<!-- by 孙艳飞 2015-12-1 dnclose manualClose -->
+		insert into ODS_HISTORY_LOG
+		  (
+		  OPERATION_BY
+				,OPERATION_DATE
+				,OPERATION_CODE
+				,OPERATION_CONTENT
+				,CREATE_BY
+				,CREATE_DATE
+		   )
+		values
+		  (
+		  #{operationBy}
+				,SYSDATE
+				,#{operationCode}
+				,#{operationContent}
+				,#{createBy}
+				,SYSDATE
+		   )
+	</insert>
+	 
+	<sql id="searchOdsHistoryLog_fragement">
+		<include refid="selectAllOdsHistoryLogColumns" />
+		where 1=1
+			<if test="odsHistoryLog.operationBy != null">
+			and OPERATION_BY like '%' || #{odsHistoryLog.operationBy} || '%'
+			</if>
+			<if test="odsHistoryLog.operationDate != null">
+			and OPERATION_DATE like '%' || #{odsHistoryLog.operationDate} || '%'
+			</if>
+			<if test="odsHistoryLog.operationCode != null">
+			and OPERATION_CODE like '%' || #{odsHistoryLog.operationCode} || '%'
+			</if>
+			<if test="odsHistoryLog.operationContent != null">
+			and OPERATION_CONTENT like '%' || #{odsHistoryLog.operationContent} || '%'
+			</if>
+			<if test="odsHistoryLog.createBy != null">
+			and CREATE_BY like '%' || #{odsHistoryLog.createBy} || '%'
+			</if>
+			<if test="odsHistoryLog.createDate != null">
+			and CREATE_DATE like '%' || #{odsHistoryLog.createDate} || '%'
+			</if>
+	</sql>
+	<select id="searchOdsHistoryLogs" resultMap="odsHistoryLogMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchOdsHistoryLog_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchOdsHistoryLogsCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchOdsHistoryLog_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+</mapper>

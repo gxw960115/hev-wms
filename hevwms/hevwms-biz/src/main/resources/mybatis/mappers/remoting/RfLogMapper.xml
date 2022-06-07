@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.RfLogDAO">
+
+	<!-- 保存日志信息 -->
+	<insert id="writeLog" parameterType="rfLog">
+	    <selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_RESOURCE_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into SYS_RF_LOG
+		  (ROW_ID,
+		   USER_ID,
+		   TYPE,
+		   SIGN,
+		   IP_ADR,
+		   STATUS,
+		   RC_NR,
+		   CC_NR,
+		   DY_DATE,
+		   FH_DATE,
+		   CREATED_DATE)
+		values
+		  (#{id},
+		   #{rfLog.userId},
+		   #{rfLog.type},
+		   #{rfLog.sign},
+		   #{rfLog.ip},
+		   #{rfLog.status},
+		   #{rfLog.rcnr},
+		   #{rfLog.ccnr},
+		   to_date(#{rfLog.dydate},'yyyy-MM-dd HH24:mi:ss'),
+		   to_date(#{rfLog.fhdate},'yyyy-MM-dd HH24:mi:ss'),
+		   sysdate
+		   )
+		]]>
+	</insert>
+</mapper>

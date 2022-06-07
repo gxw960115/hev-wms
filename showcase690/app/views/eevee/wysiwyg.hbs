@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{_PAGE_.name}}</title>
+    <meta name="description" content="{{_PAGE_.description}}">
+    <meta name="keywords" content="{{_PAGE_.keywords}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/assets/styles/vendor.css">
+    <link rel="stylesheet" href="/assets/styles/app.css">
+    <link href="/assets/styles/styles.css" type="text/css" media="screen" rel="stylesheet" />
+    <link href="/assets/styles/jquery-ui-1.10.4.custom.css" rel="stylesheet">
+    <link type="text/css" href="/assets/styles/keyboard.css" rel="stylesheet" />
+    {{#if _DESIGN_MODE_}}<link rel="stylesheet" href="/assets/styles/eevee/eevee-editable.css">{{/if}}
+<!--     <script src="/assets/scripts/jquery-1.10.2.js"></script> -->
+    <script src="/assets/scripts/jquery-1.10.2.min.js"></script>
+    <script src="/assets/scripts/jquery-ui-1.10.4.custom.min.js"></script>
+
+
+  </head>
+  <body {{#if _DESIGN_MODE_}}data-design-mode="true"{{/if}}>
+    <div {{#if _DESIGN_MODE_}}class="eve-editor-area-inner eve-hide"{{/if}}>
+{{#if _DESIGN_MODE_}}
+    {{#render "header"}}
+        <div class="eve-header"></div>
+    {{/render}}
+{{/if}}
+        {{#if _USER_.name}}
+            {{#render "header"}}
+                <div class="eve-header"></div>
+            {{/render}}
+        {{/if}}
+
+      {{#render "body"}}
+      <div class="eve-body"></div>
+      {{/render}}
+
+
+        {{#if _DESIGN_MODE_}}
+            {{#render "footer"}}
+                <div class="eve-footer"></div>
+            {{/render}}
+        {{/if}}
+
+{{#if _USER_.name}}
+      {{#render "footer"}}
+      <div class="eve-footer"></div>
+      {{/render}}
+{{/if}}
+    </div>
+    <script src="/assets/scripts/vendor.js"></script>
+    <script src="/assets/scripts/jquery.cookie.js"></script>
+    <script src="/assets/scripts/jquery.keyboard.extension-typing.js"></script>
+    <script src="/assets/scripts/jquery.keyboard.js"></script>
+    <script src="/assets/scripts/app.js"></script>
+    <script>require("app")()</script>
+  </body>
+</html>

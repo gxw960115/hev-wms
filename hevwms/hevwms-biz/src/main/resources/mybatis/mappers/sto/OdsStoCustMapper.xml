@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haier.hevwms.sto.dao.OdsStoCustDAO">
+
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<resultMap id="odsStoCustMap" type="odsStoCust">
+		<result column="ROW_ID" property="rowId" />
+		<result column="STO_NO" property="stoNo" />
+		<result column="STO_ITEM_NO" property="stoItemNo" />
+		<result column="CHECK_FLAG" property="checkFlag" />
+		<result column="GI_PLANT" property="giPlant" />
+		<result column="GR_PLANT" property="grPlant" />
+		<result column="GI_LOCATION" property="giLocation" />
+		<result column="GR_LOCATION" property="grLocation" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="UNIT" property="unit" />
+		<result column="QTY" property="qty" />
+		<result column="GI_FINISH_QTY" property="giFinishQty" />
+		<result column="GI_FINISH_FLAG" property="giFinishFlag" />
+		<result column="GR_FINISH_QTY" property="grFinishQty" />
+		<result column="GR_FINISH_FLAG" property="grFinishFlag" />
+		<result column="GI_DATE" property="giDate" />
+		<result column="GR_DATE" property="grDate" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" property="modifyDate" />
+		<result column="ITEM_DELETE" property="itemDelete" />
+		<result column="FLAG" property="flag" />
+		<result column="POSTING_DATE_IN" property="postingDateIn" />
+		<result column="TRANSPORTER_NAME_IN" property="transporterNameIn" />
+		<result column="IN_FLAG" property="inFlag" />
+		<result column="IN_MSG" property="inMsg" />
+		<result column="POSTING_DATE_OUT" property="postingDateOut" />
+		<result column="TRANSPORTER_NAME_OUT" property="transporterNameOut" />
+		<result column="OUT_FLAG" property="outFlag" />
+		<result column="OUT_MSG" property="outMsg" />
+	</resultMap>
+
+	<sql id="selectAllColumns">
+		<![CDATA[
+			SELECT
+			   ROW_ID,
+			   STO_NO,
+			   STO_ITEM_NO,
+			   CHECK_FLAG,
+			   GI_PLANT,
+			   GR_PLANT,
+			   GI_LOCATION,
+			   GR_LOCATION,
+			   MATERIAL_NO,
+			   MATERIAL_DESP,
+			   UNIT,
+			   QTY,
+			   GI_FINISH_QTY,
+			   GI_FINISH_FLAG,
+			   GR_FINISH_QTY,
+			   GR_FINISH_FLAG,
+			   GI_DATE,
+			   GR_DATE,
+			   REMARK,
+			   CREATE_BY,
+			   CREATE_DATE,
+			   CHECK_BY,
+			   CHECK_DATE,
+			   MODIFY_BY,
+			   MODIFY_DATE,
+			   ITEM_DELETE,
+			   FLAG,
+			   POSTING_DATE_IN,
+			   TRANSPORTER_NAME_IN,
+			   IN_FLAG,
+			   IN_MSG,
+			   POSTING_DATE_OUT,
+			   TRANSPORTER_NAME_OUT,
+			   OUT_FLAG,
+			   OUT_MSG
+			FROM ODS_STO_CUST S
+		]]>
+	</sql>
+
+	<sql id="searchOdsStoCust_fragement">
+		<include refid="selectAllColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsStoCust.stoNo != null">
+			and STO_NO like '%'||#{odsStoCust.stoNo}||'%'
+		</if>
+		<if test="odsStoCust.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsStoCust.materialNo}||'%' 
+		</if>
+		<if test="odsStoCust.checkFlag != null and odsStoCust.checkFlag != '-1'">
+			and CHECK_FLAG = #{odsStoCust.checkFlag} 
+		</if>
+		<if test="odsStoCust.giFinishFlag != null and odsStoCust.giFinishFlag != '-1'">
+			and GI_FINISH_FLAG = #{odsStoCust.giFinishFlag}
+		</if>
+		<if test="odsStoCust.grFinishFlag != null and odsStoCust.grFinishFlag != '-1'">
+			and GR_FINISH_FLAG = #{odsStoCust.grFinishFlag}
+		</if>
+		<if test="odsStoCust.giPlant != null and odsStoCust.giPlant != ''">
+			and GI_PLANT like '%'||#{odsStoCust.giPlant}||'%'
+		</if>
+		<if test="odsStoCust.grPlant != null and odsStoCust.grPlant != ''">
+			and GR_PLANT like '%'||#{odsStoCust.grPlant}||'%'
+		</if>
+		<if test="odsStoCust.giLocation != null and odsStoCust.giLocation != ''">
+			and GI_LOCATION IN (${odsStoCust.giLocation})
+		</if>
+		<if test="odsStoCust.grLocation != null and odsStoCust.grLocation != ''">
+			and GR_LOCATION IN (${odsStoCust.grLocation})
+		</if>
+		<if test="odsStoCust.begin != null and odsStoCust.begin != ''">
+			<![CDATA[
+				and CREATE_DATE >= TO_DATE(concat(#{odsStoCust.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsStoCust.end != null and odsStoCust.end != ''">
+			<![CDATA[
+				and CREATE_DATE <= TO_DATE(concat(#{odsStoCust.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		ORDER BY CREATE_DATE DESC, STO_NO, STO_ITEM_NO
+	</sql>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<insert id="save" parameterType="odsStoCust">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_STO_CUST_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+		<![CDATA[
+		   INSERT INTO ODS_STO_CUST(
+			   ROW_ID,
+			   STO_NO,
+			   STO_ITEM_NO,
+			   CHECK_FLAG,
+			   GI_PLANT,
+			   GR_PLANT,
+			   GI_LOCATION,
+			   GR_LOCATION,
+			   MATERIAL_NO,
+			   MATERIAL_DESP,
+			   UNIT,
+			   QTY,
+			   GI_FINISH_QTY,
+			   GI_FINISH_FLAG,
+			   GR_FINISH_QTY,
+			   GR_FINISH_FLAG,
+			   GI_DATE,
+			   GR_DATE,
+			   REMARK,
+			   CREATE_BY,
+			   CREATE_DATE,
+			   MODIFY_BY,
+			   MODIFY_DATE,
+			   CHECK_BY,
+			   CHECK_DATE,
+			   ITEM_DELETE,
+			   FLAG,
+			   IN_FLAG,
+			   OUT_FLAG
+		   )
+		   VALUES(
+			   #{rowId},
+			   #{stoNo},
+			   #{stoItemNo},
+			   #{checkFlag},
+			   #{giPlant},
+			   #{grPlant},
+			   #{giLocation},
+			   #{grLocation},
+			   #{materialNo},
+			   #{materialDesp},
+			   #{unit},
+			   #{qty},
+			   #{giFinishQty},
+			   #{giFinishFlag},
+			   #{grFinishQty},
+			   #{grFinishFlag},
+			   #{giDate},
+			   #{grDate},
+			   #{remark},
+			   #{createBy},
+			   #{createDate},
+			   #{modifyBy},
+			   #{modifyDate},
+			   #{checkBy},
+			   #{checkDate},
+			   #{itemDelete},
+			   #{flag},
+			   #{inFlag},
+			   #{outFlag}
+		   )
+		]]>
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+			DELETE FROM ODS_STO_CUST WHERE ROW_ID = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteStoCustByNo" parameterType="String">
+		<![CDATA[
+			DELETE FROM ODS_STO_CUST WHERE STO_NO = #{stoNo}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+			DELETE FROM ODS_STO_CUST WHERE ROW_ID IN
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="stoApprove" parameterType="odsStoCust">
+		<![CDATA[
+			UPDATE ODS_STO_CUST
+		   	SET CHECK_FLAG = '1',
+		   		MODIFY_BY = #{modifyBy},
+		   		MODIFY_DATE = SYSDATE,
+		   		CHECK_BY = #{modifyBy},
+		   		CHECK_DATE = SYSDATE
+		 	WHERE STO_NO = #{stoNo}
+		]]>
+	</update>
+
+	<update id="updateOgpInInfo">
+		<![CDATA[
+			UPDATE ODS_STO_CUST S
+			SET S.POSTING_DATE_IN = #{inpara.postingdate},
+				S.TRANSPORTER_NAME_IN = #{inpara.transpoterName}
+			WHERE S.STO_NO = #{inpara.orno}
+		]]>
+	</update>
+
+	<update id="updateOgpOutInfo">
+		<![CDATA[
+			UPDATE ODS_STO_CUST S
+			SET S.POSTING_DATE_IN = #{inpara.postingdate},
+				S.TRANSPORTER_NAME_IN = #{inpara.transpoterName}
+			WHERE S.STO_NO = #{inpara.orno}
+		]]>
+	</update>
+
+	<select id="get" resultMap="odsStoCustMap" parameterType="long">
+		<include refid="selectAllColumns" />
+		<![CDATA[
+			where ocr.row_id = #{rowId}
+		]]>
+	</select>
+	<select id="getAll" resultMap="odsStoCustMap">
+		<include refid="selectAllColumns" />
+	</select>
+	<select id="selectOdsStoCustNo" resultType="string" >
+		<![CDATA[
+			SELECT SUBSTR(TO_CHAR(SEQ_STO_CUST_NO.NEXTVAL,'FM0000000000'),8) FROM DUAL
+		]]>
+	</select>
+	<select id="checkStoCustExist" resultType="string">
+		SELECT CHECK_FLAG
+		FROM (SELECT T.CHECK_FLAG
+			  FROM ODS_STO_CUST T
+			  WHERE T.STO_NO = #{inpara.orno}
+			  <if test="inpara.ordertype == 1">
+				  AND T.GI_FINISH_FLAG = 1
+				  AND T.OUT_FLAG = 1
+			  </if>
+			  <if test="inpara.ordertype == 2">
+				  AND T.OUT_FLAG = 0
+			  </if>
+			  ORDER BY T.CHECK_FLAG)
+		WHERE ROWNUM = 1
+	</select>
+	<select id="checkStoCustLoc" resultType="string">
+	        SELECT CASE  WHEN COUNT(0) > 0 THEN 'Y' ELSE 'N' END
+			FROM ODS_STO_CUST T
+			WHERE T.STO_NO = #{inpara.orno}
+			AND T.CHECK_FLAG = '1'
+			<choose>
+				<when test="{inpara.ordertype == '1'}">
+					AND T.GR_PLANT
+				</when>
+				<otherwise>
+					AND	T.GI_PLANT
+				</otherwise>
+			</choose>
+				IN (SELECT DISTINCT W.CODE
+					FROM CD_USER_WH_LOC U, CD_WH_INFO W
+					WHERE W.ROW_ID = U.WH_ID
+					AND U.USER_ID = #{userId})
+			<choose>
+				<when test="{inpara.ordertype == '1'}">
+					AND T.GR_LOCATION
+				</when>
+				<otherwise>
+					AND	T.GI_LOCATION
+				</otherwise>
+			</choose>
+			IN (SELECT LOC_CODE FROM CD_USER_WH_LOC WHERE USER_ID = #{userId})
+	</select>
+
+	<select id="scanStatus" resultMap="odsStoCustMap">
+    	<![CDATA[
+    		SELECT GI_FINISH_FLAG,GR_FINISH_FLAG,IN_FLAG,OUT_FLAG
+    		FROM ODS_STO_CUST S
+    		WHERE S.STO_NO = #{stoNo}
+    	]]>
+    </select>
+
+	<select id="searchOdsStoCusts" resultMap="odsStoCustMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsStoCust_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsStoCustsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsStoCust_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="orderOgpOut" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_STOCUST_DELIVERY(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+
+	<select id="orderOgpIn" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_STOCUST_RECEIVE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+
+</mapper>

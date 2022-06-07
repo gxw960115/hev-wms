@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.scrap.dao.ScrapPDADAO">
+     <select id="orderDelete" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_SCRAP_DELETE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.barcode,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.doctype,mode=IN,jdbcType=VARCHAR},
+          #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.matno,mode=OUT,jdbcType=VARCHAR},
+          #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{out.location,mode=OUT,jdbcType=VARCHAR},
+          #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    
+    <select id="scanScrapCheck" statementType="CALLABLE">
+        <![CDATA[
+          {call prc_barcode_scrap_check(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.version,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="scrapOrderIgp" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_SCRAP_DELIVERY(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+          #{in.costCenter,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    
+    <select id="scanStatus" resultType="long">
+    	<![CDATA[
+    		SELECT COUNT(*) 
+    		FROM ODS_SCRAP_ORDER S
+    		WHERE S.SCRAP_NO = #{orderNo}
+			AND S.FINISH_FLAG = 0
+    	]]>
+    </select>
+    
+    <update id="updateSapInfo">
+		<![CDATA[
+			UPDATE ODS_SCRAP_ORDER S
+			SET S.POSTING_DATE = #{order.postingdate},
+				S.COST_CENTER = #{order.costCenter}
+			WHERE S.SCRAP_NO = #{order.orno}
+	    ]]>
+	</update>
+</mapper>

@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.inventory.dao.OdsMoveInventoryDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize}+#{pager.firstResult}-1 ) where rownum_ >= #{pager.firstResult}]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllOdsMoveInventoryColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			PLANT,
+			BARCODE,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			UNIT,
+			QTY,
+			SOURCE_LOCATION,
+			TARGE_LOCATION,
+			SAP_FLAG,
+			SAP_MSG,
+			SAP_DOC_NO,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			IN_SAP_FLAG,
+			SERIAL_NO,
+			SOURCE_SUB_LOCATION,
+			TARGE_SUB_LOCATION,
+			FINISH_FLAG,
+			SAP_SEND_ID,
+			1
+		from 
+			ODS_MOVE_INVENTORY ods_move_inventory_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="odsMoveInventoryMap" type="odsMoveInventory">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="plant" column="PLANT"/>
+		<result property="barcode" column="BARCODE"/>
+		<result property="materialNo" column="MATERIAL_NO"/>
+		<result property="materialDesp" column="MATERIAL_DESP"/>
+		<result property="unit" column="UNIT"/>
+		<result property="qty" column="QTY"/>
+		<result property="sourceLocation" column="SOURCE_LOCATION"/>
+		<result property="targeLocation" column="TARGE_LOCATION"/>
+		<result property="sapFlag" column="SAP_FLAG"/>
+		<result property="sapMsg" column="SAP_MSG"/>
+		<result property="sapDocNo" column="SAP_DOC_NO"/>
+		<result property="createBy" column="CREATE_BY"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="modifyBy" column="MODIFY_BY"/>
+		<result property="modifyDate" column="MODIFY_DATE"/>
+		<result property="flag" column="FLAG"/>
+		<result property="inSapFlag" column="IN_SAP_FLAG"/>
+		<result property="serialNo" column="SERIAL_NO"/>
+		<result property="sourceSubLocation" column="SOURCE_SUB_LOCATION"/>
+		<result property="targeSubLocation" column="TARGE_SUB_LOCATION"/>
+		<result property="finishFlag" column="FINISH_FLAG"/>
+		<result property="sapSendId" column="SAP_SEND_ID"/>
+	</resultMap>
+	<!-- =========================================================== -->
+    <!-- DAO方法中的基本增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+    <select id="getAll" resultMap="odsMoveInventoryMap">
+		<include refid="selectAllOdsMoveInventoryColumns"/>
+	</select>
+	<select id="get" resultMap="odsMoveInventoryMap" parameterType="long">
+		<include refid="selectAllOdsMoveInventoryColumns"/>
+		<![CDATA[
+		where ods_move_inventory_.row_id = #{rowId}
+		]]>	
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_MOVE_INVENTORY where row_id = #{rowId}
+		]]>	
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_MOVE_INVENTORY where row_id in
+		]]>	
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</delete>
+    <insert id="save" parameterType="odsMoveInventory">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_ODS_MOVE_INVENTORY_ID.NEXTVAL AS ID FROM DUAL 
+		</selectKey>	
+		<![CDATA[
+		insert into ODS_MOVE_INVENTORY
+		  (row_id
+				,PLANT
+				,BARCODE
+				,MATERIAL_NO
+				,MATERIAL_DESP
+				,UNIT
+				,QTY
+				,SOURCE_LOCATION
+				,TARGE_LOCATION
+				,SAP_FLAG
+				,SAP_MSG
+				,SAP_DOC_NO
+				,CREATE_BY
+				,CREATE_DATE
+				,MODIFY_BY
+				,MODIFY_DATE
+				,FLAG
+				,IN_SAP_FLAG
+				,SERIAL_NO
+				,SOURCE_SUB_LOCATION
+				,TARGE_SUB_LOCATION
+				,FINISH_FLAG
+				,SAP_SEND_ID
+		   )
+		values
+		  (#{rowId}
+				,#{plant}
+				,#{barcode}
+				,#{materialNo}
+				,#{materialDesp}
+				,#{unit}
+				,#{qty}
+				,#{sourceLocation}
+				,#{targeLocation}
+				,#{sapFlag}
+				,#{sapMsg}
+				,#{sapDocNo}
+				,#{createBy}
+				,#{createDate}
+				,#{modifyBy}
+				,#{modifyDate}
+				,#{flag}
+				,#{inSapFlag}
+				,#{serialNo}
+				,#{sourceSubLocation}
+				,#{targeSubLocation}
+				,#{finishFlag}
+				,#{sapSendId}
+		   )
+	    ]]>	
+	</insert>
+	<update id="update" parameterType="odsMoveInventory">
+		<![CDATA[
+		update ODS_MOVE_INVENTORY
+		   set 1=1
+				,PLANT = #{plant}
+				,BARCODE = #{barcode}
+				,MATERIAL_NO = #{materialNo}
+				,MATERIAL_DESP = #{materialDesp}
+				,UNIT = #{unit}
+				,QTY = #{qty}
+				,SOURCE_LOCATION = #{sourceLocation}
+				,TARGE_LOCATION = #{targeLocation}
+				,SAP_FLAG = #{sapFlag}
+				,SAP_MSG = #{sapMsg}
+				,SAP_DOC_NO = #{sapDocNo}
+				,CREATE_BY = #{createBy}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate}
+				,FLAG = #{flag}
+				,IN_SAP_FLAG = #{inSapFlag}
+				,SERIAL_NO = #{serialNo}
+				,SOURCE_SUB_LOCATION = #{sourceSubLocation}
+				,TARGE_SUB_LOCATION = #{targeSubLocation}
+				,FINISH_FLAG = #{finishFlag}
+				,SAP_SEND_ID = #{sapSendId}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchOdsMoveInventory_fragement">
+		<include refid="selectAllOdsMoveInventoryColumns" />
+		where 1=1
+			<if test="odsMoveInventory.plant != null and odsMoveInventory.plant != ''">
+			and PLANT = #{odsMoveInventory.plant} 
+			</if>
+			<if test="odsMoveInventory.barcode != null and odsMoveInventory.barcode != ''">
+			and BARCODE = #{odsMoveInventory.barcode} 
+			</if>
+			<if test="odsMoveInventory.materialNo != null and odsMoveInventory.materialNo != ''">
+			and MATERIAL_NO like '%' || #{odsMoveInventory.materialNo} || '%'
+			</if>
+			<if test="odsMoveInventory.materialDesp != null">
+			and MATERIAL_DESP like '%' || #{odsMoveInventory.materialDesp} || '%'
+			</if>
+			<if test="odsMoveInventory.unit != null">
+			and UNIT like '%' || #{odsMoveInventory.unit} || '%'
+			</if>
+			<if test="odsMoveInventory.qty != null">
+			and QTY like '%' || #{odsMoveInventory.qty} || '%'
+			</if>
+			<if test="odsMoveInventory.sourceLocation != null">
+			and SOURCE_LOCATION like '%' || #{odsMoveInventory.sourceLocation} || '%'
+			</if>
+			<if test="odsMoveInventory.targeLocation != null">
+			and TARGE_LOCATION like '%' || #{odsMoveInventory.targeLocation} || '%'
+			</if>
+			<if test="odsMoveInventory.sapFlag != null and odsMoveInventory.sapFlag != ''">
+			and SAP_FLAG = #{odsMoveInventory.sapFlag} 
+			</if>
+			<if test="odsMoveInventory.sapMsg != null">
+			and SAP_MSG like '%' || #{odsMoveInventory.sapMsg} || '%'
+			</if>
+			<if test="odsMoveInventory.sapDocNo != null">
+			and SAP_DOC_NO like '%' || #{odsMoveInventory.sapDocNo} || '%'
+			</if>
+			<if test="odsMoveInventory.createBy != null">
+			and CREATE_BY like '%' || #{odsMoveInventory.createBy} || '%'
+			</if>
+			<if test="odsMoveInventory.createDate != null">
+			and CREATE_DATE like '%' || #{odsMoveInventory.createDate} || '%'
+			</if>
+			<if test="odsMoveInventory.modifyBy != null">
+			and MODIFY_BY like '%' || #{odsMoveInventory.modifyBy} || '%'
+			</if>
+			<if test="odsMoveInventory.modifyDate != null">
+			and MODIFY_DATE like '%' || #{odsMoveInventory.modifyDate} || '%'
+			</if>
+			<if test="odsMoveInventory.flag != null and odsMoveInventory.flag != ''">
+			and FLAG = #{odsMoveInventory.flag}
+			</if>
+			<if test="odsMoveInventory.inSapFlag != null and odsMoveInventory.inSapFlag != ''">
+			and IN_SAP_FLAG = #{odsMoveInventory.inSapFlag} 
+			</if>
+			<if test="odsMoveInventory.serialNo != null and odsMoveInventory.serialNo != ''">
+			and SERIAL_NO = #{odsMoveInventory.serialNo} 
+			</if>
+			<if test="odsMoveInventory.sourceSubLocation != null">
+			and SOURCE_SUB_LOCATION like '%' || #{odsMoveInventory.sourceSubLocation} || '%'
+			</if>
+			<if test="odsMoveInventory.targeSubLocation != null">
+			and TARGE_SUB_LOCATION like '%' || #{odsMoveInventory.targeSubLocation} || '%'
+			</if>
+			<if test="odsMoveInventory.finishFlag != null">
+			and FINISH_FLAG like '%' || #{odsMoveInventory.finishFlag} || '%'
+			</if>
+	</sql>
+	<select id="searchOdsMoveInventorys" resultMap="odsMoveInventoryMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchOdsMoveInventory_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchOdsMoveInventorysCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchOdsMoveInventory_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	<select id="searchOdsMoveInventoryByParam" resultMap="odsMoveInventoryMap">
+		<include refid="searchOdsMoveInventory_fragement"/>
+	</select>
+	<update id="updateSapBySendId" parameterType="odsMoveInventory">
+		<![CDATA[
+		update ODS_MOVE_INVENTORY
+		   set 
+				 SAP_FLAG = #{odsMoveInventory.sapFlag}
+				,SAP_MSG = #{odsMoveInventory.sapMsg}
+				,SAP_DOC_NO = #{odsMoveInventory.sapDocNo}
+				,MODIFY_BY = #{odsMoveInventory.modifyBy}
+				,MODIFY_DATE = #{odsMoveInventory.modifyDate}
+		 where SAP_SEND_ID = #{odsMoveInventory.sapSendId}
+		]]>
+	</update>
+</mapper>

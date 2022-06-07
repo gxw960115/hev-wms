@@ -1,0 +1,1081 @@
+{{#component "groupManagement js-comp"}}
+<style type="text/css">
+        
+        #searchTab1{
+            display: inline-block;
+            margin-left: 50px;
+            margin-top: 20px;
+            width: 98%;
+        }
+        #searchTab1 tr{
+            height: 35px;
+        }
+        #searchTab1 input{
+            height: 30px;
+            width: 155px;
+        } 
+        .winCls{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+      
+        .winCls input{
+            height: 25px;
+            width: 155px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+        .winCls table tr{
+            height: 32px;;
+        }
+        .winCls table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+        .winTab{
+            font-size: 14px;
+            color: #636E7B;
+            margin-top:-15px;
+            margin-left:-10px;
+        }
+         .winTab input{
+            height: 30px;
+            width: 140px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+         }
+         .winTab2{
+             font-size: 14px;
+             color: #636E7B;
+             margin-top:-15px;
+             margin-left:-10px;
+         }
+        .winTab2 input{
+            height: 30px;
+            width: 140px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+         .rightCc{
+            width:100px;
+            text-align:right;
+            vertical-align:bottom;
+            padding-bottom:6px;
+         }
+         
+    </style>
+    <div id="groupMaDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab">
+                <tr style="height:55px">
+                    <td style="text-align: right"> Group Name&nbsp;&nbsp;</td> 
+                    <td class="leftCls"><input  id="name" type="text" /></td>
+                    <td class="rightCls">Group Description&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="description"  type="text" />
+                    <input id="groupStaffId" type="hidden" name="groupStaffId"/></td>
+                    <td><a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a></td>
+                    <td><a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn">Add</a></td>
+                    <td><a href="javascript:void(0)" class="btnStyle editBtn" id="updateBtn">update</a></td>
+                    <td><a href="javascript:void(0)" class="btnStyle deleteBtn" id="deleteBtn">Delete</a></td>
+                </tr>
+            </table>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="dataGrid">
+
+            </table>
+        </div>
+    </div>
+    <!-- 添加窗口 -->
+	 <div id="addPdWin"  title="Add Group"
+		data-options="modal:true,closed:true,iconCls:'icon-add', top:100, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false" style="width: 605px; height: 120px;display:none;">
+		<div class="easyui-layout" fit="true">
+            <div region="north" style="height: 110px; border: 0">
+                <form id="addPdForm" class="winCls" method="post">
+                    <table cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>Group Name.:&nbsp;&nbsp;</td>
+                            <td><input id="groupName" type="text" name="groupName" /></td>
+                            <td>&nbsp;&nbsp;Group Description.:&nbsp;&nbsp;</td>
+                            <td><input id="groupDescription" type="text" name="groupDescription" /></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 35px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="savePd();">Save</a>
+                            <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn">Cancel</a>
+            </div>
+        </div>
+	</div>
+	
+	<!-- 更新窗口 -->
+	 <div id="updatePdWin" title="Update Group"
+		data-options="modal:true,closed:true,iconCls:'icon-edit', top:100, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+		style="width: 605px; height: 120px; display:none">
+		<div class="easyui-layout" fit="true">
+			<div region="north" style="height: 230px; border: 0">
+				<form id="updatePdForm" class="winCls" method="post">
+					<table cellpadding="0" cellspacing="0">
+						<tr>
+							<td>Group Name.:&nbsp;&nbsp;</td>
+							<td><input id="updateGroupName" type="text" name="groupName" /></td>
+							<td>&nbsp;&nbsp;Group Description.:&nbsp;&nbsp;</td>
+							<td><input id="updateGroupDescription" type="text" name="groupDescription" />
+							    <input id="updateGroupId" type="hidden" name="updateGroupId"/>
+							    <input id="groupOldName" type="hidden" name="groupOldName"/></td>
+							
+						</tr>
+					</table>
+				</form>
+			</div>
+			<div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 35px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="updatePd();">Save</a>
+							<a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelUpdateBtn">Cancel</a>
+            </div>
+		</div>
+	</div>
+    
+    <div id="groupWin" class="easyui-window" title="Group Manage"
+        data-options="modal:true,closed:true,iconCls:'icon-add', top:10, left:($(window).width() - 1000) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false" style="width: 1000px; height: 500px; display:none">
+        <div id="tt" class="easyui-tabs" style="width:985px;height:460px; overflow:hidden ">
+        <div title="Group Staff" >
+            <div class="easyui-layout"  style="width:100%;height:425px;">
+            <div class="searchDivlow" region="north" style="border:0; height:100px">
+            <table class="winTab">
+                <tr style="height:50px; ">
+                    <td style="text-align: right;vertical-align:bottom;padding-bottom:6px"> Login Name:&nbsp;&nbsp;</td> 
+                    <td style="padding-top:20px"><input id="nameStaff" type="text"/>
+                                        <input id="groupId" type="hidden" /></td>
+                    <td class="rightCc">User Name:&nbsp;&nbsp;</td>
+                    <td style="padding-top:20px"><input id="nickName" type="text" /></td>
+                    <td style="width:60px; text-align:right;vertical-align:bottom;padding-bottom:6px">Email:&nbsp;&nbsp;</td>
+                    <td style="padding-top:20px"><input id="email" type="text" /></td> 
+                </tr>
+            </table>
+            <div style="margin-left:670px; margin-top:-32px;">
+            <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="queryDataStaff()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" 
+                    onclick="addDataStaff()">Add</a>
+                    <a href="javascript:void(0)" class="btnStyle deleteBtn" 
+                    onclick="deleteDataStaff()">Remove</a>
+            </div>
+        </div>
+        <div data-options="region:'center',border:false">
+            <table id="dataGridStaff">
+
+            </table>
+        </div>
+    </div>
+            </div>
+            <div title="Group Role">
+                 <div class="easyui-layout"  style="width:100%;height:425px;">
+        <div class="searchDivlow" region="north" style="border:0; height:100px">
+            <table class="winTab">
+                <tr style="height:50px; ">
+                    <td style="text-align: right;vertical-align:bottom;padding-bottom:6px"> Role Name&nbsp;&nbsp;</td> 
+                    <td style="padding-top:20px"><input id="nameRole" type="text" />
+                                        <input id="groupIdRole" type="hidden" /></td>
+                    <td class="leftCls" style="vertical-align:bottom;padding-bottom:6px">Role Description&nbsp;&nbsp;</td>
+                    <td style="padding-top:20px"><input id="descriptionRole" type="text" /></td>
+                </tr>
+            </table>
+            <div style="margin-left:670px; margin-top:-32px;">
+            <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="queryRoleData()">Query</a>
+                <a href="javascript:void(0)" class="btnStyle addBtn" onclick="addRoleData()">Add</a>
+                <a href="javascript:void(0)" class="btnStyle deleteBtn" onclick="deleteRoleData()">Remove</a>
+            </div>
+
+
+        </div>
+        <div data-options="region:'center',border:false" style="overflow:hidden">
+            <table id="dataGridRole">
+
+            </table>
+        </div>
+    </div>
+    </div>
+            <div title="Group Admin">
+                <div class="easyui-layout"  style="width:100%;height:425px;">
+        <div class="searchDivlow" region="north" style="border:0; height:100px">
+            <table class="winTab">
+                <tr style="height:50px; ">
+                    <td style="text-align: right;vertical-align:bottom;padding-bottom:6px""> Login Name&nbsp;&nbsp;</td> 
+                    <td style="padding-top:20px"><input id="nameAdmin" type="text" />
+                                        <input id="groupIdAdmin" type="hidden" /></td>
+                    <td class="rightCc">User Name&nbsp;&nbsp;</td>
+                    <td style="padding-top:20px"><input id="nickNameAdmin" type="text" /></td>
+                    <td style="width:60px; text-align:right;vertical-align:bottom;padding-bottom:6px">Email&nbsp;&nbsp;</td>
+                    <td style="padding-top:20px"><input id="emailAdmin" type="text" /></td>               
+                </tr>
+            </table>
+            <div style="margin-left:670px; margin-top:-32px;">
+            <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="queryAdminData()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" onclick="addAdminData()">Add</a>
+                    <a href="javascript:void(0)" class="btnStyle deleteBtn" onclick="deleteAdminData()">Remove</a>
+            </div>
+        </div>
+        <div region="center" data-options="region:'center',border:false" style="overflow:hidden">
+            <table id="dataGridAdmin">
+
+            </table>
+        </div>
+    </div>
+            </div>
+        </div>
+    </div>
+    <!-- group staff add begin -->
+     <div id="addPdStaffWin" class="easyui-window" title="Add User To Group"
+        data-options="modal:true,closed:true,iconCls:'icon-add', top:50, left:($(window).width() - 900) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+        style="width: 900px; height: 400px;">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style="height: 60px; border: 0; ">
+                <form id="addPdStaffForm" method="post">
+                    <table class="winTab2" style="margin-left:10px; margin-top:4px">
+                        <tr style="height:50px;">
+                            <td style="text-align: right"> Login Name&nbsp;&nbsp;</td> 
+                            <td class="leftCls"><input id="loginCode" type="text" /></td>
+                            <td class="leftCls">User Name&nbsp;&nbsp;</td>
+                            <td class="leftCls"><input id="loginName" type="text" /></td>
+                            <td class="leftCls">Email&nbsp;&nbsp;</td>
+                            <td class="leftCls"><input id="loginEmail" type="text" /></td>
+                             <td><a href="javascript:void(0)" class="btnStyle serchBtn"  onclick="addQueryData()">Query</a></td>
+                            <td><a href="javascript:void(0)" class="btnStyle addBtn" onclick="addUserData()" >Add</a></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div data-options="region:'center',border:false">
+            <table id="addDataGrid">
+
+            </table>
+        </div>
+        </div>
+    </div>
+    <!--group staff add end-->
+    <!--group Role add start-->
+<div id="addPdRoleWin" class="easyui-window" title="Add Role To Group"
+        data-options="modal:true,closed:true,iconCls:'icon-add', top:50, left:($(window).width() - 900) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+        style="width: 900px; height: 400px;">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style="height: 60px; border: 0">
+                <form id="addPdRoleForm" method="post">
+                    <table class="winTab2" style="margin-left:10px; margin-top:4px">
+                        <tr style="height:54px;">
+                            <td style="text-align: right"> Role Name:&nbsp;&nbsp;</td> 
+                            <td class="leftCls"><input id="roleName" type="text" /></td>
+                            <td class="leftCls">Role Description:&nbsp;&nbsp;</td>
+                            <td class="leftCls"><input id="roleDescription" type="text" /></td>
+                            <td style="width:100px;">&nbsp;&nbsp;<a href="javascript:void(0)" class="btnStyle serchBtn" onclick="addQueryRoleData()">Query</a></td>
+                            <td style="width:100px;"><a href="javascript:void(0)" class="btnStyle addBtn" onclick="saveRoleData()">Add</a></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div data-options="region:'center',border:false">
+            <table id="addDataRoleGrid">
+
+            </table>
+        </div>
+        </div>
+    </div>
+    <!--group Role add end-->
+    <!--group Admin add begin-->
+     <div id="addPdAdminWin" class="easyui-window" title="Add Admin To Group"
+        data-options="modal:true,closed:true,iconCls:'icon-add', top:50, left:($(window).width() - 900) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+        style="width: 900px; height: 400px;">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style="height: 60px; border: 0">
+                <form id="addPdSminForm" method="post">
+                    <table class="winTab2" style="margin-left:10px; margin-top:4px">
+                        <tr style="height:54px; ">
+                            <td style="text-align: right"> Login Name&nbsp;&nbsp;</td> 
+                            <td class="leftCls"><input id="loginCodeAdmin" type="text" /></td>
+                            <td class="leftCls">User Name&nbsp;&nbsp;</td>
+                            <td class="leftCls"><input id="loginNameAdmin" type="text" /></td>
+                            <td class="leftCls">Email&nbsp;&nbsp;</td>
+                            <td class="leftCls"><input id="loginEmailAdmin" type="text" /></td>
+                            <td><a href="javascript:void(0)" class="btnStyle serchBtn" onclick="addQueryAdminData()">Query</a></td>
+                            <td><a href="javascript:void(0)" class="btnStyle addBtn" onclick="addUserAdminData()">Add</a></td>
+                            </tr>
+                    </table>
+                </form>
+            </div>
+            <div  data-options="region:'center',border:false">
+            <table id="addDataAdminGrid">
+
+            </table>
+        </div>
+        </div>
+    </div>
+    <!--group Admin add end-->
+
+    <script type="text/javascript">
+        var columnsStaff=[];
+        var columnsRole=[];
+        var columnsAdmin=[];
+        $(function(){
+        	$('#groupMaDiv').height(suitHeight);
+            var columns=[[{
+                field:'ck',checkbox:true,align:'center'
+            },{
+                field:'name',title:'Group Name', width:160, align:'center',sortable:true,
+                formatter:function(value,row,index){
+                    return '<a href="javascript:void(0)" style="text-decoration:underline" onclick="groupTab('+row.id+')">'+value+'</a>';
+                }
+            },{
+                field:'description',title:'Group Description',width:200, align:'center',sortable:true
+            },{
+                field : 'id',title : 'ID',width: 60,align : 'center', hidden : true
+            },{
+                field : 'createBy',title : 'createBy',width: 60, hidden : true
+            }]];
+            columnsStaff=[[{
+                field:'ck',checkbox:true,align:'center'
+            },{
+                field:'name',title:'Login Name', width:100, align:'center',sortable:true
+            },{
+                field:'nickName',title:'User Name',width:120, align:'center',sortable:true
+            },{
+                field:'email',title:'Email',width:160, align:'center',sortable:true
+            },{
+                field:'type',title:'Type',width:80, align:'center',sortable:true
+            },{
+                field:'statusDesc',title:'Status',width:80, align:'center',sortable:true
+            },{
+                field:'lastLoginIp',title:'Last login IP',width:120, align:'center',sortable:true
+            },{
+                field : 'lastLoginTime',title : 'Last login time',width: 120,align : 'center',sortable:true,formatter : formatY_M_D
+            },{
+                field : 'id',title : 'ID',width: 60,align : 'center',hidden:true
+            }]];
+            columnsRole=[[{
+                field:'ck',checkbox:true,align:'center'
+            },{
+                field:'name',title:'Role Name', width:100, align:'center',sortable:true
+            },{
+                field:'description',title:'Role Description',width:120, align:'center',sortable:true
+            },{
+                field:'createBy',title:'Created By',width:160, align:'center',sortable:true
+            },{
+                field:'gmtCreate',title:'Creation Time',width:100, align:'center',sortable:true,formatter : formatY_M_D
+            },{
+                field:'lastModifiedBy',title:'Last Modified By',width:140, align:'center',sortable:true
+            },{
+                field:'gmtModified',title:'Last modified',width:120, align:'center',sortable:true,formatter : formatY_M_D
+            },{
+                field : 'id',title : 'ID',width: 60,align : 'center',hidden:true
+            }]];
+            columnsAdmin=[[{
+                field:'ck',checkbox:true,align:'center'
+            },{
+                field:'name',title:'Login Name', width:100, align:'center',sortable:true
+            },{
+                field:'nickName',title:'User Name',width:120, align:'center',sortable:true
+            },{
+                field:'email',title:'Email',width:160, align:'center',sortable:true
+            },{
+                field:'type',title:'Type',width:80, align:'center',sortable:true
+            },{
+                field:'statusDesc',title:'Status',width:100, align:'center',sortable:true
+            },{
+                field : 'id',title : 'ID',width: 60,align : 'center',hidden:true
+            }]];
+            var grid = $('#dataGrid').datagrid({
+                rownumbers:true,
+                columns:columns,
+                pagination:true,
+                striped:true,
+                url:'/group/searchGroupInfo',
+               // singleSelect: true,
+                pageNumber : 1,
+                fit:true,
+                method:'post',
+                onLoadError:function(){
+                   $.messager.alert('System Information','Network Abnormal!','warning');
+                }
+            });
+            initPagination(grid);
+
+           
+
+            $('#deleteBtn').on('click',function(){
+                deleteData();
+            }) 
+            $('#addBtn').on('click',function(){
+                addData();
+            })
+            $('#updateBtn').on('click',function(){
+                updateData();
+            })
+            $('#cancelUpdateBtn').on('click',function(){
+            	cancelUpdateData();
+            })
+            $('#cancelBtn').on('click',function(){
+            	cancelData();
+            })
+            $('#queryBtn').on('click',function(){   	
+                queryData();
+            })             
+        })
+        function groupTab(groupId){
+            $('#groupWin').show();
+            $('#tt').tabs('select',0);
+            $('#groupWin').window('open');
+            //置空条件
+            $('#nameStaff').val("");
+            $('#nickName').val("");
+            $('#email').val("");
+            $('#nameRole').val("");
+            $('#descriptionRole').val("");
+            $('#nameAdmin').val("");
+            $('#nickNameAdmin').val("");
+            $('#emailAdmin').val("");
+            //Staff
+            $("#groupId").val(groupId);
+             var grid2 = $('#dataGridStaff').datagrid({
+                rownumbers:true,
+                columns:columnsStaff,
+                pagination:true,
+                striped:true,
+                fit:true,
+                method:'post',
+                pageNumber : 1,
+                width:980,
+                height:325,
+                url:'/user/searchUsersByGroupId?groupId='+groupId,
+                onLoadError:function(){
+                   $.messager.alert('System Information','Network Abnormal!','warning');
+                   return false;
+                }
+            });
+            initPagination(grid2);
+            //Role
+            $("#groupIdRole").val(groupId);
+            grid2 = $('#dataGridRole').datagrid({
+                rownumbers:true,
+                columns:columnsRole,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                width:978,
+                height:325,
+                url:'/role/searchRolesByGroupId?groupId='+groupId,
+                method:'post' ,
+                onLoadError:function(){
+                   $.messager.alert('System Information','Network Abnormal!','warning');
+                   return false;
+                }
+            });
+            initPagination(grid2);
+            //Admin
+            $("#groupIdAdmin").val(groupId);
+            grid2 = $('#dataGridAdmin').datagrid({
+                rownumbers:true,
+                columns:columnsAdmin,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                width:978,
+                height:325,
+                url:'/group/getAdminByGroupId?groupId='+groupId,
+                method:'post',
+                onLoadError:function(){
+                   $.messager.alert('System Information','Network Abnormal!','warning');
+                   return false;
+                }
+            });
+            initPagination(grid2);
+        }
+        //group staff begin
+        function queryDataStaff(){
+           var grid= $('#dataGridStaff').datagrid(
+                {
+                    url : '/user/searchUsersByGroupId',
+                    queryParams : {
+                        groupId : $("#groupId").val(),
+                        name : $("#nameStaff").val(),
+                        nickName : $("#nickName").val(),
+                        email : $("#email").val()
+                    },
+                    onLoadSuccess : function(data) {
+                        $("#dataGridStaff").datagrid(
+                                'clearChecked');
+                       /* if (data.total == 0&& data.rows.length == 0) {
+                            $.messager
+                                    .alert(
+                                            'System Information',
+                                            'No records found.',
+                                            'warning');
+                        }*/
+                    }
+                });
+                 initPagination(grid);
+        }
+        function deleteDataStaff(){
+        var selectedRows = $("#dataGridStaff").datagrid('getChecked');
+            var ids = ",";
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return false;
+            }
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+",";
+            });
+            if(ids!=""&&ids.indexOf(","+$.session.get("userId")+",")>=0){
+                 $.messager.alert('System Information',
+                        'Cannot delete the group admin!', 'warning');
+                return false;
+            }
+            $.messager.confirm(
+                    'System Information',
+                    'Are You Sure Delete Data?',
+                    function(r) {
+                        if (r) {
+                            $.post("/security/group/deleteUserFromGroup",
+                                    {
+                                        'groupId' : $('#groupId').val(),
+                                        'ids' : ids.substring(1,ids.length)
+                                    },
+                                    function(data) {
+                                            $.messager.alert('System Information',data, 'warning');
+                                             queryDataStaff();
+                                    })
+                                    .error(
+                                    function() {
+                                        $.messager.alert('System Information','Network Abnormal!','warning');
+                                    });
+                        }
+                    });
+        }
+        function addDataStaff(){
+         $('#loginCode').val("");
+         $('#loginName').val("");
+         $('#loginEmail').val("");
+         var addGrid = $('#addDataGrid').datagrid({
+                rownumbers:true,
+                columns:columnsStaff,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                height : 200,
+                width:900,
+                url:'/user/searchUserInfo',
+                queryParams : {
+                    nickName : $('#loginName').val(),
+                    name : $('#loginCode').val(),
+                    email:$('#loginEmail').val()
+                },
+                fit:true,
+                method:'post'
+            });
+          initPagination(addGrid);
+          $('#addPdStaffWin').window('open');
+        }
+        function addQueryData(){
+        var grid= $('#addDataGrid').datagrid({
+                url : '/user/searchUserInfo',
+                queryParams : {
+                    nickName : $('#loginName').val(),
+                    name : $('#loginCode').val(),
+                    email:$('#loginEmail').val()
+                },
+                onLoadSuccess : function(data) {
+                    $("#dataGridStaff").datagrid(
+                            'clearChecked');
+                  /*  if (data.total == 0&& data.rows.length == 0) {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'No records found.',
+                                        'warning');
+                    }*/
+                }
+             });
+            initPagination(grid);
+            gridScroll(grid);
+        }
+        function addUserData(){
+            var selectedRows = $("#addDataGrid").datagrid('getChecked');
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return false;
+            }
+            var ids = "";
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+",";
+            });
+            
+            $.post("/security/group/addUserToGroup", {
+                'groupId' : $('#groupId').val(),
+                'ids' : ids
+            }, function(data) {
+                    $.messager.alert('System Information',
+                            data, 'warning');
+                    $('#addPdStaffWin').window('close');
+                    queryDataStaff();
+            }).error(
+                    function() {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'Network Abnormal!',
+                                        'warning');
+                    });
+        }
+
+//group staff end
+//group Role begin
+function queryRoleData(){
+    var grid=$('#dataGridRole').datagrid(
+                {
+                    url : '/role/searchRolesByGroupId',
+                    queryParams : {
+                        groupId : $("#groupIdRole").val(),
+                        roleName: $("#nameRole").val(),
+                        roleDescription : $("#descriptionRole").val()
+                    },
+                    onLoadSuccess : function(data) {
+                        $("#dataGridRole").datagrid(
+                                'clearChecked');
+                        /* if (data.total == 0&& data.rows.length == 0) {
+                            $.messager
+                                    .alert(
+                                            'System Information',
+                                            'No records found.',
+                                            'warning');
+                        }*/
+                    }
+                });
+                initPagination(grid);
+}
+function addRoleData(){
+    $('#roleName').val("");
+         $('#roleDescription').val("");
+    var grid = $('#addDataRoleGrid').datagrid({
+                rownumbers:true,
+                columns:columnsRole,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                height : 200,
+                width:900,
+                url:'/role/searchRoleInfo',
+                fit:true,
+                queryParams:{
+                    name : $('#roleName').val(),
+                    description : $('#roleDescription').val()
+                },
+                method:'post'
+            });
+          initPagination(grid);
+     $('#addPdRoleWin').window('open');
+}
+function deleteRoleData(){
+    var selectedRows = $("#dataGridRole").datagrid('getChecked');
+            var ids = "";
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return false;
+            }
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+",";
+            });
+            
+            $.messager.confirm(
+                    'System Information',
+                    'Are You Sure Delete Data?',
+                    function(r) {
+                        if (r) {
+                            $.post("/security/group/deleteRoleFromGroup",
+                                    {
+                                        'groupId' : $('#groupIdRole').val(),
+                                        'ids' : ids
+                                    },
+                                    function(data) {
+                                            $.messager.alert('System Information',data, 'warning');
+                                            queryRoleData();
+                                                                           })
+                                    .error(
+                                    function() {
+                                        $.messager.alert('System Information','Network Abnormal!','warning');
+                                    });
+                        }
+                    });
+}
+function addQueryRoleData(){
+    var grid= $('#addDataRoleGrid').datagrid({
+                url : '/role/searchRoleInfo',
+                queryParams : {
+                    name : $('#roleName').val(),
+                    description : $('#roleDescription').val()
+                },
+                onLoadSuccess : function(data) {
+                    $("#dataGridRole").datagrid(
+                            'clearChecked');
+                   /*  if (data.total == 0&& data.rows.length == 0) {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'No records found.',
+                                        'warning');
+                    }*/
+                }
+             });
+            initPagination(grid);
+            gridScroll(grid);
+}
+function saveRoleData(){
+    var selectedRows = $("#addDataRoleGrid").datagrid('getChecked');
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return false;
+            }
+            var ids = "";
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+",";
+            });
+            
+            $.post("/security/group/addRoleToGroup", {
+                'groupId' : $('#groupIdRole').val(),
+                'ids' : ids
+            }, function(data) {
+                    $.messager.alert('System Information',
+                            data, 'warning');
+                    $('#addPdRoleWin').window('close');
+                    queryRoleData();
+            }).error(
+                    function() {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'Network Abnormal!',
+                                        'warning');
+                    });
+}
+//group Role end
+//group Admin begin
+ function queryAdminData() {
+       var grid= $('#dataGridAdmin').datagrid(
+                {
+                    url : '/group/getAdminByGroupId',
+                    queryParams : {
+                        groupId : $("#groupIdAdmin").val(),
+                        userCode : $("#nameAdmin").val(),
+                        userName : $("#nickNameAdmin").val(),
+                        userEmail : $("#emailAdmin").val()
+                    },
+                    onLoadSuccess : function(data) {
+                        $("#dataGridAdmin").datagrid(
+                                'clearChecked');
+                       /* if (data.total == 0&& data.rows.length == 0) {
+                            $.messager
+                                    .alert(
+                                            'System Information',
+                                            'No records found.',
+                                            'warning');
+                        }*/
+                    }
+                });
+             initPagination(grid);    
+        }
+function addAdminData(){
+
+$('#loginCodeAdmin').val("");
+$('#loginNameAdmin').val("");
+$('#loginEmailAdmin').val("");
+ var grid = $('#addDataAdminGrid').datagrid({
+                rownumbers:true,
+                columns:columnsAdmin,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                height : 200,
+                width:900,
+                url:'/user/searchUserInfo',
+                queryParams:{
+                    nickName : $('#loginNameAdmin').val(),
+                    name : $('#loginCodeAdmin').val(),
+                    email:$('#loginEmailAdmin').val()
+                },
+                fit:true,
+                method:'post'
+            });
+          initPagination(grid);
+
+          $('#addPdAdminWin').window('open');
+       } 
+ function deleteAdminData() {
+            var selectedRows = $("#dataGridAdmin").datagrid('getChecked');
+            var ids = ",";
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return false;
+            }
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+",";
+            });
+            if(ids!=""&&ids.indexOf(","+$.session.get("userId")+",")>=0){
+                 $.messager.alert('System Information',
+                        'Cannot delete the group admin!', 'warning');
+                return false;
+            }
+            $.messager.confirm(
+                    'System Information',
+                    'Are You Sure Delete Data?',
+                    function(r) {
+                        if (r) {
+                            $.post("/security/group/deleteAdminFromGroup",
+                                    {
+                                        'groupId' : $('#groupIdAdmin').val(),
+                                        'ids' : ids.substring(1,ids.length)
+                                    },
+                                    function(data) {
+                                            $.messager.alert('System Information',data, 'warning');
+                                             queryAdminData();
+                                    })
+                                    .error(
+                                    function() {
+                                        $.messager.alert('System Information','Network Abnormal!','warning');
+                                    });
+                        }
+                    });
+        }
+function addUserAdminData(){
+
+            var selectedRows = $("#addDataAdminGrid").datagrid('getChecked');
+            if (selectedRows.length < 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return false;
+            }
+            var ids = "";
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+",";
+            });
+            
+            $.post("/security/group/addAdminToGroup", {
+                'groupId' : $('#groupIdAdmin').val(),
+                'ids' : ids
+            }, function(data) {
+                    $.messager.alert('System Information',
+                            data, 'warning');
+                    $('#addPdAdminWin').window('close');
+                    queryAdminData();
+            }).error(
+                    function() {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'Network Abnormal!',
+                                        'warning');
+                    });
+      }
+        
+        function addQueryAdminData(){
+            var grid= $('#addDataAdminGrid').datagrid({
+                url : '/user/searchUserInfo',
+                queryParams : {
+                    nickName : $('#loginNameAdmin').val(),
+                    name : $('#loginCodeAdmin').val(),
+                    email:$('#loginEmailAdmin').val()
+                },
+                onLoadSuccess : function(data) {
+                    $("#dataGridAdmin").datagrid(
+                            'clearChecked');
+                  /*  if (data.total == 0&& data.rows.length == 0) {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'No records found.',
+                                        'warning');
+                    }*/
+                }
+             });
+            initPagination(grid);
+            gridScroll(grid);
+         }
+
+
+//group Admin end
+        function addData(){ 
+            $("#groupName").val("");
+            $("#groupDescription").val("");
+             $('#addPdWin').show();
+            $('#addPdWin').window();
+            $('#addPdWin').window('open');
+        }
+        function cancelData(){
+            $('#addPdWin').window('close');
+       }
+        function cancelUpdateData(){
+            $('#updatePdWin').window('close');
+       }
+        function updateData(){
+        	var selectedRows = $("#dataGrid").datagrid('getChecked');
+        	if (selectedRows.length != 1) {
+	            $.messager.alert('System Information',
+	                    'Please select one data!', 'warning');
+	            return false;
+	        }
+            if (selectedRows[0].createBy != $.session.get("userName")) {
+                $.messager.alert('System Information',
+                        'security.group.update.not.admin!', 'warning');
+                return false;
+            }
+            
+        	$.each(selectedRows, function(i, row) {
+        		$("#updateGroupName").val(row.name);
+        		$("#updateGroupDescription").val(row.description);
+        		$("#updateGroupId").val(row.id);
+        		$("#groupOldName").val(row.name);
+	        });
+            $('#updatePdWin').show();
+            $('#updatePdWin').window();
+            $('#updatePdWin').window('open');
+       }
+        
+        //新增组保存
+        function savePd(){
+           
+        	if (!$("#groupName").val()) {
+                $.messager.alert('System Information','Group Name The Data not null');
+                return false;
+            }
+        	if (!$("#groupDescription").val()) {
+                $.messager.alert('System Information','Group Description The Data not null');
+                return false;
+            }
+            $.post("/security/group/createGroup", {
+                'description' : $('#groupDescription').val(),
+                'name' : $('#groupName').val()
+            }, function(data) {
+                    $.messager.alert('System Information',
+                            data, 'warning');
+                    cancelData();
+                    queryData();
+            }).error(
+                    function() {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'Network Abnormal!',
+                                        'warning');
+                    });
+        }
+        
+      //更新组信息保存
+        function updatePd(){
+        	if (!$("#updateGroupName").val()) {
+                $.messager.alert('System Information','Group Name The Data not null');
+                return false;
+            }
+        	if (!$("#updateGroupDescription").val()) {
+                $.messager.alert('System Information','Group Description The Data not null');
+                return false;
+            }
+            $.post("/security/group/updateGroup", {
+                'description' : $('#updateGroupDescription').val(),
+                'name' : $('#updateGroupName').val(),
+                'oldName' : $('#groupOldName').val(),
+                'id' : $('#updateGroupId').val()
+            }, function(data) {
+                    $.messager.alert('System Information',
+                            data, 'warning');
+                    cancelUpdateData();
+                    queryData();
+            }).error(
+                    function() {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'Network Abnormal!',
+                                        'warning');
+                    });
+        }
+        
+        //查询组数据		
+		function queryData() {
+		  var grid2=$('#dataGrid').datagrid(
+				{
+					url : '/group/searchGroupInfo',
+					queryParams : {
+						description : $('#description').val(),
+						name : $('#name').val()
+					},
+					onLoadSuccess : function(data) {
+						$("#dataGrid").datagrid(
+								'clearChecked');
+					/*	if (data.total == 0&& data.rows.length == 0) {
+							$.messager
+									.alert(
+											'System Information',
+											'No records found.',
+											'warning');
+						}*/
+					}
+				});
+                initPagination(grid2);
+		}
+
+        //删除组数据
+		function deleteData() {
+        	
+			var selectedRows = $("#dataGrid").datagrid('getChecked');
+			var ids = "";
+            var flag=true;
+	        if (selectedRows.length ==0) {
+	            $.messager.alert('System Information',
+	                    'Please select data!', 'warning');
+	            return false;
+	        }
+            $.each(selectedRows, function(i, row) {
+                ids+=row.id+",";
+                if(row.createBy!=$.session.get("userName")){
+                    flag=false;
+                    return false;
+                }
+            });
+            if (!flag) {
+                $.messager.alert('System Information',
+                        'security.group.delete.not.admin!', 'warning');
+                return false;
+            }
+	        $.messager.confirm(
+	                'System Information',
+	                'Are You Sure Delete Data?',
+	                function(r) {
+	                    if (r) {
+	                        $.post("/security/group/deleteGroupInfo",
+	                                {
+	                                    'ids' : ids
+	                                },
+	                                function(data) {
+	                                    if (data) {
+	                                        $.messager.alert('System Information','Delete Success!', 'warning');
+	                                    } else {
+	                                        $.messager.alert('System Information','Delete Failure!,'+ data,'warning');
+	                                    }
+	                                    queryData();
+	                                })
+	                                .error(
+	                                function() {
+	                                    $.messager.alert('System Information','Network Abnormal!','warning');
+	                                });
+	                    }
+	                });
+		}
+</script>
+{{/component}}

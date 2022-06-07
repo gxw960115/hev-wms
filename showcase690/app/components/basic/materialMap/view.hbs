@@ -1,0 +1,517 @@
+{{#component "stocktaking js-comp"}}
+    <style type="text/css">
+        #addInfoForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addInfoForm input{
+            height: 30px;
+            width: 155px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+        #addInfoForm table tr{
+            height: 40px;;
+        }
+        #addInfoForm table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            padding:2.5px;
+
+            height:25px;
+            }
+
+        .fileUpload input.upload {  
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            }
+	
+    </style>
+    <div id="materialMapDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab">
+                <tr>
+                   
+		    <td class="leftCls">
+                    &nbsp;&nbsp; MaterialNo:&nbsp;&nbsp;<input id="materialNoS" type="text" />
+                    &nbsp;&nbsp;</td> 
+		     <td class="rightCls" style="margin-left: 20px">Create Date:&nbsp;&nbsp;
+                    </td>
+                    <td colspan="3"  class="leftCls"><input id="begin" class="radiusCls" readonly value="" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" />
+                        - <input id="end" readonly value="" class="radiusCls" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" /></td>
+                </tr>
+                
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" onclick="exportMaterialMappingInfo()">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle importBtn" onclick="importMaterialMappingInfo()">Import</a>
+                    <a href="javascript:void(0)" class="btnStyle downloadGreyBtn" onclick="exportTemplate()">download template</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px;  overflow-y: hidden;  margin-top: -2px;">
+            <table id="dataGrid"></table>
+        </div>
+        <!-- 添加窗口 -->
+        <div id="addMetarialWin" class="easyui-window" title="Add Material"
+             data-options="modal:true,closed:true,iconCls:'icon-add', top:0, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+             style="width: 735px; height: 500px;">
+            <div class="easyui-layout" data-options="fit:true">
+                <div data-options="region:'center',border:false">
+                    <form id="addInfoForm" method="post">
+                        <table style="border: 0"  width="100%">
+                            <tr height="40px">
+                                <td height="30px" align="right" valign="middle">Material NO:&nbsp;&nbsp;</td>
+                                <td ><input id="materialNo" name="materialNo"  height="30px"   type="text" style=" border: 1px solid #CCC;border-radius: 3px;"  
+					    class="easyui-validatebox" type="text" required="true" missingMessage="The Data not null" /><font color="red">*</font></td></td>
+				<td align="right" valign="middle">CustomerModel:&nbsp;&nbsp;</td>
+                                <td ><input id="customerModel" name="customerModel" type="text" style=" border: 1px solid #CCC;border-radius: 3px;"  
+					    class="easyui-validatebox" type="text" required="true" missingMessage="The Data not null"
+					    data-options="width:155,height:30,editable:false,required:true,valueField:'customerModel',textField:'customerModel'" 
+					     /><font color="red">*</font></td></td>
+
+                            </tr>
+                            <tr  height="40px">
+                                <td align="right" valign="middle">MaterialDesp:&nbsp;&nbsp;</td>
+                                <td width="190"><input type="text" id="materialDesp" name="materialDesp"  class="easyui-validatebox"  required="true" missingMessage="The Data not null"  style=" border: 1px solid #CCC;border-radius: 3px;"/>
+                                 <font color="red">*</font></td>
+                                <td align="right" valign="middle">Plant:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="plant" name="plant" class="easyui-combobox" data-options="width:155,height:30,editable:true,valueField:'rowId',textField:'code',url:'/plant/list/select'"></td>
+                            </tr>
+			    <tr height="40px">
+                                <td align="right" valign="middle">ExternalMatGroup:&nbsp;&nbsp;</td>
+                                <td width="190"><input type="text" id="externalMatGroup" name="externalMatGroup"  style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+                                <td align="right" valign="middle">GrossWeight:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="grossWeight" name="grossWeight" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+                            </tr>
+			    <tr height="40px">
+                                <td align="right" valign="middle">NetWeight:&nbsp;&nbsp;</td>
+                                <td width="190"><input type="text" id="netWeight" name="netWeight" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+                                <td align="right" valign="middle">SizeDimension:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="sizeDimension" name ="sizeDimension" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+                            </tr>
+			    <tr height="40px">
+                                <td align="right" valign="middle">BasicUnit:&nbsp;&nbsp;</td>
+                                <td width="190"><input type="text" id="basicUnit" name="basicUnit" class="easyui-combobox" style=" border: 1px solid #CCC;border-radius: 3px;" data-options="width:155,height:30,editable:true,valueField:'code',textField:'name',url:'/plan/searchAllDictionary?type=UNIT'">
+                                 </td>
+                                <td align="right" valign="middle">PlantStatus:&nbsp;&nbsp;</td>
+                                <td>
+					<select  id="plantStatus" name="plantStatus"> <option value=""></option><option value="locked">locked</option><option value="not locked">not locked</option></select>
+				</td>
+                            </tr>
+			     <tr height="40px">
+                                <td align="right" valign="middle">Division:&nbsp;&nbsp;</td>
+                                <td width="190"><input type="text" id="division" name="division" class="easyui-combobox" style=" border: 1px solid #CCC;border-radius: 3px;" data-options="width:155,height:30,editable:true,valueField:'code',textField:'name',url:'/plan/searchAllDictionary?type=DIVISION'">
+                                </td>
+                                 <td align="right" valign="middle">内外机:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="produceAttribute" name="produceAttribute" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+                            </tr>
+			    <tr height="40px">
+				<td align="right" valign="middle" >SKU/CBU:</td>
+				<td>
+					<select id="matScanType" name="matScanType" ><option></option><option>SKU</option><option>CBU</option></select>
+					<input id="rowId" type="hidden" name="rowId"/>
+				</td>
+			    </tr>
+                            <tr >
+                                <td valign="top" align="right">Remark</td>
+                                <td  colspan="3" >
+					<textarea id="remark" name="remark" cols="80"></textarea>
+                                    
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+              
+                <div data-options="region:'south',border:false"
+                     style="text-align: right; padding: 1px; height: 35px">
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="savePd();">Save</a>
+                    <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="closePdWin();">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="importExcel" icon="icon-save" style="width: 430px">
+        <h5 id="excel_message" style="color: red;"></h5>
+        <div class="ToolTip_Form" id="exceltable" style="display:none;">
+            <form method="post" id="importExcelForm"
+                  enctype="multipart/form-data" >
+                <table width="98%" height="98%">
+                    <tr>
+                        <td>
+                            <div style="background-color:#1caf9a; height:31px; width:100px; font-size:14px; color:white" class="fileUpload btn">
+                                <span>Browse Files</span>
+                                <input id="uploadBtn" name="importfile" type="file" class="upload" />
+                            </div>
+                            <input style="height:28px;" id="uploadFile" placeholder="  Choose File" disabled="disabled" />
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" class="btnStyle importBtn" style="height:30px;" id="importbtn" onclick="importForm();">Import</a>
+                         </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+    var selPdColumns="";
+    $(function(){
+        $('#materialMapDiv').height(suitHeight);
+        var columns=[[{
+            field : 'ck',
+            checkbox : true,
+            width : 80,
+            align : 'center'
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width : 80,
+            sortable : true
+       
+        }, {
+            field : 'materialDesp',
+            title : 'MaterialDesp',
+            align : 'center',
+            width : 120,
+            sortable : true
+        }, {
+            field : 'color',
+            title : 'Color',
+            align : 'center',
+            width : 60,
+            sortable : true
+        }, {
+            field : 'inOut',
+            title : 'IDU/ODU',
+            align : 'left',
+            width : 120,
+            sortable : true
+        }, {
+            field : 'materialNoA',
+            title : 'MaterialNoA',
+            align : 'right',
+            width : 100,
+            sortable : true
+        }, {
+            field : 'materialNoB',
+            title : 'MaterialNoB',
+            align : 'right',
+            width : 100,
+            sortable : true
+        }, {
+            field : 'materialNoC',
+            title : 'MaterialNoC',
+            align : 'center',
+            width : 120,
+            sortable : true
+        }, {
+            field : 'materialNoD',
+            title : 'MaterialNoD',
+            align : 'center',
+            width : 100,
+            sortable : true
+        }, {
+            field : 'createdBy',
+            title : 'CreatedBy',
+            align : 'left',
+            width : 80,
+            sortable : true
+        }, {
+            field : 'createdDate',
+            title : 'CreatedDate',
+            align : 'center',
+            width : 100,
+            formatter : formatY_M_D
+         
+        }  ]];
+        /*selPdColumns = [ [ {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width : 100
+        }, {
+            field : 'materialNo',
+            title : 'MaterialNo',
+            align : 'center',
+            width : 120
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            align : 'center',
+            width : 160
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            width : 160
+        } ] ];*/
+        var grid = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            url:'/basic/materialMap',
+            method:'post',
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#addBtn').on('click',function(){
+            addData();
+        })
+	$('#deleteBtn').on('click',function(){
+		deleteData();
+	})
+        $('#orderOpenBtn').on('click',function(){
+            orderOpen();
+        })
+        $('#orderCloseBtn').on('click',function(){
+            orderClose();
+        })
+        $('#exportBtn').on('click',function(){
+            exportData();
+        })    
+        document.getElementById("uploadBtn").onchange = function () {
+                document.getElementById("uploadFile").value = this.value;
+        };
+        $('#warehouseCode').combobox({
+            onSelect:function(record){      
+                $.ajax({
+                    url:'/loc/select/tree',
+                    type:'post',
+                    dataType:'json',
+                    data:{
+                       rowId:record.rowId
+                    },
+                    success:function(data){
+                        $('#locTree').tree({
+                            checkbox:true,
+                            data:data
+                        });
+                    }
+                });
+                
+            }
+        });
+
+    });
+    function queryData(){
+      var grid=  $('#dataGrid').datagrid({
+            url:'/basic/materialMap',
+            queryParams: {
+                materialNo:$('#materialNoS').val(),
+		begin:$('#begin').val(),
+		end:$('#end').val()
+            },
+            onLoadSuccess : function(data) {
+                $("#dataGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                }
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+    }
+
+    function orderOpen(){
+        var selectedRows = $("#dataGrid").datagrid('getChecked');
+        if (selectedRows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return false;
+        }
+        if (selectedRows[0].orderStatus == 1) {
+            $.messager.alert('System Information',
+                    'Order already opened!', 'warning');
+            return false;
+        }
+        if (selectedRows[0].orderStatus == 2) {
+            $.messager.alert('System Information',
+                    'Order already completed!', 'warning');
+            return false;
+        }
+        updateOrderStatus('Order Open ?',
+                selectedRows[0].orderNo, '1');
+    }
+    function updateOrderStatus(alert, orderNo, status) {
+        $.messager.confirm('System Information', alert, function(r) {
+            if (r) {
+                $.post('stocktakingOrder/update', {
+                    'orderNo' : orderNo,
+                    'orderStatus' : status
+                }, function(data) {
+                    if (data.success) {
+                        $.messager.alert('System Information',
+                                'Modify Success!', 'warning');
+                    } else {
+                        $.messager.alert('System Information',
+                                'Modify Failure!', 'warning');
+                    }
+                    queryData();
+                }).error(
+                        function() {
+                            $.messager
+                                    .alert(
+                                            'System Information',
+                                            'Network Abnormal!',
+                                            'warning');
+                        });
+            }
+        });
+    }
+    function orderClose(){
+        var selectedRows = $("#dataGrid").datagrid('getChecked');
+        if (selectedRows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return false;
+        }
+
+        if (selectedRows[0].orderStatus == 2) {
+            $.messager.alert('System Information',
+                    'Order already completed!', 'warning');
+            return false;
+        }
+        updateOrderStatus('Order Close ?',
+                selectedRows[0].orderNo, '2');
+    }
+ 
+
+    
+    
+    function closePdWin(){
+        $('#addInfoForm').form('clear');
+        $('#addMetarialWin').window('close');
+    }
+
+    function deleteData(){
+	var selectedRows = $("#dataGrid").datagrid('getChecked');
+	if (selectedRows.length < 1) {
+	     $.messager.alert('System Information',
+	    'Please select datas!', 'warning');
+		return false;
+	}
+	$.messager.confirm(
+                'System Information',
+                'Are you sure delete material info?',
+                function(r) {
+                    if (r) {
+                        var codes = new Array();
+                        for ( var i = 0; i < selectedRows.length; i++) {
+                            codes.push(selectedRows[i].rowId);
+                        }
+                        $.get(
+                                "/api/delete",
+                                {
+                                    'ids' : codes.join(),
+                                    'mess' : 'user delete'
+                                },
+                                function(data) {
+                                    if (data!='true') {
+						$.messager
+								.alert(
+										'System Information',
+										'Delete Failure!',
+										'warning');
+					} else {
+						$.messager
+								.alert(
+										'System Information',
+										'Delete Success!',
+										'warning');
+						$('#dataGrid').datagrid('reload');
+					}
+                                   
+                                });
+                    }
+                });
+
+    }
+	
+     /*导 出*/
+    function exportMaterialMappingInfo() {
+        var url = "/material/exportMaterialMappingInfo?"
+                + 'materialNo=' + $('#materialNoS').val()
+		+ '&begin=' + $('#begin').val()
+		+ '&end=' + $('#end').val();
+	
+        window.location.href = url;
+    }
+    /*导 入*/
+    function importMaterialMappingInfo() {
+        $('#importExcel').dialog({
+            title : 'import',
+            modal : true, //模式窗口：窗口背景不可操作
+            top:150,
+            collapsible : true, //可折叠，点击窗口右上角折叠图标将内容折叠起来
+            resizable : true
+            //可拖动边框大小
+        });
+        $('#exceltable').css({
+            display : "block"
+        });
+        $('#importExcel').dialog('open');
+    }
+
+    function importForm() {
+	
+        var fileType = $('#uploadBtn').val().substring(
+                $('#uploadBtn').val().lastIndexOf(".") + 1);
+        if (fileType != "xls") {
+            $.messager.alert('System Information', 'Please import .xls format Excel file!', 'warning');
+            return;
+        }
+        $('#importExcelForm').form(
+                'submit',
+                {
+                    url : '/material/importMaterialMappingInfo',
+                    onSubmit : function() {
+
+                    },
+                    success : function(data) {
+                        $('#importExcel').dialog('close');
+                        $.messager.alert('System Information',
+                                data, 'info');
+                        $('#dataGrid').datagrid('reload');
+                    }
+                });
+    }
+     function exportTemplate() {
+        window.location.href = "/materialMapping/download"
+    }
+    </script>
+{{/component}}

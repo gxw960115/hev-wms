@@ -1,0 +1,387 @@
+{{#component "userQuery js-comp"}}
+   <style type="text/css">
+        #searchTab1 {
+            margin-left:-5px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+    </style>
+    <div id="userQDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab">
+                <tr>
+                    <td style="text-align: right"> User Name&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="loginName" type="text" /></td>
+                    <td class="leftCls">Nick Name&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="userName" type="text" /></td>
+                    <td class="leftCls">Email&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="email" type="text" /></td>
+                    <td class="centerCls">Status&nbsp;&nbsp;</td>
+	                <td class="leftCls">
+	                    <input id="statusOption" type="text" class="easyui-combobox" data-options="width:155,height:30,editable:false,panelHeight:'auto'">     
+	                </td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                	<a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle editBtn" id="editBtn" onclick="edit()">Edit</a>
+                    <a href="javascript:void(0)" class="btnStyle deleteBtn" id="deleteBtn">Delete</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="dataGrid">
+
+            </table>
+        </div>
+        
+        <!-- 编辑窗口 -->
+        <div id="updateUserWin" title="Update User"
+             data-options="modal:true,closed:true,iconCls:'icon-edit', top:0, left:($(window).width() - 765) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+             style="width: 765px; height: 420px; display:none">
+        <table class="form_table" id="searchTab1">
+            <tr>
+                <td class="centerCls">User Name&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls" style="width:240px;"><input type="text" class="radiusCls" id="updateuserName">
+                                    <input type="hidden" class="radiusCls" id="locs">
+                                    <input type="hidden" class="radiusCls" id="userId"></td>
+                <td class="centerCls">User Nick Name&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input type="text" class="radiusCls" id="userNickName"></td>
+            </tr>
+            <tr>
+                <td class="centerCls">Email&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input type="email" class="radiusCls" id="updateemail"></td>
+                <td class="centerCls">Status&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls" colspan="2">
+                    <input id="status" type="text" class="easyui-combobox" data-options="width:155,height:30,editable:false,panelHeight:'auto'">     
+                </td>
+            </tr>
+            <tr>
+                <td class="centerCls">Last Modified By&nbsp;&nbsp;</td>
+                <td class="leftCls"><input type="text" class="radiusCls" id="modifiedBy" readonly = "readonly"></td>
+                <td class="centerCls">Last modified&nbsp;&nbsp;</td>
+                <td class="leftCls"><input type="text" class="radiusCls" id="lastModified" readonly = "readonly"></td>
+            </tr>
+            <tr>
+<!--                 <td class="centerCls">Product Division&nbsp;<font color="red">*</font>&nbsp;</td> -->
+<!--                 <td class="leftCls"><input type="text" id="productDivision" class="easyui-combobox"  -->
+<!--                 	data-options="width:155,height:30,editable:true,valueField:'code',textField:'name',url:'/user/list/select'"></td> -->
+                <td class="centerCls">Function Type&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls">
+                    <input type="text" id="functionType" class="easyui-combobox" data-options="width:155,height:30,editable:false,panelHeight:'auto'" />                     
+                </td>
+                <td class="centerCls">Expiration date&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input id="expirationDate" class="radiusCls" readonly value="" onClick="WdatePicker({lang:'en',dateFmt:'yyyy-MM-dd'})" /></td>
+            </tr>
+<!--             <tr> -->
+                
+<!--                 <td class="centerCls">Password&nbsp;&nbsp;</td> -->
+<!--                 <td class="leftCls"> <input class="radiusCls" id="updatePassword"> </td> -->
+<!--             </tr> -->
+            <tr>
+                <td class="centerCls">Warehouse&Location&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls" colspan="3">
+	                <div style="height: 150px; border: 1px #ccc solid; width: 350px; overflow-y: scroll; overflow-x: auto;">
+                        <ul id="whTree"></ul>
+                    </div>
+				</td>
+            </tr>
+            <tr></tr>
+            <tr>
+                <td colspan="4" style="text-align:right">
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" id="addBtn" onclick="update();">Save</a>
+				</td>
+            </tr>
+        </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var treeData=[];
+        $(function(){
+        	$('#userQDiv').height(suitHeight);
+            getTreeData();
+            $('#statusOption').combobox({
+                value:'-1',
+                data:[{"text":"All","value":"-1"},{"text":"Active","value":"1"},{"text":"Disable","value":"0"},{"text":"Locked","value":"2"}]
+            });
+            $('#status').combobox({
+                value:'1',
+                data:[{"text":"Active","value":"1"},{"text":"Disable","value":"0"},{"text":"Locked","value":"2"}]
+            });
+            $('#functionType').combobox({
+                value:'1',
+                onSelect:function(record){
+                    setWhlTree(record.value);
+                },
+                data:[{"text":"Super Admin","value":"1"},{"text":"Location Admin","value":"3"}]
+            });
+            $('#loginName').val("");
+			$('#userName').val("");
+			$('#email').val("");
+            var columns=[[{
+                field:'ck',checkbox:true,align:'center'
+            },{
+                field:'name',title:'Login Name', width:120, align:'center',sortable:true
+            },{
+                field:'nickName',title:'User Name',width:120, align:'center',sortable:true
+            },{
+                field:'email', title:'Email', width:160,align:'center',sortable:true
+            },{
+                field:'groupName',title:'Group Name',width:120,align:'center',sortable:true
+            },{
+                field:'statusDesc',title:'Status',width:100,align:'center',sortable:true
+            },{
+                field:'lastLoginIp',title:'Last Login IP',width:120, align:'center',sortable:true
+            },{
+                field:'lastLoginTime',title:'Last Login Time',width:160,align:'center',sortable:true,formatter : formatY_M_D
+            },{
+                field : 'id',title : 'ID',width: 60,align : 'center', hidden : true
+            },{
+                field : 'lastModifiedBy',title : 'lastModifiedBy',width: 60,align : 'center', hidden : true
+            },{
+                field : 'gmtModified',title : 'gmtModified',width: 60,align : 'center', hidden : true
+            },{
+                field:'status',title:'Status',width:100,align:'center',sortable:true,hidden : true
+            },{
+                field:'productDivision',title:'productDivision',hidden : true
+            },{
+                field:'dutyType',title:'dutyType',hidden : true
+            }]];
+            var grid = $('#dataGrid').datagrid({
+                rownumbers:true,
+                columns:columns,
+                pagination:true,
+                striped:true,
+                pageNumber : 1,
+                singleSelect:false,
+                // toolbar:'#toolbar',
+                height:document.body.clientHeight -125,
+                //  width:700,
+                // url:'',
+                method:'post'
+            });
+            initPagination(grid);
+            gridScroll(grid);
+            $('#queryBtn').on('click',function(){
+                queryData();
+            })
+            $('#deleteBtn').on('click',function(){
+                deleteData();
+            })
+            
+        })
+        function getTreeData(){
+            $.ajax({
+                url:'/sapInfo/localTree?userType=3' + '&userId=' + $('#userId').val(),
+                type:'post',
+                dataType:'json',
+                async:false,
+                success:function(data){
+                    treeData=data;
+                }
+            });
+        }
+        function queryData(){
+           var grid= $('#dataGrid').datagrid({
+            	url : '/user/searchUserInfo',
+				queryParams : {
+					name : $('#loginName').val(),
+					nickName : $('#userName').val(),
+					email:$('#email').val(),
+					status:$('#statusOption').combobox('getValue')
+				},
+				onLoadSuccess : function(data) {
+					$("#dataGrid").datagrid(
+							'clearChecked');
+					if (data.total == 0&& data.rows.length == 0) {
+						$.messager
+								.alert(
+										'System Information',
+										'No records found.',
+										'warning');
+					}
+				}
+            });
+           initPagination(grid);
+           gridScroll(grid);
+        }
+        
+      //删除组数据
+		function deleteData() {
+        	
+			var selectedRows = $("#dataGrid").datagrid('getChecked');
+			if (selectedRows.length != 1) {
+	            $.messager.alert('System Information',
+	                    'Please select one data!', 'warning');
+	            return false;
+	        }
+			var id = "";
+			$.each(selectedRows, function(i, row) {
+	            id=row.id;
+	        });
+			
+	        $.messager.confirm(
+	                'System Information',
+	                'Are You Sure Delete Data?',
+	                function(r) {
+	                    if (r) {
+	                        $.post("/security/user/deleteUserInfo",
+	                                {
+	                                    id : id
+	                                },
+	                                function(data) {
+	                                    if (data) {
+	                                        $.messager.alert('System Information','Delete Success!', 'warning');
+	                                    } else {
+	                                        $.messager.alert('System Information','Delete Failure!,'+ data,'warning');
+	                                    }
+	                                    queryData();
+	                                })
+	                                .error(
+	                                function() {
+	                                    $.messager.alert('System Information','Network Abnormal!','warning');
+	                                });
+	                    }
+	                });
+		}
+      function edit(){
+			var selectedRows = $("#dataGrid").datagrid('getChecked');
+			if (selectedRows.length != 1) {
+			     $.messager.alert('System Information',
+			    'Please select one data!', 'warning');
+				return false;
+			}
+			var row = selectedRows[0];
+            var duty=row.dutyType;
+            setWhlTree(duty);
+            $('#updateUserWin').show();
+            $('#updateUserWin').window();
+			$('#updateUserWin').window('open');
+			$('#userId').val(row.id);
+			$('#updateuserName').val(row.name);
+			$('#userNickName').val(row.nickName);
+			$('#updateemail').val(row.email);
+			$('#modifiedBy').val(row.lastModifiedBy);
+            $('#status').combobox("setValue",row.status);
+//             $('#productDivision').combobox("setValue",row.productDivision);
+			$('#lastModified').val(formatY_M_D(row.gmtModified));
+            $('#functionType').combobox("setValue",duty);
+            $('#expirationDate').val(formatY_M_D(row.expiredTime));
+            $('#updatePassword').val("");
+            //先置空
+            if(duty==3){
+                $('#whTree').tree({
+                    data:treeData
+                });
+                $.ajax({
+                    url:'/basic/findCdUserLoc',
+                    type:'post',
+                    dataType:'json',
+                    data:{
+                        "userType":3,
+                        "userId":row.id
+                    },
+                    success:function(data){
+                        var len=data.length;
+                        if(len>0){
+                        	var arrId=",";
+                            for(var i=0;i<len;i++){  
+                            	arrId+=data[i]+",";
+                            }
+                            //循环得到所有的二级节点  与arrid中的值比较
+                            var roots=$('#whTree').tree("getRoots");
+                            var children;
+                            for(var i=0;i<roots.length;i++){
+                               children = $('#whTree').tree('getChildren',roots[i].target);
+                               if(children){
+                               	  for(var j=0;j<children.length;j++){ //循环所有子节点 
+                               	  	  if(arrId.indexOf(","+children[j].id+",")>=0){ 
+                               	  	  	 $('#whTree').tree('check',children[j].target);  
+                               	  	  }
+                               	  }
+                               }
+                            }
+                        }
+                    }
+                });
+            }else{
+                $('#whTree').tree({
+                    data:[]
+                });
+            }
+		}
+		
+		function update(){
+	        
+	        if (!$("#updateuserName").val()) {
+	            $.messager.alert('System Information','User Name The Data not null');
+	            return false;
+	        }
+	        if (!$("#userNickName").val()) {
+	            $.messager.alert('System Information','User Nick Name The Data not null');
+	            return false;
+	        }
+	        if (!$("#updateemail").val()) {
+	            $.messager.alert('System Information','email The Data not null');
+	            return false;
+	        }
+// 	        if (!$("#productDivision").combobox('getValue')) {
+// 	            $.messager.alert('System Information','Product Division The Data not null');
+// 	            return false;
+// 	        }
+	        var nodes=$('#whTree').tree('getChecked');
+			var codes = new Array();
+			for ( var i = 0; i < nodes.length; i++) {
+				if(nodes[i].Type=='3'){
+					codes.push(nodes[i].id);
+				}
+			}
+			$("#locs").val(codes);
+	        if(!((/^[0-9a-zA-Z_-]{1,}(\.[0-9a-zA-Z_-]{1,})*@[0-9a-zA-Z_-]{1,}(\.[0-9a-zA-Z_-]{1,})*\.[a-zA-Z]{2,3}$/).test($("#updateemail").val()))){
+				$.messager.alert('System Information','The email format is not correct');
+				return false;
+			}
+	        var expireDate = $("#expirationDate").val();
+	        var temp = expireDate.split("-");
+	        var date1 = new Date(temp[0]-1, temp[1]-1, temp[2]);
+	        var date2 = new Date();
+	        if (date1 > date2){
+	        	$.messager.alert('System Information','Period of validity should less than 1 year!');
+	            return false;
+	        }
+	        $.post("/security/updateUser", {
+	        	'id'       :$('#userId').val(),
+	            'name' :     $('#updateuserName').val(),
+	            'nickName' : $("#userNickName").val(),
+	            'email' :    $('#updateemail').val(),
+	            'status' :   $('#status').combobox('getValue'),
+// 	            'productDivision': $("#productDivision").combobox('getValue'),
+	            'expiredTime':     $('#expirationDate').val(),
+	            'dutyType':        $('#functionType').combobox('getValue'),
+	            'whLocs':    $("#locs").val(),
+	            'password':$("#updatePassword").val()
+	        }, function(data) {
+	                $.messager.alert('System Information',data, 'warning');
+	                $('#updateUserWin').window('close');
+	                queryData();
+	        }).error(
+	                function() {
+	                    $.messager.alert('System Information','Network Abnormal!','warning');
+	                });
+	    }
+      
+		function setWhlTree(value) {
+			 if(value=='1'){
+			  $('#whTree').tree();
+                $('#whTree').tree('loadData',"");
+				
+            }else{//3
+                $('#whTree').tree({
+                                checkbox:true,
+                                data :treeData
+                            });
+            }
+	    }
+    </script>
+{{/component}}

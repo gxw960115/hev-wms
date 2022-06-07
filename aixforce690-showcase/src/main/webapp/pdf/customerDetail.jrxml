@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SO_DN_Print" columnCount="4" printOrder="Horizontal" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="138" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b93580ae-8a6e-413f-bdea-535b802e12a6">
+	<property name="ireport.zoom" value="1.5000000000000007"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="dataset1" uuid="d232cb74-5d1f-455a-a904-91a6eccaf5a6"/>
+	<subDataset name="Table Dataset 1" uuid="bd60d0b5-f52c-4040-9eec-dcee25fe3270"/>
+	<subDataset name="Table Dataset 2" uuid="fd23fe16-d16d-47bb-b29c-7dadfe02ca5c"/>
+	<parameter name="barcode" class="java.lang.String"/>
+	<parameter name="orderNo" class="java.lang.String"/>
+	<parameter name="locations" class="java.lang.String"/>
+	<parameter name="customerPo" class="java.lang.String"/>
+	<parameter name="deliveryName" class="java.lang.String"/>
+	<parameter name="deliveryAddress" class="java.lang.String"/>
+	<parameter name="logo" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select CTR_ORDER_NO ORDER_NO, NVL(SUBSTR(MATERIAL_DESP, 1, INSTR(MATERIAL_DESP,':',1,1)-1), MATERIAL_DESP) MAT_DESC,BARCODE BAR_CODE, LOCATION LOCATION
+from ODS_CUSTOMER_SCAN_INFO where ctr_order_no = $P!{orderNo} ORDER BY SUBSTR(MAT_DESC, 1, 4)||SUBSTR(MAT_DESC, 6, LENGTH(MAT_DESC))]]>
+	</queryString>
+	<field name="MAT_DESC" class="java.lang.String"/>
+	<field name="BAR_CODE" class="java.lang.String"/>
+	<field name="ORDER_NO" class="java.lang.String"/>
+	<field name="LOCATION" class="java.lang.String"/>
+	<variable name="barcode_number" class="java.lang.Integer" resetType="Group" resetGroup="MATERIAL_DESP_Group" calculation="Count">
+		<variableExpression><![CDATA[$F{BAR_CODE}]]></variableExpression>
+	</variable>
+	<group name="MATERIAL_DESP_Group">
+		<groupExpression><![CDATA[$F{MAT_DESC}]]></groupExpression>
+		<groupFooter>
+			<band height="25">
+				<textField isStretchWithOverflow="true">
+					<reportElement uuid="94b06e5d-6ddb-4d53-ba5a-7c40cca32d06" x="0" y="0" width="504" height="22"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" size="9" isBold="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{MAT_DESC}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="f14eb252-0afe-4b4b-bf28-1675cffd415a" x="504" y="0" width="48" height="22"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["SL:"+$V{barcode_number}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="115" splitType="Stretch">
+			<image isLazy="true">
+				<reportElement uuid="553b1aaa-cd34-4acb-b6c6-4a50126cc8fd" x="0" y="-24" width="105" height="105"/>
+				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="fe63e75b-2721-4a76-b2e4-05bf20cd167b" x="0" y="0" width="555" height="54"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="24" isBold="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[PHIẾU GIAO NHẬN SỐ SERI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d336c000-4e97-4b3d-8cef-dfb54094bbb4" x="353" y="86" width="50" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Ngày xuất:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="9aa780a1-f704-414c-9856-01a527b88cbb" x="405" y="86" width="150" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="9ee7e15b-ba30-4fae-88f9-22e1ef14fb03" x="0" y="62" width="50" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Kho xuất:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="035063f5-861e-4fe6-a145-dfe8be100811" x="53" y="62" width="280" height="20"/>
+				<box leftPadding="1"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LOCATION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="d336c000-4e97-4b3d-8cef-dfb54094bbb4" x="1" y="86" width="49" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Order No.:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="9aa780a1-f704-414c-9856-01a527b88cbb" x="53" y="86" width="150" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ORDER_NO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="22" splitType="Prevent">
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="d0675da7-f12b-49fd-bf11-879b074d1150" x="0" y="0" width="138" height="22"/>
+				<box leftPadding="2" rightPadding="3">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BAR_CODE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<lastPageFooter>
+		<band height="50">
+			<line>
+				<reportElement uuid="5a6a7eec-d399-49c6-b248-9d73b2ddc055" x="5" y="0" width="550" height="2"/>
+			</line>
+			<staticText>
+				<reportElement uuid="3d344fa5-3b17-4d53-ab28-de367930355f" x="435" y="2" width="100" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[THỦ KHO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b096bcf9-ced6-44a8-b15b-e1dab9db6391" x="435" y="22" width="100" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[(Ký ghi rõ họ tên)]]></text>
+			</staticText>
+		</band>
+	</lastPageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

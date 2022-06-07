@@ -1,0 +1,510 @@
+{{#component "stocktaking js-comp"}}
+    <style type="text/css">
+        #addInfoForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addInfoForm input{ 
+            height: 30px;
+            width: 155px; 
+        }
+        #addInfoForm table tr{
+            height: 36px;;
+        }
+        #addInfoForm table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            padding:2.5px;
+
+            height:25px;
+            }
+
+        .fileUpload input.upload {  
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            }
+	
+    </style>
+    <div id="materialDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab1" style="margin-top:15px">
+                <tr>
+                    <td style="text-align: right"> MaterialNo:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="materialNoS" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Material Desp:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="materialDespQuery" class="radiusCls" type="text" /></td> 
+		    		<!--<td style="text-align: right"> SKU/CBU:&nbsp;&nbsp;</td>
+		    		<td class="leftCls"><input id="matScanTypeS" type="text" class="easyui-combobox" data-options="width:155,height:30,editable:false,panelHeight:'auto'" />
+		    		</td>-->
+                </tr>
+                
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn">Add</a>
+		            <a href="javascript:void(0)" class="btnStyle editBtn" id="editBtn" onclick="edit()">Edit</a>
+		            <a href="javascript:void(0)" class="btnStyle deleteBtn" id="deleteBtn" >Delete</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" onclick="exportMaterialInfo()">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle downloadWhiteBtn" onclick="downloadData()">Download</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px;  overflow-y: hidden;  margin-top: -2px;">
+            <table id="dataGrid" style="width:100%;"></table>
+        </div>
+        <!-- 添加窗口 -->
+        <div id="addMetarialWin" 
+             data-options="modal:true,closed:true, top:100, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+             style="width: 735px; height: 450px; display:none">
+            <div class="easyui-layout" data-options="fit:true">
+                <div data-options="region:'center',border:false">
+                    <form id="addInfoForm" method="post">
+                        <table style="border: 0"  width="100%">
+                        	<input id = "rowId" name = "rowId" type = "hidden" />
+                            <tr height="40px"> 
+                                <td height="30px" align="right" valign="middle">Material No.:&nbsp;&nbsp;</td>
+                                <td><input id="materialNo" name="materialNo" height="30px" type="text" style=" border: 1px solid #CCC;border-radius: 3px;"  
+					    		class="easyui-validatebox" required="true" missingMessage="The Data not null" /><font color="red">*</font></td></td>
+                                <td align="right" valign="middle">Material Desc.:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="materialDesp" name="materialDesp" class="easyui-validatebox" required="true" 
+                                missingMessage="The Data not null"  style=" border: 1px solid #CCC;border-radius: 3px;"/>
+                                <font color="red">*</font></td>
+                            </tr>
+			    			<tr height="40px">
+                                <td align="right" valign="middle">Plant:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="plant" name="plant" class="easyui-combobox" required="true" missingMessage="The Data not null" 
+                                data-options="width:155,height:30,editable:true,valueField:'code',textField:'name',url:'/plant/list/select'"><font color="red">*</font></td>
+                                <td align="right" valign="middle">Basic Unit:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="basicUnit" name="basicUnit" class="easyui-combobox" required="true" 
+                                missingMessage="The Data not null" style=" border: 1px solid #CCC;border-radius: 3px;" data-options="width:155,height:30,editable:true,valueField:'code',textField:'name',url:'/plan/searchAllDictionary?type=UNIT'">
+                                <font color="red">*</font></td>
+                            </tr>
+                            <tr height="40px">
+                                <td align="right" valign="middle">Type:&nbsp;&nbsp;</td>
+                                <td><input id="matScanType" name="matScanType" type="text" class="easyui-combobox" required="true" 
+                                missingMessage="The Data not null" data-options="width:155,height:30,editable:false,panelHeight:'auto'" /><font color="red">*</font></td>
+                            </tr>
+<!-- 			    			<tr height="40px"> -->
+<!-- 								<td align="right" valign="middle">MRP Code:&nbsp;&nbsp;</td> -->
+<!--                                 <td><input type="text" id="mrpCode" name="mrpCode" class="easyui-validatebox" precision="0" maxlength="20"  data-options="width:155,height:30" style=" border: 1px solid #CCC;border-radius: 3px;"></td> -->
+<!-- 								<td align="right" valign="middle">Old Mat:&nbsp;&nbsp;</td> -->
+<!--                                 <td><input type="text" id="oldMat" name="oldMat" class="easyui-validatebox" precision="0" maxlength="20"  data-options="width:155,height:30" style=" border: 1px solid #CCC;border-radius: 3px;"></td> -->
+<!-- 			   		 		</tr> -->
+			    			<tr height="40px">
+								<td align="right" valign="middle">Length:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="length" name="length" class="easyui-numberbox" precision="0" maxlength="20"  data-options="width:155,height:30" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+								<td align="right" valign="middle">Width:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="width" name="width" class="easyui-numberbox" precision="0" maxlength="20"  data-options="width:155,height:30" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+			   		 		</tr>
+			    			<tr height="40px">
+								<td align="right" valign="middle">Hight:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="higth" name="higth" class="easyui-numberbox" precision="0" maxlength="20"  data-options="width:155,height:30" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+                                <td align="right" valign="middle">Measure Unit:&nbsp;&nbsp;</td>
+                                <td width="190"><input type="text" id="measureUnit" name="measureUnit"  class="easyui-validatebox"  style=" border: 1px solid #CCC;border-radius: 3px;"/></td>
+			    			</tr>
+			    			<tr height="40px">
+								<td align="right" valign="middle">Volume:&nbsp;&nbsp;</td>
+                                <td><input type="text" id="volume" name="volume" class="easyui-numberbox" precision="0" maxlength="20"  data-options="width:155,height:30" style=" border: 1px solid #CCC;border-radius: 3px;"></td>
+                                <td align="right" valign="middle">Volume Unit:&nbsp;&nbsp;</td>
+                                <td width="190"><input type="text" id="volumeUnit" name="volumeUnit" class="easyui-validatebox" style=" border: 1px solid #CCC;border-radius: 3px;"/></td>
+			    			</tr>
+			    			<tr style="height:10px">
+			    			</tr>
+                            <tr >
+                                <td valign="top" align="right">Remark:&nbsp;&nbsp;</td>
+                                <td  colspan="3" >
+									<textarea id="remark" name="remark" cols="60"></textarea>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+              
+                <div data-options="region:'south',border:false" style="text-align: right; padding: 3px;height: 45px">
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetWinData(this)">Reset</a>
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveMatInfo();">Save</a>
+                    <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="closePdWin();">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="importExcel" icon="icon-save" style="width: 430px">
+        <h5 id="excel_message" style="color: red;"></h5>
+        <div class="ToolTip_Form" id="exceltable" style="display:none;">
+            <form method="post" id="importExcelForm"
+                  enctype="multipart/form-data" >
+                <table width="98%" height="98%">
+                    <tr>
+                       <td>
+                            <div style="background-color:#1caf9a; height:31px; width:100px; font-size:14px; color:white" class="fileUpload btn">
+                                <span>Browse Files</span>
+                                <input id="uploadBtn" name="importfile" type="file" class="upload" />
+                            </div>
+                            <input style="height:28px;" id="uploadFile" placeholder="  Choose File" disabled="disabled" />
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" class="btnStyle importBtn" style="height:30px;" id="importbtn" onclick="importForm();">Import</a>
+                         </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var totalWidth = $('#dataGrid').width();
+    
+    // set width of column 
+	function fixWidth(percent) { 
+    	return totalWidth * percent;   
+	}
+    
+    var selPdColumns="";
+    $(function(){
+        $('#materialDiv').height(suitHeight);
+        
+        
+        $("#matScanType").combobox({
+            value:'CBU',
+            data:[{"text":"FG","value":"CBU"},{"text":"Gift","value":"SKU"}]
+        });
+        
+        var columns=[[{
+            field : 'ck',
+            checkbox : true,
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.10),
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'MaterialDesp',
+            align : 'center',
+            width: fixWidth(0.20),
+            sortable : true
+        },{
+            field : 'basicUnit',
+            title : 'Unit',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        },  {
+            field : 'matScanType',
+            title : 'Type',
+            width: fixWidth(0.07),
+            align : 'center',
+            sortable : true,
+            formatter: function(val,row){
+            	if (row.matScanType=='SKU'){
+					return 'Gift';
+				}else {
+					return 'FG';
+				}
+            }
+        },  {
+            field : 'oldMat',
+            title : 'Old Mat',
+            align : 'center',
+            width: fixWidth(0.10),
+            sortable : true
+        }, {
+            field : 'length',
+            title : 'Length',
+            align : 'center',
+            width: fixWidth(0.06),
+            sortable : true
+        }, {
+            field : 'width',
+            title : 'Width',
+            align : 'center',
+            width: fixWidth(0.06),
+            sortable : true
+        }, {
+            field : 'higth',
+            title : 'Height',
+            align : 'center',
+            width: fixWidth(0.06),
+            sortable : true
+        },{
+            field : 'measureUnit',
+            title : 'Measure Unit',
+            align : 'center',
+            width: fixWidth(0.10),
+            sortable : true
+        },{
+            field : 'volume',
+            title : 'Volume',
+            align : 'center',
+            width: fixWidth(0.06),
+            sortable : true
+        },{
+            field : 'volumeUnit',
+            title : 'Volume Unit',
+            align : 'center',
+            width: fixWidth(0.10),
+            sortable : true
+        }, {
+            field : 'remark',
+            title : 'Remark',
+            align : 'center',
+            width: fixWidth(0.12),
+            sortable : true
+        }  ]];
+        
+        var grid = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            url:'/api/search',
+            method:'post',
+            onLoadSuccess:function() {
+                $('.datagrid-btable').find('div.datagrid-cell').css('text-align','left');
+            },
+            onLoadError:function(){
+                 $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#addBtn').on('click',function(){
+            addData();
+        })
+        document.getElementById("uploadBtn").onchange = function () {
+                document.getElementById("uploadFile").value = this.value;
+        };
+		$('#deleteBtn').on('click',function(){
+			deleteData();
+		})   
+    });
+    function queryData() {
+		var grid=  $('#dataGrid').datagrid({
+            url:'/api/search',
+            queryParams: {
+                materialNo:$('#materialNoS').val(),
+                materialDesp:$('#materialDespQuery').val()
+            },
+            onLoadSuccess : function(data) {
+            	$('.datagrid-btable').find('div.datagrid-cell').css('text-align','left');
+                $("#dataGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information','No records found.','warning');
+                }
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+    }
+    function addData(){
+    	$('#materialNo').removeAttr('readonly');
+		$('#addInfoForm').form('clear');       
+		$('#addMetarialWin').show();
+	    $('#addMetarialWin').window({
+	        title:'Add Material',
+	        iconCls:'icon-add'
+	    });
+	    $('#addMetarialWin').window('open');
+		url="/api/saveMamdtInfo";
+    }
+    
+    function exportPoReceiveData(){
+
+    }
+
+    //新建保存
+    function saveMatInfo(){
+	   if(!$("#addInfoForm").form("validate")){return}
+	   var saveData = $("#addInfoForm").serialize();
+	   $.post(url,saveData,function(data){
+	       if(data=='true'){
+				$.messager.alert('System Information',	'Save Success!');
+				closePdWin();
+				queryData();
+			}else if(data=='false'){
+				$.messager.alert('System Information','Add Failure!','warning');
+			}else{
+	            $.messager.alert('System Information',data,'warning');
+	        }
+       });
+    }
+
+    
+    //修改
+    function edit(){
+    
+		var selectedRows = $("#dataGrid").datagrid('getChecked');
+		
+		if (selectedRows.length != 1) {
+		     $.messager.alert('System Information','Please select one data!', 'warning');
+			return false;
+		}
+		var row = selectedRows[0];
+	    $('#addMetarialWin').show();
+	    $('#addMetarialWin').window({
+	         title:'Update Material',
+	        iconCls:'icon-edit'
+	    });
+		$('#addMetarialWin').window('open');
+		$('#rowId').val(row.rowId);
+		$('#materialNo').val(row.materialNo);
+		$('#materialNo').attr("readonly","readonly");
+		$('#materialDesp').val(row.materialDesp);
+		$('#mrpCode').val(row.mrpCode);
+		$('#oldMat').val(row.oldMat);
+		$('#matScanType').combobox('setValue', row.matScanType);
+		$('#plant').combobox('setValue', row.plant);
+		$('#basicUnit').combobox('setValue', row.basicUnit);
+		$('#length').numberbox('setValue',row.length);
+		$('#width').numberbox('setValue',row.width);
+		$('#higth').numberbox('setValue',row.higth);
+		$('#measureUnit').val(row.measureUnit);
+		$('#volume').numberbox('setValue',row.volume);
+		$('#volumeUnit').val(row.volumeUnit);
+		$('#remark').val(row.remark);
+		
+		url = "/api/update";
+    }
+    function closePdWin(){
+        $('#addInfoForm').form('clear');
+        $('#addMetarialWin').window('close');
+    }
+
+    function deleteData(){
+		var selectedRows = $("#dataGrid").datagrid('getChecked');
+		if (selectedRows.length < 1) {
+		     $.messager.alert('System Information',
+		    'Please select datas!', 'warning');
+			return false;
+		}
+		$.messager.confirm(
+	        'System Information',
+	        'Are you sure delete material info?',
+	        function(r) {
+	            if (r) {
+	                var codes = new Array();
+	                for ( var i = 0; i < selectedRows.length; i++) {
+	                    codes.push(selectedRows[i].rowId);
+	                }
+	                $.get(
+	                    "/api/delete",
+	                    {
+	                        'ids' : codes.join(),
+	                        'mess' : 'user delete'
+	                    },
+	                    function(data) {
+	                        if (data!='true') {
+								$.messager.alert('System Information','Delete Failure!','warning');
+							} else {
+								$.messager.alert('System Information','Delete Success!','warning');
+								$('#dataGrid').datagrid('reload');
+							}
+	                    });
+	            	}
+	        });
+    }
+	
+     /*导 出*/
+    function exportMaterialInfo() {
+    	
+        var url = "/material/exportMaterialInfo?" + 'materialNo=' + $('#materialNoS').val();
+	
+        window.location.href = url;
+    }
+    /*导 入*/
+    function importMaterialInfo() {
+        $('#importExcel').dialog({
+            title : 'Import MdmatInfo',
+            modal : true, //模式窗口：窗口背景不可操作
+            top:150,
+            collapsible : true, //可折叠，点击窗口右上角折叠图标将内容折叠起来
+            resizable : true
+            //可拖动边框大小
+        });
+        $('#exceltable').css({
+            display : "block"
+        });
+        $('#importExcel').dialog('open');
+    }
+
+    function importForm() {
+	
+        var fileType = $('#uploadBtn').val().substring($('#uploadBtn').val().lastIndexOf(".") + 1);
+        if (fileType != "xls") {
+            $.messager.alert('System Information', 'Please import the file in XLS format!', 'warning');
+            return;
+        }
+        $('#importExcelForm').form(
+                'submit',
+                {
+                    url : '/material/importMaterialInfo',
+                    onSubmit : function() {
+
+                    },
+                    success : function(data) {
+                        $('#importExcel').dialog('close');
+                        $.messager.alert('System Information',data, 'info');
+                        $('#dataGrid').datagrid('reload');
+                    }
+                });
+    }
+     function exportTemplate() {
+        window.location.href = "/material/download"
+    }
+    
+    //add for MDM interface, 2016-3-21
+    function downloadData() {
+    	
+    	var materialNo = $('#materialNoS').val().trim();
+        if (materialNo == ''||materialNo == undefined) {
+            $.messager.alert('System Information', 'Please input the material No.!', 'warning');
+            return;
+        }
+    	$.maskLoading();
+        $.post(
+                "/basic/downloadData",
+                {materialNo:$('#materialNoS').val()},
+                function(data) {
+                    var jsonObj = JSON.parse(data);
+                    $.messager.alert('System Information', jsonObj.msg, 'warning');
+                    $.maskEnd();
+                    $('#dataGrid').datagrid('reload');
+                }).error(function() {
+                    $.maskEnd();
+                    $.messager.alert('System Information','System Error. Please contact with administrator.', 'warning');
+                });
+    }
+    </script>
+{{/component}}

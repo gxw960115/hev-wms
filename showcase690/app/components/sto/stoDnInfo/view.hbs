@@ -1,0 +1,827 @@
+{{#component "stoDnDetailList js-comp"}}
+    <style type="text/css">
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            padding: 2.5px;
+            height: 25px;
+        }
+
+        .fileUpload input.upload {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
+        
+    </style>
+    <div id="stoDnDDiv" class="easyui-layout" style="width:100%;">
+        <div class="searchDiv" region="north" style="top:auto" >
+            <table id="searchTab1">
+                <tr>
+                    <td style="text-align:right;width:110px;">STO NO:</td>
+                    <td class="leftCls"><input  id="stono" class="radiusCls" style="width:155px;" type="text" /></td>
+                    <td style="text-align:right;width:110px;">STO DN NO:</td>
+                    <td class="leftCls" ><input style="width:155px;" id="stodnno" class="radiusCls" type="text" />
+                    <td style="text-align:right;width:110px;">Material No:</td>
+                    <td class="leftCls"><input style="width:155px;" id="materialNo" class="radiusCls" type="text" /></td>
+                    <td style="text-align:right;width:110px;">STO Type: </td>
+                    <td class="leftCls"><input style="width:155px;" id="stoType" class="radiusCls" type="text"></td>
+<!--                     <td style="text-align:right;width:110px;" class="rightCls">Do Flag:</td> -->
+<!--                     <td class="leftCls"> -->
+<!--                         <input style="width:110px;" id="flag" class="easyui-combobox flag" data-options="width:155,height:30,editable:false,panelHeight:'auto'" /></td> -->
+                </tr>
+                <tr>
+                    <td style="text-align:right;width:110px;">Gr Plant:</td> 
+                    <td class="leftCls"><input id="grPlant" type="text" class="easyui-combobox" style="border:0" data-options="border:false, width:155,height:30,editable:true,required:false"/></td> 
+<!--                    <td class="rightCls">Gi Location:</td> -->
+<!--                     <td class="leftCls"> -->
+<!--                         <input id="giLocation" style="width:155px" class="radiusCls" type="text" /></td> -->
+                    <td class="rightCls">Gr Location:</td>
+                    <td class="leftCls">
+                        <select id="grLocation" class="easyui-combobox" data-options="editable:false,multiple:true,multiline:true,valueField:'id',textField:'id'" style="width:155px;height:30px" ></select></td>
+<!--                 	<td style="text-align:right;width:110px;">Gi Plant:</td>  -->
+<!--                     <td class="leftCls"> -->
+<!--                         <input id="giPlant" type="text" class="easyui-combobox" style="border:0" data-options="border:false, width:155,height:30,editable:true,required:false"/> -->
+<!--                     </td>  -->
+                    
+                    <td style="text-align:right;">Create Date:</td>
+                    <td class="leftCls" colspan="3">
+                        <input  id="begin" class="radiusCls" style="width:155px;text-align: left;" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/> &nbsp;&nbsp;
+                        -  &nbsp;&nbsp;
+                        <input id="end" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                    
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" style="display: none;" class="btnStyle importBtn" id="importBtn1" onclick="importPlanReceipt()">Receipt Import</a>
+                   <!--  <a href="javascript:void(0)" class="btnStyle importBtn" id="importBtn" onclick="importPlanDelivery()">Delivery Import</a> -->
+                    <a href="javascript:void(0)" style="display: none;" class="btnStyle downloadGreyBtn" id="downloadBtn1" onclick="downTemplate()">Download Template</a>
+<!--                     <a href="javascript:void(0)" class="btnStyle scanBtn" id="prescanBtn">Pre Scan</a> -->
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" id="exportBtn">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle downloadWhiteBtn" id="okBtn">Download From SAP</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="dataGrid" style="width: 140%"></table>
+            <!--  sunyanfei-->
+            <input id="chkOrderNo" type="hidden">
+            <div id="showOrderWin" class="easyui-window" title="OrderInfo"
+                 data-options="border:false,modal:true,closed:true,top:0,iconCls:'icon-search',collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false"
+                 style="width: 920px; height: 480px;">
+                <div class="easyui-layout" fit="true" >
+                    <div region="center" data-options="border:false">
+                        <div class="easyui-layout" fit="true">
+                            <div region="center" style="width: 460px;" data-options="border:false">
+                                <table id="orderNoGrid"></table>
+                                <!-- <div id="orderNoGridTool">
+                                    <input type="text" id="orderNoP" size="19" value="">| 
+                                    <img src="/assets/images/serch-icon.png" id="serch-icon" onclick="searchOrder()"></td>
+                                </div> -->
+                            </div>
+                            <!-- <div region="center" data-options="border:false">
+                                <table id="orderGrid"></table>
+                            </div> -->
+                            <div region="east" style="width: 460px;" data-options="border:false">
+                                <div class="easyui-layout" fit="true" data-options="border:false">
+                                    <div region="center"  data-options="border:false">
+                                        <table id="stoGrid"></table>
+                                    </div>
+                                    <!-- <div region="center" style="height:46px;">
+                                        <font color="red" style="padding-left:33px;">carNo</font>
+                                        :<input id="carNo" type="text" readonly="readonly"/><br />
+                                        <font color="red">postingDate</font>
+                                        :<input id="postingDate" readonly value="${today }"
+                                                onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-options="region:'south',border:false"
+                         style="text-align: right; padding: 1px; height: 34px">
+                         <font color="red" style="padding-left:33px;">carNo</font>
+                                        :<input id="carNo" type="text" readonly/>
+                                        <font color="red">postingDate</font>
+                                        :<input id="postingDate" readonly value="${today }"
+                                                onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
+                         <a href="javascript:void(0)" class="btnStyle saveBtn"
+                         onclick="saveOrder()">confirm</a> 
+                         <a href="javascript:void(0)" class="btnStyle closeBtn" onclick="javascript:$('#showOrderWin').window('close');">cancel</a> 
+                    </div>
+                </div>
+            </div>
+            <!--  sunyanfei-->
+        </div>
+    </div>
+    <!--Excel导入begin-->
+    <div id="importExcel" icon="icon-save" style="width: 430px;top:180px;">
+        <h5 id="excel_message" style="color: red;"></h5>
+        <div class="ToolTip_Form" id="exceltable" style="display:none;">
+            <form method="post" id="importExcelForm" enctype="multipart/form-data" >
+                <table width="98%" height="98%">
+                    <tr>
+                        <td>
+                            <div style="background-color:#1caf9a; height:31px; width:100px; font-size:14px; color:white" class="fileUpload btn">
+                                <span>Browse Files</span>
+                                <input id="uploadBtn" name="importfile" type="file" class="upload" />
+                            </div>
+                            <input style="height:28px;" id="uploadFile" placeholder="  Choose File" disabled="disabled" />
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" class="btnStyle importBtn" style="height:30px;" id="importbtn" onclick="importForm();">Import</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <!--Excel导入end-->
+    <script type="text/javascript">
+        var totalWidth = $('#dataGrid').width();
+        $(function(){
+        	$('#stoDnDDiv').height(suitHeight);
+        	var currentUser = $.session.get("userName").toString();
+        	if (currentUser.toLowerCase() == 'punehub'||currentUser.toLowerCase()=='pankaj'){
+        		$("#importBtn1,#downloadBtn1").css('display','');
+        	} 
+
+            //初始化日期
+	        var date=new Date();
+	        var y=date.getFullYear();
+	        var m=date.getMonth()+1;
+	        var d=date.getDate();
+	        date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+	        $('#begin').val(getLastRq(date,-7));
+	        $('#end').val(date);
+	        
+            var columns=[[{
+                field:'ck',checkbox:true
+            },{
+                field:'stoNo',title:'STO NO',width:fixWidth(0.07), align:'center',sortable:true
+            },{
+                field:'stoItemNo',title:'STO Item',width:fixWidth(0.05), align:'center',sortable:true
+            },{
+                field:'stodnNo',title:'STO Dn No',width:fixWidth(0.07),align:'center',sortable:true
+            },{
+                field:'stodnItemNo',title:'STO Dn Item No',width:fixWidth(0.075), align:'center',sortable:true
+            },{
+            	field:'stoType',title:'STO Type',width:fixWidth(0.05), align:'center',sortable:true
+            },{
+                field:'materialNo', title:'Material No', width:fixWidth(0.07),align:'center',sortable:true
+            },{
+                field:'qty',title:'Qty',width:fixWidth(0.025), align:'center',sortable:true
+            },{
+                field:'unit',title:'Unit',width:fixWidth(0.03), align:'center',sortable:true
+            },{
+            	field:'grPlant',title:'GR Plant', width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'grLocation',title:'GR Location', width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'grFinishQty',title:'GR Scan Qty',width:fixWidth(0.06),align:'center',sortable:true
+            },{
+                field:'grFinishFlag',title:'GR Scan Flag',width:fixWidth(0.06), align:'center',sortable:true
+            }]];
+            var grid = $('#dataGrid').datagrid({
+                rownumbers: true,
+                columns: columns,
+                pagination: true,
+                striped: true,
+                remoteSort : false,
+                pageNumber : 1,
+                fit: true,
+                method: 'post',
+                url: '',
+//                 url:'/order/searchStoDn',
+//                 queryParams: {
+//                     stoNo:$('#stodn').val(),
+//                     stoDnNo:$('#stodnno').val(),
+//                     materialNo: $('#materialNo').val(),
+//                     giFinishFlag:$('#flag').combobox("getValue"),
+//                     begin:$('#begin').val(),
+//                     end:$('#end').val(),
+//                     location: $('#location').val()
+//                 },
+                onLoadError:function(){
+                     $.messager.alert('System Information','Network Abnormal!','warning');
+                },
+                onLoadSuccess:function(){
+                	$(this).datagrid("fixRownumber");
+                }
+            });
+            $.ajax({
+                url:'/plant/list/select',
+                type:'post',
+                dataType:'json',
+                success:function(data){
+                    var dataRes = [];
+                   // dataRes.push({ "text": " ", "value": " " });
+                    if(data!=''||data!=null||data!=undefined){
+                       for(var i=0;i<data.length;i++){
+                           dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                        }           
+                    }
+//                     $('#giPlant').combobox({
+//                         data:dataRes, 
+//                         panelWidth:180
+//                     })
+                    $('#grPlant').combobox({
+                        data:dataRes, 
+                        panelWidth:180
+                    })
+                }
+            });
+
+            // 加载Location数据
+            $(document).ready(function () {
+                $("#grPlant").combobox({
+                    onChange: function (record) {
+                        $.ajax({
+                            url: '/loc/getLocationList',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                               rowId: record.rowId,
+                               locationType: 0,
+                               parentId: record.rowId
+                            },
+                            success: function (data) {
+                                $("#grLocation").combobox({
+                                    data:data
+                                });
+                            }
+                        })
+                    }
+                });
+            });
+            initPagination(grid);
+            $('#queryBtn').on('click',function(){
+                queryStoReceiveData();
+            })
+
+            $('#prescanBtn').on('click',function(){
+                prescanStoReceiveData();
+            });
+           
+            $('#okBtn').on('click',function(){
+                okStoReceiveData();
+            })
+            $('#exportBtn').on('click',function(){
+                exportStoReceiveData();
+            })
+        })
+        // set width of column
+        function fixWidth(percent) {
+            return totalWidth * percent;
+        }
+
+        // 查询
+        function queryStoReceiveData() {
+            var grLocationArr = $('#grLocation').combobox('getValues');
+            var grLocations = getLocationStr(grLocationArr);
+            var grid=$('#dataGrid').datagrid({
+                url:'/sto/searchStodn',
+                queryParams: {
+                    stoNo:$('#stono').val(),
+                    stodnNo:$('#stodnno').val(),
+                    materialNo: $('#materialNo').val(),
+//                     giFinishFlag:$('#flag').combobox("getValue"),
+                    begin:$('#begin').val(),
+                    end:$('#end').val(),
+//                     giPlant:$('#giPlant').combobox('getValue'),
+                    grPlant:$('#grPlant').combobox('getValue'),
+//                     gilocation: $('#giLocation').val(),
+                    grLocation: grLocations,
+                    stoType: $('#stoType').val()
+                },
+                onLoadSuccess : function(data) {
+                    if (data.total == 0 && data.rows.length == 0) {
+                        $.messager.alert('System Information', 'No records found.', 'warning');
+                        gridScroll(grid);
+                    }
+                    $(this).datagrid("fixRownumber");
+                }
+            });
+            initPagination(grid);
+        }
+
+        function okStoReceiveData(){
+        	if(!$('#stono').val().trim()) {
+                $.messager.alert('System Information', 'The sto no should not be empty!', 'warning');
+                return false;
+        	}
+            if(!$('#stodnno').val().trim()) {
+                    $.messager.alert('System Information', 'The stodn no should not be empty!', 'warning');
+                    return false;
+            }
+            $.maskLoading();
+            $.post(
+                    "/sto/downloadStodn",
+                    {
+                        'type' : 'stodn',
+                        'stoNo': $('#stono').val(),
+                        'stodnNo' : $('#stodnno').val()
+//                         'begin' : $('#begin').val(),
+//                         'end' : $('#end').val()
+                    },
+                    function(data) {
+                        var jsonObj = JSON.parse(data);
+                        if (jsonObj.status == 'S') {
+                            $.maskEnd();
+                            $.messager.alert('System Information', 'Download Success!', 'warning');
+                            queryStoReceiveData();
+                        } else {
+                            $.maskEnd();
+                            $.messager.alert('System Information', jsonObj.msg, 'error');
+                        }
+                        // unLoadMask($('#loading'));
+                        // $('#stgStoDownGrid').datagrid('reload');
+                    }).error(function() {
+                        $.maskEnd();
+                        // unLoadMask($('#loading'));
+                        $.messager.alert('System Information', 'Network Abnormal!', 'error');
+                    });
+        }
+
+        // 导出
+        function exportStoReceiveData(){
+            var grLocationArr = $('#grLocation').combobox('getValues');
+            var grLocations = getLocationStr(grLocationArr);
+            var stoNo_ = $('#stono').val();
+            var a = $('#stodnno').val();
+            var b = $('#materialNo').val();
+//             var c = $('#giLocation').val();
+//             var d = $('#flag').combobox("getValue");
+//             var f = $('#giPlant').combobox('getValue');
+            var g = $('#grPlant').combobox('getValue');
+            var i = $('#begin').val();
+            var j = $('#end').val();
+            
+            $.ajax({
+            	url:'/sto/searchStgStodnDownAmount',
+            	type:'post',
+            	dataType:'json',
+            	data:{
+            		a:1,
+                    stoNo: stoNo_,
+            		stodnNo:a,
+            		materialNo:b,
+//             		giLocation:c,
+//             		grFinishFlag:d,
+//             		giPlant:f,
+            		grLocation:grLocations,
+            		grPlant:g,
+            		begin:i,
+            		end:j
+            	},
+            	success:function(data) {
+            		if (data == "success") {
+            			var url = "/sto/exportStgStodnDownExcel?a=1"
+                            + '&stodnNo=' +a
+                            + '&materialNo=' + b
+//                             + '&giLocation=' + c 
+//                             + '&grFinishFlag='+ d
+                            + '&stoNo='+ stoNo_
+//                             + '&giPlant='+ f
+                            + '&grLocation='+ grLocations
+                            + '&grPlant='+g 
+                            + '&begin='+i
+                            + '&end='+j;
+                    window.location.href = url;
+            		}else {
+            			$.messager.alert('System Information',data,	'warning');
+            		}
+            	}
+            });
+            
+            /*var url = "/order/exportStgStoDnDown?a=1"
+                    + '&stoDnNo=' +a
+                    + '&materialNo=' + b
+                    + '&location=' + c 
+                    + '&giFinishFlag='+ d
+                    + '&stoNo='+ e
+                    + '&plant='+ f
+                    + '&grLocation='+h
+                    + '&grPlant='+g 
+                    + '&begin='+i
+                    + '&end='+j;
+            window.location.href = url;*/
+        }
+        var orderNoColumns = [ [ {
+        	 field : 'orderNo',
+             title : 'STO DN No',
+             align : 'center'  
+        },{
+        	
+        	 field : 'orderItem',
+             title : 'DN Item',
+             align : 'center'
+           
+        },{
+        	
+        	field : 'materialNo',
+            title : 'Material NO',
+            align : 'center'
+           
+        },{
+        	
+        	field : 'scannedQty',
+            title : 'Scanned Qty',
+            align : 'center'
+           
+        },{
+        	
+        	field : 'requireQty',
+            title : 'require Qty',
+            align : 'center'
+           
+        }] ];
+        var orderColumns = [ [ {
+            field : 'materialNo',
+            title : 'materialNo',
+            align : 'center',
+            formatter : function(val, row) {
+                if (row.trueFlag) {
+                    return "<font color='red'>" + val + "</font>";
+                } else {
+                    return "<font color='green'>" + val + "</font>";
+                }
+            }
+        }, {
+            field : 'scannedQty',
+            title : 'scannedQty',
+            align : 'center'
+        }, {
+            field : 'unit',
+            title : 'unit',
+            align : 'center',
+            width : 80
+        }, {
+            field : 'sapFlag',
+            title : 'sapFlag',
+            align : 'center',
+            width : 80
+        } ] ];
+        var stoColumns = [[{
+            field : 'rowId',
+            title : '  ',
+            align : 'center',
+        },{
+            field : 'orderNo',
+            title : 'OGP No',
+            align : 'center'
+        }, {
+            field : 'barcode',
+            title : 'BarCode',
+            align : 'center'
+        }, {
+            field : 'qty',
+            title : 'Qty',
+            align : 'center'
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            align : 'center'
+        } 
+        , {
+            field : 'plant',
+            title : 'Plant',
+            align : 'center'
+        }
+        , {
+            field : 'location',
+            title : 'Location',
+            align : 'center'
+        }] ];
+     
+        // preScan 点击批量导入入库条码事件
+        function prescanStoReceiveData(){
+        	
+        	var selectedRows = $("#dataGrid").datagrid('getChecked');
+        	
+           if (selectedRows.length != 1) {
+                $.messager.alert('System Information',
+                        'Please select one data', 'warning');
+                return false;
+            }
+            
+          if (selectedRows[0].prescanFlag == 1) {
+                $.messager
+                      .alert('System Information',
+                        'The data already Pre Scan!',
+                     'warning');
+            return false;
+          } 
+          
+            //订单已被处理
+            if (selectedRows[0].grFinishQty >0) {
+                $.messager
+                        .alert('System Information',
+                        'The STO order has  been  processed!',
+                        'warning');
+                return false;
+            }
+            
+            $.ajax({
+                type:'post',
+                url:"/order/prescanImportCheck",
+                dataType:'json',
+                data:{ 'stoDNNo':selectedRows[0].stoDnNo },
+                success:function(data) {
+                    if (data.success!='success') {
+                   	 $.messager.alert('System Information',data.result,'warning');
+                   	 return false;
+                    } 
+                    
+                  //单据号 grid
+                    var orderNoGrid= $('#orderNoGrid').datagrid({
+                         title : 'STO DN Detail',
+                         rownumbers : true,
+                         pagination : true,
+                         striped : true,
+                         singleSelect : true,
+                         height : 420,
+                         loadMsg : 'query',
+                         url : '/order/searchStoDNDetail?orderNo='+selectedRows[0].stoDnNo,
+                         idField : 'orderNo',
+                         fitColumns : false,
+                         fit : true,
+                         pageNumber : 1,
+                         columns : orderNoColumns,
+                         toolbar : '#orderNoGridTool',
+                         onDblClickRow : orderClick
+                     });
+                    
+                     initPagination(orderNoGrid);
+                    
+                     //STO列表
+                     $('#stoGrid').datagrid(
+                             {
+                                 title : 'STO Info',
+                                 rownumbers : true,
+                                 pagination : true,
+                                 striped : true,
+                       //          singleSelect : false,
+                                 idField : 'materialNo',
+                                 fitColumns : false,
+                                 remoteSort:false,
+                                 pageNumber : 1,
+                                 fit : true,
+                                 columns : stoColumns,
+                                 url : '/order/searchOgpDetailList',
+                                 queryParams : {
+                                 	'orderNo':selectedRows[0].stoDnNo,
+                                 	'orderItem':selectedRows[0].stoDnItemNo
+                                 },
+                                 onLoadSuccess : function(data) {
+                                     if (data.mess != null) {
+                                         $.messager.alert('System Information',
+                                                 data.mess, 'warning');
+                                         return;
+                                     }
+                                 },
+                                 onLoadError:function(){
+                                      $.messager.alert('System Information','Network Abnormal!','warning');
+                                 }
+                             });
+                     $('#showOrderWin').window("open");
+                     
+                },  //success结束
+              error: function() {
+                    $.messager.alert('System Information','error','warning');
+                    return false;
+                }//error end
+           });//ajax end 
+        }
+        
+        function orderClick(index, row) {
+            $('#stoGrid').datagrid(
+                    {
+                        url : '/order/searchOgpDetailList',
+                        queryParams : {
+                        	'orderNo':row.orderNo,
+                        	'orderItem':row.orderItem
+                        }, 
+                        onLoadSuccess : function(data) {
+                            $("#orderGrid").datagrid('clearChecked');
+                            if (data.total == 0 && data.rows.length == 0) {
+                                $.messager.alert('System Information',
+                                        'No data',
+                                        'warning');
+                            }
+                        },
+                        onLoadError:function(){
+                             $.messager.alert('System Information','Network Abnormal!','warning');
+                        }
+                    });
+            $('#stoGrid').datagrid("reload");
+            $('#chkOrderNo').val(
+                    row.orderNo + ","
+                    + $("#dataGrid").datagrid('getChecked')[0].stoDnNo);
+            //加载车号
+            $('#carNo').val(row.carNo);
+        }
+        
+        function orderClick(index, row) {
+            $('#stoGrid').datagrid(
+                    {
+                        url : '/order/searchOgpDetailList',
+                        queryParams : {
+                        	'orderNo':row.orderNo,
+                        	'orderItem':row.orderItem
+                        }, 
+                        onLoadSuccess : function(data) {
+                            $("#orderGrid").datagrid('clearChecked');
+                            if (data.total == 0 && data.rows.length == 0) {
+                                $.messager.alert('System Information',
+                                        'No data',
+                                        'warning');
+                            }
+                        },
+                        onLoadError:function(){
+                             $.messager.alert('System Information','Network Abnormal!','warning');
+                        }
+                    });
+            $('#stoGrid').datagrid("reload");
+            $('#chkOrderNo').val(
+                    row.orderNo + ","
+                    + $("#dataGrid").datagrid('getChecked')[0].stoDnNo);
+            //加载车号
+            $('#carNo').val(row.carNo);
+        }
+
+        function searchOrder() {
+          var grid = $('#orderNoGrid').datagrid({
+                    url : '/order/searchOrderNo',
+                    queryParams : {
+                        'orderNo' : $('#orderNoP').val()
+                    },
+                    loadMsg : 'query',
+                    onLoadSuccess : function(data) {
+                        $("#orderNoGrid").datagrid('clearChecked');
+                        if (data.total == 0 && data.rows.length == 0) {
+                            $.messager.alert('System Information', 'Query no data', 'warning');
+                        }
+                    }
+                });
+             initPagination(grid);
+        }
+
+      function saveOrder() {
+            var stoDnNo =$("#dataGrid").datagrid('getChecked')[0].stoDnNo;
+            
+            $.messager .confirm( 'System Information', 'OdsOrderInfo confirm prescan',
+              function(r) {
+                        if (r) {
+                        	$.maskLoading();
+                            //进行物料选择
+                            $.ajax({
+                                    type:'post',
+                                    url:"/order/prescanImport",
+                                    dataType:'json',
+                                    data:{'stoDNNo':stoDnNo },
+                                    success:function(data) {
+                                    	if(data.msg){
+                                            
+                                            $.messager.show({
+                                                title:'Prescan Message Detail',
+                                                msg:data.result+"</br>"+data.msg,
+                                                timeout:0,
+                                                width:600,
+                                                height:400,
+                                                showType:'show',
+                                                style:{
+                                                    top:50,
+                                                    left:($(window).width() - 600) * 0.5
+                                                }
+                                            });
+                                        }else{
+                                            $.messager
+                                                    .alert(
+                                                    'System Information',
+                                                    'Pre Scan Success!',
+                                                    'warning');
+                                        }
+                                        $('#showOrderWin').window("close");
+                                        $('#stgStoDownGrid').datagrid('reload');
+                                        $.maskEnd();
+                                    },  //success结束
+                                  error: function() {
+                                        $.messager
+                                                .alert(
+                                                'System Information',
+                                                'error',
+                                                'warning');
+                                    }//error end
+                           });//ajax end 
+                        } //if end
+                    });//fuction  end  confirm end 
+        } // save end
+        //Excel导入 调用该方法
+        var orderType='1';
+        function importPlanReceipt() {
+        	orderType='1';
+            $('#importExcel').show();
+            $('#importExcel').dialog({
+                title : 'import',
+                modal : true, //模式窗口：窗口背景不可操作
+                collapsible : true, //可折叠，点击窗口右上角折叠图标将内容折叠起来
+                resizable : true
+                //可拖动边框大小
+            });
+            $('#exceltable').css({
+                display : "block"
+            });
+            $('#importExcel').dialog('open');
+        }
+        function importPlanDelivery() {
+        	orderType='2';
+            $('#importExcel').show();
+            $('#importExcel').dialog({
+                title : 'import',
+                modal : true, //模式窗口：窗口背景不可操作
+                collapsible : true, //可折叠，点击窗口右上角折叠图标将内容折叠起来
+                resizable : true
+                //可拖动边框大小
+            });
+            $('#exceltable').css({
+                display : "block"
+            });
+            $('#importExcel').dialog('open');
+        }
+        //Excel导入
+        document.getElementById("uploadBtn").onchange = function () {
+            document.getElementById("uploadFile").value = this.value;
+        };
+        var dataMsg='';
+        function importForm() {
+        	var url='/order/stoReceiptImportSuper?orderType='+orderType;
+            $.maskLoading();
+            $('#importExcelForm').form(
+                    'submit',
+                    {
+                        url : url,
+                        success : function(data) {
+                            var data = eval('(' + data + ')');
+                            if(data.msg){
+                                /* dataMsg=data.msg; */
+                                $('#importExcel').dialog('close');
+                                /* $.messager.alert('System Information',
+                                        data.result+"</br><a href='javascript:void(0)'  onclick='showDetail()'>Details</a>", 'info'); */
+                                $.messager.show({
+                                    title:'Import Message Detail',
+                                    msg:data.result+"</br>",//+data.msg
+                                    timeout:0,
+                                    width:600,
+                                    height:400,
+                                    showType:'show',
+                                    style:{
+                                        top:50,
+                                        left:($(window).width() - 600) * 0.5
+                                    }
+                                });
+                            }else {
+                                $('#importExcel').dialog('close');
+                                $.messager.alert('System Information',
+                                        data.result, 'info');
+                            }
+                            $.maskEnd();
+                        },
+                        onLoadError : function(){
+                            $.messager.alert('System Information',
+                                    'Network Abnormal', 'info');
+                            $.maskEnd();
+                        }
+                    });
+        }
+      
+        function showDetail(){
+            $.messager.show({
+                title:'Fail Message Detail',
+                msg:dataMsg,
+                timeout:0,
+                width:600,
+                height:400,
+                showType:'show',
+                style:{
+                    top:50,
+                    left:($(window).width() - 600) * 0.5
+                }
+            });
+
+        }
+        function downTemplate(){
+            window.location.href="/order/downStoTemplate?filename=sto_import_template.xls";
+        }
+    </script>
+{{/component}}

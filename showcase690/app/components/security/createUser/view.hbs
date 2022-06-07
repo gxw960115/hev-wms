@@ -1,0 +1,197 @@
+{{#component "createUser js-comp"}}
+    <style type="text/css">
+        #searchTab{
+            display: inline-block;
+            margin-left: 8px;
+            margin-top: 10px; 
+        }
+        #searchTab1{
+            display: inline-block;
+            margin-left: 50px;
+            margin-top: 20px;
+            width: 98%;
+        }
+        #searchTab1 tr{
+            height: 35px;
+        }
+        #searchTab1 input{
+            height: 30px;
+            width: 155px;
+        } 
+    </style>
+     <script type="text/javascript">
+    var treeData=[];
+    $(function(){
+        //初始化日期 
+        var date=new Date();
+        var m=date.getMonth()+1;
+        var day=date.getDate();
+        $('#expirationDate').val(date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( day< 10 ? '0' + day : day));
+        getTreeData();
+        $('#status').combobox({
+            value:'1',
+            data:[{"text":"Active","value":"1"},{"text":"Disable","value":"0"},{"text":"Locked","value":"2"}]
+        });
+        $('#functionType').combobox({
+            value:'1',
+            onSelect:function(record){
+                setWhlTree(record.value);
+            },
+            data:[{"text":"Super Admin","value":"1"},{"text":"Location Admin","value":"3"}]
+        });
+    });
+    
+    function savePd(){
+
+        if (!$("#userName").val()) {
+            $.messager.alert('System Information','User Name The Data not null');
+            return false;
+        }
+        if (!$("#userNickName").val()) {
+            $.messager.alert('System Information','User Nick Name The Data not null');
+            return false;
+        }
+        if (!$("#password").val()) {
+            $.messager.alert('System Information','Password The Data not null');
+            return false;
+        }
+        if (!$("#confirmPassword").val()) {
+            $.messager.alert('System Information','Password The Data not null');
+            return false;
+        }
+        if (!$("#email").val()) {
+            $.messager.alert('System Information','email The Data not null');
+            return false;
+        }
+        var nodes=$('#whTree').tree('getChecked');
+        var codes = new Array();
+        for ( var i = 0; i < nodes.length; i++) {
+            if(nodes[i].Type=='3'){
+                codes.push(nodes[i].id);
+            }
+        }
+        $("#locs").val(codes);
+        if($("#confirmPassword").val()!=$("#password").val()){
+            $.messager.alert('System Information','The password is different from the confirmPassword');
+            return false;
+        }
+        if(!((/^[0-9a-zA-Z_-]{1,}(\.[0-9a-zA-Z_-]{1,})*@[0-9a-zA-Z_-]{1,}(\.[0-9a-zA-Z_-]{1,})*\.[a-zA-Z]{2,3}$/).test($("#email").val()))){
+            $.messager.alert('System Information','The email format is not correct');
+            return false;
+        }
+        
+        var expireDate = $("#expirationDate").val();
+        var temp = expireDate.split("-");
+        var date1 = new Date(temp[0]-1, temp[1]-1, temp[2]);
+        var date2 = new Date();
+        if (date1 > date2){
+        	$.messager.alert('System Information','Period of validity should less than 1 year!');
+            return false;
+        }
+
+        $.maskLoading();
+        $.post("/security/createUser", {
+            'name' :     $('#userName').val(),
+            'nickName' : $("#userNickName").val(),
+            'password' : $("#password").val(),
+            'email' :    $('#email').val(),
+            'status' :   $('#status').combobox('getValue'),
+            'expiredTime':     $('#expirationDate').val(),
+            'dutyType':        $('#functionType').combobox('getValue'),
+            'whLocs':    $("#locs").val()
+        }, function(data) {
+                $.messager.alert('System Information',data, 'warning');
+                $.maskEnd();
+        }).error(
+                function() {
+                    $.messager.alert('System Information','Network Abnormal!','warning');
+                    $.maskEnd();
+                });
+    }
+    
+    function resetPd(){
+        
+        $("#userName").val("");
+        $("#userNickName").val("");
+        $("#password").val("");
+        $("#confirmPassword").val("");
+        $("#email").val("");
+    }
+     
+    function getTreeData(){
+        $.ajax({
+            url:'/sapInfo/localTree?userType='+ '3',
+            type:'post',
+            dataType:'json',
+            async:false,
+            success:function(data){
+                treeData=data;
+            }
+        });
+        
+    }
+    function setWhlTree(value) {
+        if(value=='1'){
+            $('#whTree').tree();
+            $('#whTree').tree('loadData',"");
+        }else{//3
+            $('#whTree').tree({
+                checkbox:true,
+                data :treeData
+            });
+        }
+            
+    } 
+    </script>
+    
+    <div class="easyui-layout"  style="width:100%;height:522px;">
+    <div class="addDiv">
+        <table class="form_table" id="searchTab1">
+            <tr>
+                <td style="text-align: center">User Name&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls" style="width:240px;"><input type="text" class="radiusCls" id="userName">
+                                    <input type="hidden" class="radiusCls" id="locs"></td>
+                <td style="text-align: center;">User Nick Name&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input type="text" class="radiusCls" id="userNickName"></td>
+            </tr>
+            <tr>
+                <td style="text-align: center">Password&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input type="password" class="radiusCls" id="password"></td>
+                <td style="text-align: center">Confirm Password&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input type="password" class="radiusCls" id="confirmPassword"></td>
+            </tr>
+            <tr>
+                <td style="text-align: center">Email&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls"><input type="email" class="radiusCls" id="email"></td>
+                <td style="text-align: center">Status&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls" colspan="2">
+                   <input id="status" type="text" class="easyui-combobox" data-options="width:155,height:30,editable:false,panelHeight:'auto'"> 
+                </td>
+            </tr>
+            <tr>
+				<td style="text-align: center">Function Type&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls">
+                    <input type="text" id="functionType" class="easyui-combobox" data-options="width:155,height:30,editable:false,panelHeight:'auto'" />                       
+                </td>
+                <td style="text-align: center">Expiration date&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td colspan="3"  class="leftCls"><input id="expirationDate" class="radiusCls" readonly value="" onClick="WdatePicker({lang:'en',dateFmt:'yyyy-MM-dd'})" /></td>
+            </tr>
+            <tr>
+                <td style="text-align: center">Warehouse&Location&nbsp;<font color="red">*</font>&nbsp;</td>
+                <td class="leftCls" colspan="3">
+	                <div style="height: 200px; border: 1px #ccc solid; width: 350px; overflow-y: scroll; overflow-x: auto;">
+                        <ul id="whTree"></ul>
+                    </div>
+				</td>
+            </tr>
+            <tr></tr>
+            <tr style="height:50px;">
+                <td colspan="4" style="text-align:right">
+                    <a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn" onclick="savePd();">Add</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" id="addBtn" onclick="resetPd();">reset</a>
+				</td>
+            </tr>
+        </table>
+        </div>
+    </div>
+{{/component}}

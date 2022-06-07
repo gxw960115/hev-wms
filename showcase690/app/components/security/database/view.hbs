@@ -1,0 +1,370 @@
+{{#component "oracle js-comp"}}
+<style type="text/css">
+    .tableCss {
+		min-height: 15px;
+		line-height: 15px;
+		text-align: center;
+		border-collapse: collapse;
+	}
+	.tableCss th,td {
+		text-align: center;
+		vertical-align: middle;
+		white-space: nowrap; ;
+		height: 15px;
+		max-height: 15px;
+		padding: 5px;
+		border: 1px solid black;
+	}
+	.tableCss th {
+		font-weight:bold;
+		background-color: #F0F0F0;
+	}
+	.tableCss tbody > tr:nth-of-type(even) > td {
+		background: #E5FFE5;
+	}
+	.tableCss tbody > tr:nth-of-type(odd) > td {
+		background: #FFFFFF;
+	}
+	.tableCss tbody > tr:hover {
+		background-color: #f5f5f5;
+	}
+    .table-cont{
+        max-height: 500px;
+        overflow: auto;
+        margin: 0px 0px 0px 15px;
+        width: 100%;
+        height : 500px;
+    }
+</style>
+
+<div style="width: 1000px;">
+    <div style="width: 100%">
+    	<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;表:<select style="margin-left:10px;margin-top:10px;" id = "tableSelect" onchange="changeColumns(this)"></select>
+        &nbsp;&nbsp;列:<select style="margin-left:10px;margin-top:10px;" id = "columnSelect"></select>  
+        <br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;函数:<select style="margin-left:10px;margin-top:10px;" id = "functionSelect" onchange="changePrc(this)"></select>  
+        &nbsp;&nbsp;过程:<select style="margin-left:10px;margin-top:10px;" id = "procedureSelect" onchange="changePrc(this)"></select>  
+        <div style="float:right;margin-rigth:100px;">
+        	<div class="table-use">
+        		<a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+            	<a href="javascript:void(0)" class="btnStyle editBtn" id="modifyBtn">Modify</a>
+        	</div>
+            <div class="prc-use">
+            	<a href="javascript:void(0)" class="btnStyle editBtn" id="updateBtn">Modify</a>
+            </div>
+        </div>
+        <br/> 
+    </div>
+    <div style="margin-top:10px;margin-left:20px;" class = "table-use">
+    	<textarea id = "sql" rows="4" cols="110" style="resize:none"></textarea>
+    </div>
+    <div class = "table-cont table-use" id="table-cont">
+        <table class="tableCss">
+            <thead id = "head">
+                
+            </thead>
+            <tbody id = "body">
+                
+            </tbody>
+        </table>
+    </div>
+    <div class = "table-use">
+	    <ul id="pagination" class="pagination"></ul>
+	</div>
+    <div style="margin-top:10px;margin-left:20px;" class = "prc-use">
+    	<textarea id = "prc" rows="30" cols="110" style="resize:both"></textarea>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var pageSize = 100;
+    var currPro = "";
+    $(function(){
+    	$(".prc-use").css('display','none');
+        //表头固定
+        window.onload = function(){
+            var tableCont = document.querySelector('#table-cont');
+            function scrollHandle (e){
+                var scrollTop = this.scrollTop;
+                this.querySelector('thead').style.transform = 'translateY(' + scrollTop + 'px)';
+            }
+            tableCont.addEventListener('scroll',scrollHandle);
+        }
+        $.post('/security/wms/init', function(data) {
+            var tables = data.split(":")[0].split(",");
+            var columns = data.split(":")[1].split(",");
+            var functions = data.split(":")[2].split(",");
+            var procedures = data.split(":")[3].split(",");
+            var tabInfos = "";
+            var colInfos = "";
+            var funcInfos = "";
+            var proInfos = "";
+            for(var i=0; i < tables.length; i++){
+                tabInfos += "<option value=" + tables[i]+">"+tables[i]+"</option>";
+            }
+            for(var i=0; i < columns.length; i++){
+                colInfos += "<option value=" + columns[i]+">"+columns[i]+"</option>";
+            }
+            for(var i=0; i < functions.length; i++){
+            	funcInfos += "<option value=" + functions[i]+">"+functions[i]+"</option>";
+            }
+            for(var i=0; i < procedures.length; i++){
+            	proInfos += "<option value=" + procedures[i]+">"+procedures[i]+"</option>";
+            }
+            $("#tableSelect").html(tabInfos);
+            $("#columnSelect").html(colInfos);
+            $("#functionSelect").html(funcInfos);
+            $("#procedureSelect").html(proInfos);
+        })
+    })
+
+    function changeColumns(obj){
+    	$(".prc-use").css('display','none');
+    	$(".table-use").css('display','block');
+    	$(".table-use1").css('display','inline');
+        $.post('/security/wms/changeColumns', {
+            'tableName' : obj.value
+        }, function(data) {
+            var columns = data.split(",");
+            var colInfos = "";
+            for(var i=0; i < columns.length; i++){
+                colInfos += "<option value=" + columns[i]+">"+columns[i]+"</option>";
+            }
+            $("#columnSelect").html(colInfos);
+        })
+        var sql = $("#sql").val().trim(); 
+        if(sql == ""){
+            $("#sql").val("SELECT * FROM " + obj.value);
+        }
+    }
+
+    $("#queryBtn").click(function(){
+        var sql = $("#sql").val().trim(); 
+        if(sql == ""){
+            $.messager.alert('System Information','请输入SQL!', 'warning');
+            return false;
+        } else {
+            var sqlType = sql.split(" ")[0].toUpperCase();
+            if(sqlType == "UPDATE"){
+                $.messager.alert('System Information',sqlType+'语句,请点击Modify!', 'warning');
+                return false;
+            }
+            if(sqlType == "DELETE"){
+                $.messager.alert('System Information',sqlType+'语句,请点击Modify!', 'warning');
+                return false;
+            }
+            if(sqlType == "INSERT"){
+                $.messager.alert('System Information',sqlType+'语句,请点击Modify!', 'warning');
+                return false;
+            }
+            if(sqlType != "SELECT" && sqlType != "WITH" ){
+                $.messager.alert('System Information','无效SQL', 'warning');
+                return false;
+            }
+        }
+        
+        $.post('/security/wms/query', {
+            'sql' : sql,
+            'pageSize' : pageSize,
+            'currentPage' : 1
+        }, function(data) {
+            var msg = JSON.parse(data);
+            var status = msg.status;
+            if ("1" == status) {
+                var info = JSON.parse(msg.info);
+                var headMsg = info.title.split(",");
+                var bodyMsg = JSON.parse(info.row);
+                var headHtml = "";
+                var bodyHtml = "";
+                for (var i = 0; i < headMsg.length; i++) {
+                    if(headMsg[i] == "ROW_"){
+                        headHtml += "<th>&nbsp;&nbsp;NO.&nbsp;&nbsp;</th>";
+                    } else {
+                        headHtml += "<th>&nbsp;&nbsp;"+headMsg[i]+"&nbsp;&nbsp;</th>";
+                    }
+                }
+                headHtml = "<tr>" + headHtml + "</tr>";
+                for (var i = 0; i < bodyMsg.length; i++) {
+                    var trRow = bodyMsg[i];
+                    bodyHtml += "<tr>";
+                    for (var j = 0; j < headMsg.length; j++) {
+                        var rowV = trRow[headMsg[j]];
+                        if (typeof(rowV) == "undefined") {
+                            rowV = "";
+                        } else {
+                            rowV = ("null" == rowV ? "" : rowV);
+                        }
+                        bodyHtml += "<td>"+rowV+"</td>"; 
+                    }
+                    bodyHtml += "</tr>";
+                }
+                $("#head").html(headHtml);
+                $("#body").html(bodyHtml);
+                var totalPage = msg.totalPage;
+                $("#pagination").jqPaginator({
+                    totalPages: totalPage,
+                    visiblePages: 10,
+                    currentPage: 1,
+                    onPageChange: function (n,type) {
+                        if("change" == type){
+                            $.post('/security/wms/query', {
+                                    'sql' : sql,
+                                    'pageSize' : pageSize,
+                                    'currentPage' : n
+                                }, function(data) {
+                                    var msg = JSON.parse(data);
+                                    var status = msg.status;
+                                    if ("1" == status) {
+                                        var info = JSON.parse(msg.info);
+                                        var headMsg = info.title.split(",");
+                                        var bodyMsg = JSON.parse(info.row);
+                                        var headHtml = "";
+                                        var bodyHtml = "";
+                                        for (var i = 0; i < headMsg.length; i++) {
+                                            if(headMsg[i] == "ROW_"){
+                                                headHtml += "<th>&nbsp;&nbsp;NO.&nbsp;&nbsp;</th>";
+                                            } else {
+                                                headHtml += "<th>&nbsp;&nbsp;"+headMsg[i]+"&nbsp;&nbsp;</th>";
+                                            }
+                                        }
+                                        headHtml = "<tr>" + headHtml + "</tr>";
+                                        for (var i = 0; i < bodyMsg.length; i++) {
+                                            var trRow = bodyMsg[i];
+                                            bodyHtml += "<tr>";
+                                            for (var j = 0; j < headMsg.length; j++) {
+                                                var rowV = trRow[headMsg[j]];
+                                                if (typeof(rowV) == "undefined") {
+                                                    rowV = "";
+                                                } else {
+                                                    rowV = ("null" == rowV ? "" : rowV);
+                                                }
+                                                bodyHtml += "<td>"+rowV+"</td>"; 
+                                            }
+                                            bodyHtml += "</tr>";
+                                        }
+                                        $("#head").html(headHtml);
+                                        $("#body").html(bodyHtml);
+                                    } else {
+                                        $.messager.alert('System Information',msg.info, 'warning');
+                                        $("#head").empty();
+                                        $("#body").empty();
+                                    }
+                                }).error(
+                                    function() {
+                                        $.messager.alert('System Information','Network Abnormal!','warning');
+                                        $("#head").empty();
+                                        $("#body").empty();
+                                    }); 
+                        }
+                    }
+                });
+
+            } else {
+                $.messager.alert('System Information',msg.info, 'warning');
+                $("#head").empty();
+                $("#body").empty();
+            }
+        }).error(
+            function() {
+                $.messager.alert('System Information','Network Abnormal!','warning');
+                $("#head").empty();
+                $("#body").empty();
+            });
+    })
+    
+    $("#modifyBtn").click(function(){
+        var sql = $("#sql").val().trim(); 
+        var sqlType = "";
+        if(sql == ""){
+            $.messager.alert('System Information','请输入SQL!', 'warning');
+            return false;
+        } else {
+            sqlType = sql.split(" ")[0].toUpperCase();
+            if(sqlType == "SELECT"){
+                $.messager.alert('System Information',sqlType+'语句,请点击Query!', 'warning');
+                return false;
+            }
+            if(sqlType != "UPDATE" && sqlType != "DELETE" && sqlType != "INSERT"){
+                $.messager.alert('System Information','无效SQL', 'warning');
+                return false;
+            }
+        }
+        var sqlTypeC = "";
+        if (sqlType == "DELETE") {
+            sqlTypeC = "&nbsp;删除&nbsp;";
+        } else if(sqlType == "UPDATE") {
+            sqlTypeC = "&nbsp;修改&nbsp;";            
+        } else if(sqlType == "INSERT") {
+            sqlTypeC = "&nbsp;新增&nbsp;";            
+        }
+        sqlTypeC = "<font color = red><b>" + sqlTypeC + "</b></font>";
+        var msg = '即将执行'+sqlTypeC+"语句！！！<br>";
+        msg += "执行前,建议您先根据所有条件执行对应的<font color = green><b>&nbsp;查询&nbsp;</b></font>语句,";
+        msg += "确保要"+sqlTypeC+"的记录符合您的预期！";
+        msg += "确定"  + sqlTypeC + "吗？";
+        $.messager.confirm('System Information',msg,
+            function(r) {
+                if (r) {
+                    $.post('/security/wms/modify', {
+                        'sql' : sql
+                    }, function(data) {
+                        if (data == "success") {
+                            $.messager.alert('System Information',sqlType +' Success!', 'warning');
+                        } else {
+                            $.messager.alert('System Information',data, 'warning');
+                        }
+                    }).error(
+                        function() {
+                            $.messager.alert('System Information','Network Abnormal!','warning');
+                        }
+                    );
+                }
+            }
+        );
+    })
+    
+    function changePrc(obj){
+    	$(".table-use").css('display','none');
+    	$(".prc-use").css('display','block');
+    	var proContext = "";
+    	currPro = obj.value;
+        $.post('/security/wms/checkProcedure', {
+            'prcName' : currPro
+        }, function(data) {
+        	debugger;
+        	var jsonObj=eval(data);  
+        	
+            $.each(jsonObj, function (i, item) {  
+                proContext += item;
+            });  
+            $("#prc").html(proContext);
+        })
+
+    }
+    
+    $("#updateBtn").click(function(){
+    	var prcContext = "create or replace " + $("#prc").val().trim(); 
+    	var msg = "即将编译该函数/过程，请先在测试库中检查语法错误！";
+    	var sqlType = "<font color = red><b>&nbsp;编译&nbsp;</b></font>";
+    	$.messager.confirm('System Information',msg, function(r){
+    		if (r) {
+    			$.post('/security/wms/modify', {
+                    'sql' : prcContext
+                }, function(data) {
+                    if (data == "success") {
+                        $.messager.alert('System Information',sqlType +' Success!', 'warning');
+                    } else {
+                        $.messager.alert('System Information',sqlType +' Failed!'+data, 'warning');
+                    }
+                }).error(
+                    function() {
+                        $.messager.alert('System Information','Network Abnormal!','warning');
+                    }
+                );
+    		}
+    	});
+    });
+</script>
+{{/component}}

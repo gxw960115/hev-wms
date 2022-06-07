@@ -1,0 +1,38 @@
+SELECT
+	ROW_ID,
+	CUSTOMER_CODE,
+	CUSTOMER_DESC,
+	MATERIAL_NO,
+	MATERIAL_DESP,
+	PLANT,
+	QTY,
+	UNIT,
+	BARCODE,
+	CREATE_BY,
+	DATE_FORMAT(
+		CREATE_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) CREATE_DATE,
+	MODIFY_BY,
+	DATE_FORMAT(
+		MODIFY_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) MODIFY_DATE,
+	FLAG,
+	VERSION,
+	USE_QTY
+FROM
+	ods_consignment_dtl
+WHERE
+	(
+		CREATE_DATE > DATE_ADD(NOW(), INTERVAL - 30 DAY)
+		OR MODIFY_DATE > DATE_ADD(NOW(), INTERVAL - 30 DAY)
+	)
+AND plant IN (
+	SELECT DISTINCT
+		cd.`CODE`
+	FROM
+		cd_factory cd
+	WHERE
+		cd.country_code = '6600'
+)

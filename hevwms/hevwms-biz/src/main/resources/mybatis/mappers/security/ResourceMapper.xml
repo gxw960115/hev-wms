@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.security.dao.ResourceDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllResourceColumns">
+		<![CDATA[
+		select resource_info_.id,
+		       resource_info_.name,
+		       resource_info_.description,
+		       resource_info_.url,
+		       resource_info_.type,
+		       resource_info_.status,
+		       resource_info_.code,
+		       resource_info_.configuration,
+		       resource_info_.module_name,
+		       resource_info_.gmt_create,
+		       resource_info_.gmt_modified,
+		       resource_info_.create_by,
+		       resource_info_.last_modified_by,
+		       resource_info_.order_index,
+		       resource_info_.parent_id
+		  from resource_info resource_info_
+		  where 1 = 1
+		]]>
+	</sql>
+	
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="resourceMap" type="resource">
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="name" column="NAME"/>
+		<result property="description" column="DESCRIPTION"/>
+		<result property="url" column="URL"/>
+		<result property="type" column="TYPE"/>
+		<result property="status" column="STATUS"/>
+		<result property="code" column="CODE"/>
+		<result property="configuration" column="CONFIGURATION"/>
+		<result property="moduleName" column="MODULE_NAME"/>
+		<result property="gmtCreate" column="GMT_CREATE"/>
+		<result property="gmtModified" column="GMT_MODIFIED"/>
+		<result property="createBy" column="CREATE_BY"/>
+		<result property="lastModifiedBy" column="LAST_MODIFIED_BY"/>
+		<result property="orderIndex" column="ORDER_INDEX" javaType="int" jdbcType="NUMERIC" />
+		<result property="parentId" column="PARENT_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="iconUrl" column="icon_url"/>
+	</resultMap>
+	
+	<!-- =========================================================== -->
+    <!-- DAO方法中的增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+	<!-- 查询所有启用资源 -->
+	<select id="getAll" parameterType="resource" resultMap="resourceMap">
+		<include refid="selectAllResourceColumns"/>
+		<if test="status==0"><!-- 此处使用status判断是否是全部显示（1代表全部显示） -->
+			<![CDATA[and nvl(resource_info_.status,'')<>'0']]>	
+		</if>
+	</select>
+	
+	<!-- 查询单个资源 -->
+	<select id="getResourceById" resultMap="resourceMap" parameterType="long">
+		<include refid="selectAllResourceColumns"/>
+		<![CDATA[
+		and resource_info_.id = #{id}
+		]]>	
+	</select>
+	
+	<!-- 删除资源 -->
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from resource_info where id = #{id}
+		]]>	
+	</delete>
+	
+	<!-- 通过名称查找记录 -->
+	<select id="getResourceByName" resultMap="resourceMap">
+		<include refid="selectAllResourceColumns"/>
+		<![CDATA[
+		and resource_info_.name = #{name} and resource_info_.parent_id=#{parentId} and ROWNUM = 1
+		]]>	
+	</select>
+	
+	<!-- 通过名称查找记录 -->
+	<select id="getChildren" resultMap="resourceMap">
+		<include refid="selectAllResourceColumns"/>
+		<![CDATA[
+		and resource_info_.parent_id=#{resourceId} and resource_info_.parent_id != resource_info_.id
+		]]>	
+	</select>
+	
+	<!-- 通过名称查找记录 -->
+	<select id="getResourceByCode" resultMap="resourceMap" parameterType="string">
+		<include refid="selectAllResourceColumns"/>
+		<![CDATA[
+		and resource_info_.code = #{code} and ROWNUM = 1
+		]]>	
+	</select>
+	
+	<!-- 获取父节点资源列表 -->
+	<select id="getRoots" resultMap="resourceMap">
+		<include refid="selectAllResourceColumns"/>
+		<![CDATA[
+		and resource_info_.parent_id = resource_info_.id 
+		]]>	
+		<![CDATA[
+			order by resource_info_.order_index
+		]]>
+	</select>
+	
+	<!--获取指定id下的所有资源列表  -->
+	<select id="getResourceByRoleIds" resultMap="resourceMap">
+		select resource_info_.id,
+		       resource_info_.name,
+		       resource_info_.description,
+		       resource_info_.url,
+		       resource_info_.type,
+		       resource_info_.status,
+		       resource_info_.code,
+		       resource_info_.configuration,
+		       resource_info_.module_name,
+		       resource_info_.gmt_create,
+		       resource_info_.gmt_modified,
+		       resource_info_.create_by,
+		       resource_info_.last_modified_by,
+		       resource_info_.order_index,
+		       resource_info_.parent_id
+		  from resource_info resource_info_,role_resource role_resource_
+		  where resource_info_.id = role_resource_.resource_id
+		    and role_resource_.role_id in
+		<foreach collection="roleIds" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</select>
+	
+	<!-- 获取指定用户id下的所有资源列表 -->
+	<select id="getGroupResourceByUserId" resultMap="resourceMap">
+		<![CDATA[
+		select distinct ri.id,ri.name,
+				  		ri.url,ri.parent_id,
+				  		ri.type,
+				  		ri.code,
+				  		ri.order_index
+				from user_group ug,
+				     role_group rg,
+				     role_resource rr,
+				     resource_info ri
+				where ug.user_id = #{userId}
+				and ug.group_id = rg.group_id
+				and rg.role_id = rr.role_id
+				and rr.resource_id = ri.id
+				and nvl(ri.module_name,'')<>'RF Resource'
+				and nvl(ri.status,'')<>'0'
+				order by ri.parent_id,ri.order_index
+		]]> 	
+	</select>	
+	
+	<!-- 获取指定模块下的所有资源列表 -->
+	<select id="getUserDisplayedURLResourcesByModuleAndRoles" resultMap="resourceMap">
+		select distinct t.id,
+		                t.name,
+		                t.description,
+		                t.url,
+		                t.type,
+		                t.status,
+		                t.code,
+		                t.configuration,
+		                t.module_name,
+		                t.gmt_create,
+		                t.gmt_modified,
+		                t.create_by,
+		                t.last_modified_by,
+		                t.order_index,
+		                t.parent_id,
+		                t.icon_url
+                    from resource_info t 
+                       inner join role_resource rr 
+                       		on t.id = rr.resource_id 
+                       inner join role_group rg 
+                       		on rg.role_id = rr.role_id 
+                       inner join user_group ug 
+                       		on ug.group_id = rg.group_id 
+                   where ug.user_id = #{userId} 
+	               and t.type=0
+ 				   and t.status =  1
+                   and t.module_name = #{moduleName} 
+                   order by t.order_index
+	</select>
+	
+	<!-- 查询系统中的模块列表 -->
+	<select id="getmoduleNames" resultType="java.lang.String">
+		<![CDATA[
+		select distinct module_name from resource_info
+		]]> 
+	</select>
+	
+	<!-- 保存资源信息 , added by lynn -->
+	<insert id="save" parameterType="resource">
+	    <selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_RESOURCE_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into resource_info
+		  (id,
+		   name,
+		   description,
+		   url,
+		   type,
+		   status,
+		   code,
+		   configuration,
+		   module_name,
+		   gmt_create,
+		   gmt_modified,
+		   create_by,
+		   last_modified_by,
+		   order_index,
+		   parent_id)
+		values
+		   (#{id},
+		   #{name},
+		   #{description},
+		   #{url},
+		   #{type},
+		   #{status},
+		   #{code},
+		   #{configuration},
+		   #{moduleName},
+		   sysdate,
+		   sysdate,
+		   #{createBy},
+		   #{lastModifiedBy},
+		   #{orderIndex},
+		   #{parentId})
+	    ]]>	
+	</insert>
+	
+	<!-- 更新信息, added by lynn -->
+	<update id="update" parameterType="resource">
+		<![CDATA[
+		update resource_info
+		   set name             = #{name},
+		       description      = #{description},
+		       url              = #{url},
+		       type             = #{type},
+		       status           = #{status},
+		       code             = #{code},
+		       configuration    = #{configuration},
+		       module_name      = #{moduleName},
+		       gmt_modified     = sysdate,
+		       last_modified_by = #{lastModifiedBy},
+		       order_index      = #{orderIndex},
+		       parent_id        = #{parent.id}
+		 where id = #{id}
+		]]>
+	</update>
+	<!-- 分页查询资源 -->
+	<sql id="searchResource_fragement">
+		<include refid="selectAllResourceColumns" />
+		<if test="resource.name != null and resource.name != '' ">
+			and resource_info_.name like '%'||#{resource.name}||'%'
+		</if>
+		<if test="resource.description != null and resource.description != '' ">
+			and resource_info_.description like '%'||#{resource.description}||'%'
+		</if>
+	</sql>
+	<select id="searchResources" parameterType="resource" resultMap="resourceMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchResource_fragement"/>
+		<if test="resource.type==0">
+			and resource_info_.type=0
+		</if>
+		<if test="resource.type==1">
+			and resource_info_.type=1
+		</if>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchResourcesCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchResource_fragement"/>
+		<if test="resource.type==0">
+			and resource_info_.type=0
+		</if>
+		<if test="resource.type==1">
+			and resource_info_.type=1
+		</if>
+		<![CDATA[and nvl(resource_info_.module_name,'')<>'RF Resource']]>
+		<include refid="count_Tail"/>
+	</select>
+	
+	<!-- 通过唯一约束字段查找记录 -->
+	<select id="findUniqueBy" resultMap="resourceMap">
+		<include refid="selectAllResourceColumns"/>
+		<![CDATA[
+		and resource_info_.${columnName} = #{columnValue} and rownum =1
+		]]>	
+	</select>
+	<!-- 得到一级module -->
+	<select id="getParentResource" parameterType="resource" resultMap="resourceMap">
+		<include refid="selectAllResourceColumns"/>
+		and resource_info_.parent_id=0
+		<if test="status==0"><!-- 此处使用status判断是否是全部显示（1代表全部显示） -->
+			<![CDATA[and nvl(resource_info_.status,'')<>'0']]>
+		</if>
+	</select>
+</mapper>

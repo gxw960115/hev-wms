@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 使用dubbo协议暴露服务 -->
+	<!-- <bean id="rfWsBase" class="com.haier.openplatform.wms.remoting.service.impl.RfWsBase">
+	 	<property name="otcwmsLoginService" ref="otcwmsLoginService"></property>
+		<property name="otcwmsLogoutService" ref="otcwmsLogoutService"></property>
+		<property name="rfWsService" ref="rfWsService"></property>
+		<property name="otcwmsOrderCheckService" ref="otcwmsOrderCheckService"></property>
+		<property name="otcwmsOrderLoadService" ref="otcwmsOrderLoadService"></property>
+		<property name="otcwmsOrderUploadService" ref="otcwmsOrderUploadService"></property>
+		<property name="otcwmsOrderIgpService" ref="otcwmsOrderIgpService"></property>
+		<property name="otcwmsOrderConfirmService" ref="otcwmsOrderConfirmService"></property>
+		<property name="otcwmsOrderDeleteService" ref="otcwmsOrderDeleteService"></property>
+		<property name="otcwmsOrderMoveService" ref="otcwmsOrderMoveService"></property>
+		<property name="odsTgPlanService" ref="odsTgPlanService"></property>
+    </bean> -->
+
+	<bean id="rfWsClient"
+		class="com.haier.openplatform.wms.remoting.service.impl.RfWsImpl">
+		<property name="otcwmsLoginService" ref="otcwmsLoginService"></property>
+		<property name="otcwmsLogoutService" ref="otcwmsLogoutService"></property>
+		<property name="rfWsService" ref="rfWsService"></property>
+		<property name="otcwmsOrderCheckService" ref="otcwmsOrderCheckService"></property>
+		<property name="otcwmsOrderUploadService" ref="otcwmsOrderUploadService"></property>
+		<property name="otcwmsOrderIgpService" ref="otcwmsOrderIgpService"></property>
+		<property name="otcwmsOrderConfirmService" ref="otcwmsOrderConfirmService"></property>
+		<property name="otcwmsOrderDeleteService" ref="otcwmsOrderDeleteService"></property>
+		<property name="otcwmsOrderMoveService" ref="otcwmsOrderMoveService"></property>
+		<property name="stgPoDownService" ref="stgPoDownService"></property>
+		<property name="stgStoDownService" ref="stgStoDownService"></property>
+		<property name="odsPdInfoService" ref="odsPdInfoService"></property>
+		<property name="odsCustomerOrderService" ref="odsCustomerOrderService"></property>
+		<property name="odsCustomerScanInfoService" ref="odsCustomerScanInfoService"></property>
+<!-- 		<property name="odsTgPlanService" ref="odsTgPlanService"></property> -->
+<!-- 		<property name="odsTgPlanService" ref="odsTgPlanService"></property> -->
+<!-- 		<property name="odsTgPlanService" ref="odsTgPlanService"></property> -->
+<!-- 		<property name="odsTgPlanService" ref="odsTgPlanService"></property> -->
+<!-- 		<property name="odsTgPlanService" ref="odsTgPlanService"></property> -->
+	</bean>
+	<dubbo:service interface="com.haier.openplatform.wms.remoting.service.RfWsClient"
+		owner="Hevwms" ref="rfWsClient" version="5.0" protocol="dubbo" delay="-1"
+		registry="qingdaoRegistry690" />
+
+	<bean id="rfScanWhenPDClient"
+		class="com.haier.openplatform.wms.remoting.service.impl.RfScanWhenPDClientImpl">
+		<property name="scanWhenPDService" ref="rfScanWhenPdService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.remoting.service.RfScanWhenPDClient"
+		owner="Hevwms" ref="rfScanWhenPDClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+
+</beans>

@@ -1,0 +1,278 @@
+app: aixforce690-showcase
+
+services:
+  "getUserByIdAndName":
+    app: otcwms     #应用删除
+    uri: "com.haier.openplatform.showcase.security.service.UserServiceClient:getUserByIdAndName"
+    
+  "confirmUser":
+    app: otcwms     #应用删除
+    uri: "com.haier.openplatform.showcase.security.service.UserServiceClient:confirmUser"
+    
+  "searchBarcodes":
+    app: otcwms     #应用删除
+    uri: "com.haier.openplatform.showcase.security.service.UserServiceClient:searchBarcodes"
+
+  "searchPlant":
+    app: otcwms     #页面加载前 执行查询，和 根据工厂名和编码 调用同一个方法
+    uri: "com.haier.openplatform.wms.security.service.PlantServiceClient:searchPlantByCodeAndName"
+
+  "searchPlantByCodeAndName":
+    app: otcwms     #根据工厂编码 和 工厂名称 进行查询操作
+    uri: "com.haier.openplatform.wms.security.service.PlantServiceClient:searchPlantByCodeAndName"
+
+  "StocktakingOrderUpdate":
+    app: otcwms     # 库存盘点单信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.stocktaking.service.StocktakingServiceClient:updateStocktakingOrder"  
+
+  "SelectStocktakingOrderNo":
+    app: otcwms     # 库存盘点单信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.stocktaking.service.StocktakingServiceClient:getStocktakingOrderNo"
+
+  "StocktakingOrderAdd":
+    app: otcwms     # 库存盘点单信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.stocktaking.service.StocktakingServiceClient:addStocktakingOrders"
+
+  "StocktakingOrderdelete":
+    app: otcwms     # 库存盘点单信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.stocktaking.service.StocktakingServiceClient:deleteStocktakingOrder"
+
+  "StocktakingDetailsDiff":
+    app: otcwms     # 库存盘点单信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.stocktaking.service.StocktakingDiffServiceClient:processDiff"
+    
+  "SelectInventoryTransferOrderNo":
+    app: otcwms     # 获取311移库单号
+    uri: "com.haier.openplatform.wms.order.service.TransferInventoryServiceClient:getTransferInventoryOrderNo"
+    
+  "TransferInventoryOrderAdd":
+    app: otcwms     # 311移库新增
+    uri: "com.haier.openplatform.wms.order.service.TransferInventoryServiceClient:addTranferInventoryOrders"
+    
+  "TransferInventoryOrderdelete":
+    app: otcwms     # 311移库单删除
+    uri: "com.haier.openplatform.wms.order.service.TransferInventoryServiceClient:deleteTranferInventoryOrder"
+
+  "SecurityCreateUser":
+    app: otcwms       # 安全管理_增加用户信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.SecurityUserServiceClient:createUser"
+    
+  "SecurityUpdateUser":
+    app: otcwms       # 安全管理_更新用户信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.SecurityUserServiceClient:updateUser"
+
+  "SecurityCreateGroup":
+    app: otcwms     # 安全管理_增加组信息 open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:createGroup"
+    
+  "SecurityDeleteGroup":
+    app: otcwms     # 安全管理_删除组信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:deleteGroup"
+    
+  "SecurityUpdateGroup":
+    app: otcwms     # 安全管理_更新组信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:updateGroup"
+    
+  "SecurityAddUserToGroup":
+    app: otcwms     # 安全管理_添加组内用户  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:addUserToGroup"
+    
+  "SecurityDeleteUserFromGroup":
+    app: otcwms     # 安全管理_删除组内用户  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:deleteUserFromGroup" 
+    
+  "SecurityAddRoleToGroup":
+    app: otcwms     # 安全管理_添加组内角色  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:addRoleToGroup"
+    
+  "SecurityDeleteRoleFromGroup":
+    app: otcwms     # 安全管理_删除组内角色  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:deleteRoleFromGroup"
+    
+  "SecurityAddAdminToGroup":
+    app: otcwms     # 安全管理_添加组管理员  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:addAdminToGroup" 
+    
+  "SecurityDeleteAdminFromGroup":
+    app: otcwms     # 安全管理_添加组管理员  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.GroupServiceClient:deleteAdminFromGroup"
+ 
+  "SecurityDeleteUser":
+    app: otcwms     # 安全管理_删除用户信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.SecurityUserServiceClient:deleteUserInfo"
+    
+  "SecurityUpdatePassword":
+    app: otcwms     # 安全管理_删除用户信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.SecurityUserServiceClient:updatePassword"
+ 
+  "SecurityCerateRole":
+    app: otcwms     # 安全管理_创建角色信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.RoleServiceClient:createRole"
+    
+  "SecurityUpdateRole":
+    app: otcwms     # 安全管理_更新角色信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.RoleServiceClient:updateRole"
+    
+  "getRoleResources":
+    app: otcwms     # 安全管理_更新角色信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.RoleServiceClient:getRoleResources"
+
+  "SecurityDeleteRole":
+    app: otcwms     # 安全管理_删除角色信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.RoleServiceClient:deleteRoleMessage"
+    
+  "SecurityCreateResource":
+    app: otcwms     # 安全管理_创建资源信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.ResourceServiceClient:createResource"
+    
+  "SecurityUpdateResource":
+    app: otcwms     # 安全管理_更新资源信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.ResourceServiceClient:updateResource"
+    
+  "SecurityDeleteResource":
+    app: otcwms     # 安全管理_删除资源信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.ResourceServiceClient:deleteResourceMessage"
+    
+  "SecuritySaveSystemNotice":
+    app: otcwms     # 安全管理_发布公告信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.portal.service.PortalServiceClient:saveSystemNotice"
+    
+  "SecurityDeleteFiles":
+    app: otcwms     # 安全管理_删除附件信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.FileUploadServiceClient:deletefiles"
+    
+  "MdDictionarySave":
+    app: otcwms           #物料信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.dictionary.service.MdDictionaryServiceClient:addMdDictionarys"
+
+  "MdDictionaryUpdate":
+    app: otcwms           #物料信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.dictionary.service.MdDictionaryServiceClient:updateMdDictionary"
+
+  "PlantSave":
+    app: otcwms           #物料信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.PlantServiceClient:addPlant"
+
+  "PlantUpdate":
+    app: otcwms           #物料信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.PlantServiceClient:updatePlant"
+
+  "PlantDelete":
+    app: otcwms           #物料信息  open or close orderStatus
+    uri: "com.haier.openplatform.wms.security.service.PlantServiceClient:deletePlantsByIds"
+    
+  "closeStgDnDown":
+    app: otcwms         #dnclose manual close
+    uri: "com.haier.openplatform.wms.order.service.StgDnDownServiceClient:closeStgDn"
+
+  "openStgDnDown":
+    app: otcwms         #dnopen manual open
+    uri: "com.haier.openplatform.wms.order.service.StgDnDownServiceClient:openStgDn"
+
+  "closeStgStoDown":
+    app: otcwms         #stgsto manual close 
+    uri: "com.haier.openplatform.wms.sto.service.StgStoDownServiceClient:closeStgStoDown"
+    
+  "openStgStoDown":
+    app: otcwms         #stgsto manual OPEN 暂时没打开 
+    uri: "com.haier.openplatform.wms.sto.service.StgStoDownServiceClient:openStgStoDown"
+   
+  "LocationSave":
+    app: otcwms           #物料信息  
+    uri: "com.haier.openplatform.wms.basicdata.service.CdLocInfoServiceClient:createLocInfos"
+
+  "LocationUpdate":
+    app: otcwms           #物料信息  
+    uri: "com.haier.openplatform.wms.basicdata.service.CdLocInfoServiceClient:updateLocInfo"
+
+  "LocationDelete":
+    app: otcwms           #物料信息  
+    uri: "com.haier.openplatform.wms.basicdata.service.CdLocInfoServiceClient:deleteLocInfoByRowids"
+
+  "getInventoryPieData":
+    app: otcwms             #portal inventoryPie
+    uri: "com.haier.openplatform.wms.portal.service.PortalServiceClient:getInventoryPieData"
+
+  "getToDoChartsData":
+    app: otcwms             #portal getToDoChartsData
+    uri: "com.haier.openplatform.wms.portal.service.PortalServiceClient:getToDoChartsData"
+    
+  "getNoticeData":
+    app: otcwms             #portal getNoticeData
+    uri: "com.haier.openplatform.wms.portal.service.PortalServiceClient:getNoticeData"
+
+  "WarehouseSave":
+    app: otcwms           #物料信息  仓库管理
+    uri: "com.haier.openplatform.wms.basicdata.service.CdWhInfoServiceClient:createCdWhInfo"
+
+  "WarehouseUpdate":
+    app: otcwms           #物料信息  
+    uri: "com.haier.openplatform.wms.basicdata.service.CdWhInfoServiceClient:updateCdWhInfo"
+
+  "WarehouseDelete":
+    app: otcwms           #物料信息  
+    uri: "com.haier.openplatform.wms.basicdata.service.CdWhInfoServiceClient:deleteCdWhInfoByRowids"
+  
+  "findOrderNo":
+    app: otcwms          #gift order add生成OGP/IGP NO
+    uri: "com.haier.openplatform.wms.order.service.OdsOrderInfoServiceClient:getOrderNo"
+
+  "inOutWarehouse":
+    app: otcwms          #gift order add生成OGP/IGP NO
+    uri: "com.haier.openplatform.wms.order.service.OdsOrderInfoServiceClient:inOutWarehouse"
+    
+  "barcodeRemarkUpdate":
+    app: otcwms          #对库存中的条码做备注
+    uri: "com.haier.openplatform.wms.inventory.service.SearchStockAgeReportClient:barcodeRemarkUpdate"   
+      
+  "downInventoryFromSap":
+    app: otcwms          #下载sap库存
+    uri: "com.haier.openplatform.wms.inventory.service.StgSapStockServiceClient:downInventoryFromSap"
+
+  "getfileNameShow":
+    app: otcwms          #portal页面文件列表
+    uri: "com.haier.openplatform.wms.security.service.FileUploadServiceClient:getfileNameShow"
+
+  "printMdBarcode":
+    app: otcwms          #物料信息 保存 open or close orderStatus
+    uri: "com.haier.openplatform.wms.basicdata.service.MdBarcodeServiceClient:create1DBarcode"
+
+  "findCdUserLoc":
+    app: otcwms          #user edit （the relationship of user and wh_location）
+    uri: "com.haier.openplatform.wms.basicdata.service.CdWhInfoServiceClient:findCdUserLoc"
+
+  "downloadData":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.basicdata.service.MdmathInfoServiceClient:downloadData"    
+
+  "stoConfirm":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.sto.service.StgStoDownServiceClient:confirmSto"
+    
+  "queryPdTempOrder":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.stocktaking.service.OdsPdTempServiceClient:searchOdsPdTemps"  
+    
+  "addPdTempOrder":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.stocktaking.service.OdsPdTempServiceClient:addPdTempOrder"          
+
+  "getPdTempOrderNo":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.stocktaking.service.OdsPdTempServiceClient:getTempPdOrderNo"          
+    
+  "updateStatusForTempPd":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.stocktaking.service.OdsPdTempServiceClient:updateStatus"  
+    
+  "queryPdTempOrderDetail":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.stocktaking.service.OdsPdTempDtlServiceClient:searchOdsPdTempdtls"       
+    
+  "moveBarcodes":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.stocktaking.service.OdsPdTempDtlServiceClient:moveBarcodes"    
+    
+  "updateBarcodeStatusForTempPdDtl":
+    app: otcwms          #download material data from MDM
+    uri: "com.haier.openplatform.wms.stocktaking.service.OdsPdTempDtlServiceClient:updateBarcodesStatus"

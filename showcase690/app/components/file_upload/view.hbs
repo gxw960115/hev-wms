@@ -1,0 +1,93 @@
+{{#component "create_hac_app js-comp"}}
+    <div id="breadcrumbs" style="background-color:#F6FBFF;min-height:490px">
+        <div class="row-fluid">
+            <div class="">
+                <h1><div class="icons-search">
+                    <span style="color: #ffffff;font-weight:bold;font-size:15px;position: relative;left:20px;top:-7px">文件上传</span>
+                </div></h1>
+                <div style="position: absolute;left: 15%;width: 75%;">
+                    <form method="post" enctype="multipart/form-data" id="abc">
+                    <table style="width: 100%">
+                        <tr>
+                            <td style="width: 10%">文件<span class="starRed">*</span></td>
+                            <td style="width: 50%"> <input type="file" id="houseMaps" name="houseMaps"/>
+                            <input type="button" value="上传" onclick="fileupload()">
+                            </td>
+                            <td style="width: 20%">
+                            <input type="button" value="删除" onclick="deleteFile()">
+                        </td>
+                            <td style="width: 20%">
+                                <!--<input type="button" value="下载" onclick="downloadFile()">-->
+                                <a href="/downLoadFile?appName=showcase&fileUUID=ed919ea9-7a4f-411e-98d1-d11e0b4b4369">下载</a>
+                            </td>
+                        </tr>
+                    </table>
+                    </form>
+                    <div style="width: 10%;">
+                    <form action="/exportExcel" method="get">
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0"
+                               bgcolor="b5d6e6">
+                            <tr>
+                                <td width="10%" align="right">
+                                    <input type="submit" value="导出参与用户数据" />&nbsp;&nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function deleteFile(){
+            $.get("/deleteFile?appName=showcase&fileUUID=fe8cc692-7563-4ee8-952b-f7efea656714",function(data){
+                var dataObj=eval("("+data+")");
+                if(dataObj.success){
+                    alert("删除成功!");
+                }else{
+                    alert(dataObj.msg);
+                }
+            });
+        }
+        function downloadFile(){
+            $.get("/downLoadFile?appName=showcase&fileUUID=ed919ea9-7a4f-411e-98d1-d11e0b4b4369",function(data){
+                var dataObj=eval("("+data+")");
+                if(dataObj.success){
+                    alert("删除成功!");
+                }else{
+                    alert(dataObj.msg);
+                }
+            });
+        }
+        function fileupload(){
+            var maxsize = 8*1024*1024;//8M
+            var obj_file = document.getElementById("houseMaps");
+            var filesize = obj_file.files[0].size;
+            if(filesize>maxsize){
+                alert("文件大小为超过8M,请使用ftp进行上传");
+                return;
+            }
+            var file =$('#houseMaps').val();
+            var fileType = file.substring(file.lastIndexOf(".")+1);
+            if(fileType!="png"&&fileType!="jpg"){
+                alert("上传文件格式错误");
+                return;
+            }
+            $.ajaxFileUpload(
+                    {
+                        url:'/upload?appName=showcase',            //需要链接到服务器地址
+                        secureuri:false,
+                        fileElementId:'houseMaps',                        //文件选择框的id属性
+                        dataType: 'json',                                    //服务器返回的格式，可以是json
+                        success: function (data, status){
+                            alert(data.fileUUID);
+                        },
+                        error: function(data, status, e){
+                            alert("上传失败!");
+                        }
+                    }
+            );
+        }
+    </script>
+{{/component}}

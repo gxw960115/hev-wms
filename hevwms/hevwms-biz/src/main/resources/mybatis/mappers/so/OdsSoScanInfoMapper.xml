@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.so.dao.OdsSoScanInfoDAO">
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<resultMap id="BaseResultMap" type="com.haier.openplatform.wms.so.dto.OdsSoScanInfoDTO" >
+	  <result column="ROW_ID" property="rowId" />
+	  <result column="ORDER_TYPE" property="orderType" />
+	  <result column="BIN" property="bin" />
+	  <result column="SO_NO" property="soNo" />
+	  <result column="SO_ITEM_NO" property="soItemNo" />
+	  <result column="BATCH_NO" property="batchNo" />
+	  <result column="PLANT" property="plant" />
+	  <result column="CUSTOMER_MODEL" property="customerModel" />
+	  <result column="LOCATION" property="location" />
+	  <result column="MATERIAL_NO" property="materialNo" />
+	  <result column="MATERIAL_DESP" property="materialDesp" />
+	  <result column="UNIT" property="unit" />
+	  <result column="BARCODE" property="barcode" />
+	  <result column="VENDOR_CODE" property="vendorCode" />
+	  <result column="VENDOR_NAME" property="vendorName" />
+	  <result column="DELIVERY_CODE" property="deliveryCode" />
+	  <result column="DELIVERY_NAME" property="deliveryName" />
+	  <result column="SCANNED_BY" property="scannedBy" />
+	  <result column="SCANNED_DATE" property="scannedDate" jdbcType="DATE" />
+	  <result column="DELIVERY_DATE" property="deliveryDate" jdbcType="DATE" />
+	  <result column="ORDER_ID" property="orderId" />
+	  <result column="ORDER_NO" property="orderNo" />
+	  <result column="CAR_NO" property="carNo" />
+	  <result column="CREATE_BY" property="createBy" />
+	  <result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+	  <result column="MODIFY_BY" property="modifyBy" />
+	  <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+	  <result column="FLAG" property="flag" />
+	  <result column="VERSION" property="version" />
+	  <result column="QTY" property="qty" />
+	  <result column="ORDER_ITEM" property="orderItem" />
+	  <result column="SERIAL_NO" property="serialNo" />
+	  <result column="FINISH_FLAG" property="finishFlag" />
+	  <result column="IN_OUT_FLAG" property="inOutFlag" />
+	  <result column="IN_OUT_MSG" property="inOutMsg" />
+	  <result column="USED_FLAG" property="usedFlag" />
+	  <result column="SUB_LOCATION" property="subLocation" />
+	  <result column="REMARK" property="remark" />
+	  <result column="OLD_BARCODE" property="oldBarcode" />
+	</resultMap>
+  
+	<sql id="Base_Column_List" >
+	  ROW_ID, ORDER_TYPE, BIN, SO_NO, SO_ITEM_NO, BATCH_NO, PLANT, CUSTOMER_MODEL, LOCATION, 
+	  MATERIAL_NO, MATERIAL_DESP, UNIT, BARCODE, VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE, 
+	  DELIVERY_NAME, SCANNED_BY, SCANNED_DATE, DELIVERY_DATE, ORDER_ID, ORDER_NO, CAR_NO, 
+	  CREATE_BY, CREATE_DATE, MODIFY_BY, MODIFY_DATE, FLAG, VERSION, QTY, ORDER_ITEM, SERIAL_NO, 
+	  FINISH_FLAG, IN_OUT_FLAG, IN_OUT_MSG, USED_FLAG, SUB_LOCATION, REMARK,OLD_BARCODE
+	</sql>
+	
+	<sql id="searchOdsSoScanInfo_fragement">
+		where 1=1 
+		<if test="odsSoScanInfo.rowId != null" >
+	      and ROW_ID = #{odsSoScanInfo.rowId},
+	    </if>
+	    <if test="odsSoScanInfo.orderType != null and odsSoScanInfo.orderType != ''" >
+	      and ORDER_TYPE like '%'||#{odsSoScanInfo.orderType}||'%'
+	    </if>
+	    <if test="odsSoScanInfo.bin != null and odsSoScanInfo.bin != ''" >
+	      and BIN like '%'||#{odsSoScanInfo.bin}||'%' 
+	    </if>
+	    <if test="odsSoScanInfo.soNo != null and odsSoScanInfo.soNo != ''" >
+	      and SO_NO like '%'||#{odsSoScanInfo.soNo}||'%' 
+	    </if>
+	    <if test="odsSoScanInfo.soItemNo != null and odsSoScanInfo.soItemNo != ''" >
+	      and SO_ITEM_NO like '%'||#{odsSoScanInfo.soItemNo}||'%' 
+	    </if>
+	    <if test="odsSoScanInfo.plant != null and odsSoScanInfo.plant != ''" >
+	      and PLANT like '%'||#{odsSoScanInfo.plant}||'%' 
+	    </if>
+	    <if test="odsSoScanInfo.customerModel != null and odsSoScanInfo.customerModel != ''" >
+	      and CUSTOMER_MODEL like '%'||#{odsSoScanInfo.customerModel}||'%'  
+	    </if>
+	    <if test="odsSoScanInfo.location != null and odsSoScanInfo.location != ''" >
+	      and LOCATION IN (${odsSoScanInfo.location})
+	    </if>
+	    <if test="odsSoScanInfo.materialNo != null and odsSoScanInfo.materialNo != ''" >
+	      and MATERIAL_NO like '%'||#{odsSoScanInfo.materialNo}||'%' 
+	    </if>
+	    <if test="odsSoScanInfo.barcode != null and odsSoScanInfo.barcode != ''" >
+	      and BARCODE like '%'||#{odsSoScanInfo.barcode}||'%' 
+	    </if>
+	    <if test="odsSoScanInfo.orderNo != null and odsSoScanInfo.orderNo != ''" >
+	      and ORDER_NO like '%'||#{odsSoScanInfo.orderNo}||'%' 
+	    </if>
+		<if test="odsSoScanInfo.scannedBy != null and odsSoScanInfo.scannedBy !=''">
+			and SCANNED_BY = #{odsSoScanInfo.scannedBy}
+		</if>
+	    <if test="odsSoScanInfo.finishFlag != null and odsSoScanInfo.finishFlag != ''" >
+	      and FINISH_FLAG = #{odsSoScanInfo.finishFlag}
+	    </if>
+	    <if test="odsSoScanInfo.begin != null and odsSoScanInfo.begin != ''" >
+	      	<![CDATA[
+				and CREATE_DATE >= TO_DATE(#{odsSoScanInfo.begin}||' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+	    <if test="odsSoScanInfo.end != null and odsSoScanInfo.end != ''" >
+	      	<![CDATA[
+				and CREATE_DATE <= TO_DATE(#{odsSoScanInfo.end}||' 23:59:59', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+	    <if test="odsSoScanInfo.subLocation == '-1'" >
+	      and SUB_LOCATION is null
+	    </if>
+	    <if test="odsSoScanInfo.subLocation != null and odsSoScanInfo.subLocation != '' and odsSoScanInfo.subLocation != '-1'" >
+	      and SUB_LOCATION = #{odsSoScanInfo.subLocation}
+	    </if>
+	</sql>
+	
+	<sql id="selectAllOdsSoScanInfoColumns">
+		select 
+		<include refid="Base_Column_List" /> 
+		from ODS_SO_SCAN_INFO
+	</sql>
+	
+	<select id="getAll" resultMap="BaseResultMap" >
+		<include refid="selectAllOdsSoScanInfoColumns" />
+	</select>
+	
+	<delete id="delete" parameterType="long" >
+	  delete from ODS_SO_SCAN_INFO where ROW_ID = #{odsSoScanInfo.rowId}
+	</delete>
+	
+	<insert id="save" parameterType="odsSoScanInfo" >
+	   <selectKey keyProperty="id" order="BEFORE" resultType="long">
+	       SELECT SEQ_SO_SCAN_INFO_ID.NEXTVAL AS ID FROM DUAL
+	   </selectKey>
+		insert into ODS_SO_SCAN_INFO 
+		(
+            ROW_ID, ORDER_TYPE, BIN, 
+			SO_NO, SO_ITEM_NO, BATCH_NO, 
+			PLANT, CUSTOMER_MODEL, LOCATION, 
+			MATERIAL_NO, MATERIAL_DESP, UNIT, 
+			BARCODE, VENDOR_CODE, VENDOR_NAME, 
+			DELIVERY_CODE, DELIVERY_NAME, SCANNED_BY, 
+			SCANNED_DATE, DELIVERY_DATE, ORDER_ID, 
+			ORDER_NO, CAR_NO, CREATE_BY, 
+			CREATE_DATE, MODIFY_BY, MODIFY_DATE, 
+			FLAG, VERSION, QTY, ORDER_ITEM, 
+			SERIAL_NO, FINISH_FLAG, IN_OUT_FLAG, 
+			IN_OUT_MSG, USED_FLAG, SUB_LOCATION, 
+			REMARK,OLD_BARCODE
+		)
+		values 
+		(
+            #{id}, #{orderType}, #{bin}, 
+			#{soNo}, #{soItemNo}, #{batchNo}, 
+			#{plant}, #{customerModel}, #{location}, 
+			#{materialNo}, #{materialDesp}, #{unit}, 
+			#{barcode}, #{vendorCode}, #{vendorName}, 
+			#{deliveryCode}, #{deliveryName}, #{scannedBy}, 
+			#{scannedDate,jdbcType=DATE}, #{deliveryDate,jdbcType=DATE}, #{orderId}, 
+			#{orderNo}, #{carNo}, #{createBy}, 
+			#{createDate,jdbcType=DATE}, #{modifyBy}, #{modifyDate,jdbcType=DATE}, 
+			#{flag}, #{version}, #{qty}, #{orderItem}, 
+			#{serialNo}, #{finishFlag}, #{inOutFlag}, 
+			#{inOutMsg}, #{usedFlag}, #{subLocation}, #{remark}, #{oldBarcode}
+		)
+	</insert>
+	
+	<!-- 分页查询 -->
+	<select id="searchOdsSoScanInfoByPage" resultMap="BaseResultMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllOdsSoScanInfoColumns" />
+		<include refid="searchOdsSoScanInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsSoScanInfoCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllOdsSoScanInfoColumns" />
+		<include refid="searchOdsSoScanInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+	<!-- 条件查询列表 -->
+	<select id="getListByParam" resultMap="BaseResultMap">
+		<include refid="selectAllOdsSoScanInfoColumns" />
+		<include refid="searchOdsSoScanInfo_fragement" />
+	</select>
+	
+	<update id="update" parameterType="odsSoScanInfo" >
+		update ODS_SO_SCAN_INFO
+		set 
+			ORDER_TYPE = #{record.orderType},
+			BIN = #{record.bin},
+			SO_NO = #{record.soNo},
+			SO_ITEM_NO = #{record.soItemNo},
+			BATCH_NO = #{record.batchNo},
+			PLANT = #{record.plant},
+			CUSTOMER_MODEL = #{record.customerModel},
+			LOCATION = #{record.location},
+			MATERIAL_NO = #{record.materialNo},
+			MATERIAL_DESP = #{record.materialDesp},
+			UNIT = #{record.unit},
+			BARCODE = #{record.barcode},
+			VENDOR_CODE = #{record.vendorCode},
+			VENDOR_NAME = #{record.vendorName},
+			DELIVERY_CODE = #{record.deliveryCode},
+			DELIVERY_NAME = #{record.deliveryName},
+			SCANNED_BY = #{record.scannedBy},
+			SCANNED_DATE = #{record.scannedDate,jdbcType=DATE},
+			DELIVERY_DATE = #{record.deliveryDate,jdbcType=DATE},
+			ORDER_ID = #{record.orderId},
+			ORDER_NO = #{record.orderNo},
+			CAR_NO = #{record.carNo},
+			CREATE_BY = #{record.createBy},
+			CREATE_DATE = #{record.createDate,jdbcType=DATE},
+			MODIFY_BY = #{record.modifyBy},
+			MODIFY_DATE = #{record.modifyDate,jdbcType=DATE},
+			FLAG = #{record.flag},
+			VERSION = #{record.version},
+			QTY = #{record.qty},
+			ORDER_ITEM = #{record.orderItem},
+			SERIAL_NO = #{record.serialNo},
+			FINISH_FLAG = #{record.finishFlag},
+			IN_OUT_FLAG = #{record.inOutFlag},
+			IN_OUT_MSG = #{record.inOutMsg},
+			USED_FLAG = #{record.usedFlag},
+			SUB_LOCATION = #{record.subLocation},
+			REMARK = #{record.remark},
+			OLD_BARCODE = #{record.oldBarcode}
+		where ROW_ID = #{record.rowId}
+	</update>
+
+	<select id="getListByBarcodes" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List"/>
+		from ODS_SO_SCAN_INFO
+		where BARCODE in (${barcodes})
+	</select>
+	
+	<update id="updateOldBarcode" parameterType="odsSoScanInfo">
+		<![CDATA[
+			update ods_so_scan_info 
+				set old_barcode = #{odsSoScanInfo.oldBarcode} ,
+				    modify_by = #{odsSoScanInfo.modifyBy} ,
+				    modify_date = #{odsSoScanInfo.modifyDate} 
+		    where so_no = #{odsSoScanInfo.soNo} 
+		    	and barcode = #{odsSoScanInfo.barcode}
+		]]>
+	</update>
+</mapper>

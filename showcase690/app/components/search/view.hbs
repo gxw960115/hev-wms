@@ -1,0 +1,25 @@
+{{#component "search js-comp"}}
+<style>
+  .suggest li{
+    float:left;
+  }
+
+</style>
+  <form class="form form-search " type="get" id="form-search" action="/search" data-hrefbase="/search">
+    <fieldset>
+      <div class="input-group input-group-append input-search" style="text-align: center">
+        <input type="text" name="q" class="search-input items-suggest active" value="{{q}}" autocomplete="off">
+        <span class="input-group-btn">
+          <button class="btn btn-danger btn-medium" id="search-button" style="margin-left: 0px;" type="submit">搜&nbsp;索</button>
+        </span>
+      </div>
+    </fieldset>
+  </form>
+  <div style="position: absolute;left: 536px;">
+  <table border="1px">
+    {{#each _DATA_.result.data}}
+    <tr><td>{{id}}</td><td>{{userName}}</td><td>{{userCode}}</td><td>{{age}}</td></tr>
+    {{/each}}
+  </table>
+  </div>
+{{/component}}

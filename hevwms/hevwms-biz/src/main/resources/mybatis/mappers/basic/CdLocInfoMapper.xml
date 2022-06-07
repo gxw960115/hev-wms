@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.basic.dao.CdLocInfoDAO">
+    <!-- Oracle 分页头 -->
+    <sql id="pagination_Head">
+		<![CDATA[
+        select * from ( select row_.*, rownum rownum_ from (
+        ]]>
+	</sql>
+    <!-- Oracle 分页尾 -->
+    <sql id="pagination_Tail">
+		<![CDATA[
+        ) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1
+        ]]>
+	</sql>
+    <!-- count * from -->
+    <sql id="count_Head">
+		<![CDATA[
+        select count(*) from (
+        ]]>
+	</sql>
+    <sql id="count_Tail">
+		<![CDATA[
+        )
+        ]]>
+	</sql>
+
+    <resultMap id="cdLocInfoMap" type="cdLocInfo">
+        <id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="parentId" column="PARENT_ID"/>
+        <result property="createBy" column="CREATE_BY"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="modifyBy" column="MODIFY_BY"/>
+        <result property="modifyDate" column="MODIFY_DATE"/>
+        <result property="flag" column="FLAG"/>
+        <result property="version" column="VERSION"/>
+        <result property="whCode" column="wh_code"/>
+        <result property="whName" column="wh_Name"/>
+        <result property="cityName" column="CITY_NAME"/>
+        <result property="cityCode" column="CITY_CODE"/>
+        <result property="remark" column="REMARK"/>
+        <result property="locationType" column="LOCATION_TYPE"/>
+        <result property="address" column="ADDRESS"/>
+        <result property="tel" column="TEL"/>
+    </resultMap>
+
+    <sql id="selectAllCdLocInfoColumns">
+		<![CDATA[
+
+                select
+                  cd_loc_info_.ROW_ID,
+                  cd_loc_info_.NAME,
+                  cd_loc_info_.CODE,
+                  cd_loc_info_.PARENT_ID,
+                  cd_loc_info_.CREATE_BY,
+                  cd_loc_info_.CREATE_DATE,
+                  cd_loc_info_.MODIFY_BY,
+                  cd_loc_info_.MODIFY_DATE,
+                  cd_loc_info_.FLAG,
+                  cd_loc_info_.VERSION,
+                  cd_loc_info_.city_code,
+                  cd_loc_info_.city_name,
+                  cd_loc_info_.remark,
+                  cd_loc_info_.location_type,
+                  cd_loc_info_.address,
+                  cd_loc_info_.tel,
+                  wh.name wh_name,
+                  wh.code wh_code
+                from
+                  CD_LOC_INFO cd_loc_info_ left join cd_wh_info wh
+                  on cd_loc_info_.parent_id = wh.row_id
+
+        ]]>
+	</sql>
+
+    <select id="getAll" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        order by cd_loc_info_.code asc
+    </select>
+    <select id="findCdLocByCityName" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where cd_loc_info_.city_code = #{cdLocInfo.cityCode}
+    </select>
+
+    <select id="getCdLocInfosByParentIdIsNull" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where cd_loc_info_.parent_id is null
+    </select>
+    <select id="getCdLocInfosByParentIdNotnull" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where cd_loc_info_.parent_id=#{parentId}
+        <if test="locType != null  and locType != ''">
+            and cd_loc_info_.LOCATION_TYPE = #{locType}
+        </if>
+    </select>
+
+    <select id="get" resultMap="cdLocInfoMap" parameterType="long">
+        <include refid="selectAllCdLocInfoColumns"/>
+        <![CDATA[
+		where cd_loc_info_.row_id = #{rowId}
+		]]>
+    </select>
+
+    <select id="searchCdLocationTree" resultMap="cdLocInfoMap" parameterType="long">
+        <![CDATA[
+			select
+				loc.CODE,
+				loc.code || '(' || loc.name || ')' name
+			from
+				cd_loc_info loc,
+				cd_wh_info wh
+			where
+				loc.PARENT_ID = wh.row_id and wh.row_id = #{parentId}
+		]]>
+        <if test="locType != null and locType != ''">
+            and loc.location_type = #{locType}
+        </if>
+        ORDER BY loc.code
+    </select>
+
+    <select id="searchCdLocationTreeWithType" resultMap="cdLocInfoMap" parameterType="cdLocInfo">
+        <![CDATA[
+			select
+				loc.CODE,
+				loc.code || '(' || loc.name || ')' name
+			from cd_loc_info loc,cd_wh_info wh
+			where loc.PARENT_ID = wh.row_id
+			and wh.row_id = #{cdLocInfo.parentId}
+		]]>
+        <if test="'' != cdLocInfo.locationType and null != cdLocInfo.locationType">
+            and loc.LOCATION_TYPE = #{cdLocInfo.locationType}
+        </if>
+        order by loc.code
+    </select>
+
+    <select id="searchCdLocInfo" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where rownum&lt;=10
+    </select>
+
+    <select id="searchCdLocationTreeWithLocation" resultMap="cdLocInfoMap" parameterType="cdLocInfo">
+		<![CDATA[
+
+                    select
+                        loc.CODE,
+                        loc.code || '(' || loc.name || ')' name
+                    from cd_loc_info loc,cd_wh_info wh
+                    where loc.PARENT_ID = wh.row_id
+                    and wh.row_id = #{cdLocInfo.parentId}
+                    and loc.LOCATION_TYPE = (select location_type from cd_loc_info WHERE CODE = #{cdLocInfo.code})
+                    order by loc.code
+
+        ]]>
+	</select>
+
+    <select id="searchCdPhyLocationTree" resultMap="cdLocInfoMap" parameterType="long">
+		<![CDATA[
+
+                select loc.CODE,loc.code||'('||loc.name||')' name
+                from cd_loc_info loc,cd_wh_info wh
+                where loc.PARENT_ID=wh.row_id and  wh.row_id= #{parentId}
+                    and SUBSTR(loc.code, 0, 2) not in (wh.LOC_PREFIX, 'AD', 'RC')
+                    and loc.code not in ('BG09', 'HG09')
+                order by loc.code
+
+        ]]>
+	</select>
+
+    <delete id="delete" parameterType="long">
+		<![CDATA[
+
+                delete from CD_LOC_INFO where row_id = #{rowId}
+
+        ]]>
+	</delete>
+    <delete id="deleteAll">
+        <![CDATA[
+		delete from CD_LOC_INFO where row_id in
+		]]>
+        <foreach collection="idList" item="item" index="index" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- 插入数据 -->
+    <insert id="save" parameterType="cdLocInfo">
+        <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+            SELECT SEQ_CD_LOC_INFO_ID.NEXTVAL AS ID FROM DUAL
+        </selectKey>
+        <![CDATA[
+		insert into CD_LOC_INFO (
+			row_id ,NAME ,CODE ,PARENT_ID,city_code,city_name,
+			CREATE_BY,CREATE_DATE,MODIFY_DATE,MODIFY_BY,remark,location_type,address,tel
+		)
+		values (
+			#{rowId},#{name},#{code},#{parentId},#{cityCode},#{cityName},
+			#{createBy},#{createDate},#{modifyDate},#{modifyBy},#{remark},#{locationType},#{address},#{tel}
+		)
+	    ]]>
+    </insert>
+
+    <update id="updateFlag">
+        <![CDATA[
+		update CD_LOC_INFO set flag = '1' where row_id in
+		]]>
+        <foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    <update id="update" parameterType="cdLocInfo">
+		<![CDATA[
+
+                update CD_LOC_INFO
+                   set  NAME = #{name}
+                        ,CODE = #{code}
+                        ,PARENT_ID = #{parentId}
+                        ,city_code=#{cityCode}
+                        ,city_name=#{cityName}
+                        ,MODIFY_BY = #{modifyBy}
+                        ,MODIFY_DATE = #{modifyDate}
+                        ,remark = #{remark}
+                        ,LOCATION_TYPE = #{locationType}
+                        ,ADDRESS = #{address}
+                        ,TEL = #{tel}
+                 where row_id = #{rowId}
+
+        ]]>
+	</update>
+    <update id="updateParentId">
+        <![CDATA[
+		update CD_LOC_INFO
+		   set  PARENT_ID = #{parentId}
+		 where row_id in
+		]]>
+        <foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    <update id="updateParentId22">
+        <![CDATA[
+		update CD_LOC_INFO
+		   set  PARENT_ID = #{parentId}
+		 where row_id in
+		]]>
+        <foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    <sql id="searchCdLocInfo_fragement">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where 1=1
+        <if test="cdLocInfo.name != null  and cdLocInfo.name != ''">
+            and cd_loc_info_.NAME like '%'||#{cdLocInfo.name}||'%'
+        </if>
+        <if test="cdLocInfo.code != null and cdLocInfo.code != ''">
+            and cd_loc_info_.CODE like '%'||#{cdLocInfo.code}||'%'
+        </if>
+        <if test="cdLocInfo.whName!= null and cdLocInfo.whName != ''">
+            and wh.NAME like '%'||#{cdLocInfo.whName}||'%'
+        </if>
+    </sql>
+
+    <select id="searchCdLocInfos" resultMap="cdLocInfoMap">
+        <include refid="pagination_Head"/>
+        <include refid="searchCdLocInfo_fragement"/>
+        <include refid="pagination_Tail"/>
+    </select>
+    <select id="searchCdLocInfosCount" resultType="long">
+        <include refid="count_Head"/>
+        <include refid="searchCdLocInfo_fragement"/>
+        <include refid="count_Tail"/>
+    </select>
+
+    <update id="updateById" parameterType="cdLocInfo">
+		<![CDATA[
+
+                update CD_LOC_INFO
+                    set  NAME = #{cdLocInfo.name}
+                        ,CODE = #{cdLocInfo.code}
+                        ,PARENT_ID = #{cdLocInfo.parentId}
+                        ,MODIFY_BY = #{cdLocInfo.modifyBy}
+                        ,MODIFY_DATE = #{cdLocInfo.modifyDate}
+                        ,remark = #{cdLocInfo.remark}
+                        ,address = #{cdLocInfo.address}
+                        ,tel = #{cdLocInfo.tel}
+                        ,LOCATION_TYPE = #{cdLocInfo.locationType}
+                where row_id = #{cdLocInfo.rowId}
+
+        ]]>
+	</update>
+    <select id="searchCdLocation" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where 1=1
+        <if test="cdLocInfo.rowId != null  and cdLocInfo.rowId != ''">
+            and cd_loc_info_.ROW_ID = #{cdLocInfo.rowId}
+        </if>
+        <if test="cdLocInfo.parentId != null  and cdLocInfo.parentId != ''">
+            and cd_loc_info_.PARENT_ID = #{cdLocInfo.parentId}
+        </if>
+        <if test="cdLocInfo.name != null  and cdLocInfo.name != ''">
+            and cd_loc_info_.NAME like '%'||#{cdLocInfo.name}||'%'
+        </if>
+        <if test="cdLocInfo.code != null and cdLocInfo.code != ''">
+            and cd_loc_info_.CODE like '%'||#{cdLocInfo.code}||'%'
+        </if>
+        <if test="cdLocInfo.whName != null and cdLocInfo.whName != ''">
+            and wh.NAME like '%'||#{cdLocInfo.whName}||'%'
+        </if>
+    </select>
+    <select id="searchCdLocByCode" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where 1=1
+        <if test="cdLocInfo.code != null and cdLocInfo.code != ''">
+            and cd_loc_info_.CODE = #{cdLocInfo.code}
+        </if>
+        <if test="cdLocInfo.parentId != null and cdLocInfo.parentId != ''">
+            and cd_loc_info_.PARENT_ID = #{cdLocInfo.parentId}
+        </if>
+        <if test="cdLocInfo.parentId == null or cdLocInfo.parentId == ''">
+            and cd_loc_info_.PARENT_ID is null
+        </if>
+    </select>
+    <select id="findCdLocByWarehouse" resultMap="cdLocInfoMap">
+        <include refid="selectAllCdLocInfoColumns"/>
+        where wh.code = #{whCode}
+    </select>
+    <select id="ifRepairLocation" resultType="string">
+		SELECT
+			CASE
+			WHEN count(*) > 0 THEN
+			'0'
+			ELSE
+			'1'
+			END
+		FROM
+			cd_loc_info loc
+			LEFT JOIN cd_wh_info wh ON loc.PARENT_ID = wh.ROW_ID
+		WHERE
+			loc.CODE = #{locationCode}
+			AND loc.NAME LIKE '%repair%'
+			AND wh.CODE = #{plantCode}
+	</select>
+
+    <select id="getCdLocInfoListByCode" resultMap="cdLocInfoMap">
+		select * from CD_LOC_INFO where CODE in (${codes})
+	</select>
+
+    <select id="getCdLocInfoManyColumn" resultMap="cdLocInfoMap">
+        SELECT
+        ROW_ID,
+        NAME,
+        CODE,
+        PARENT_ID,
+        FLAG,
+        VERSION,
+        CITY_NAME,
+        CITY_CODE,
+        REMARK,
+        LOCATION_TYPE,
+        ADDRESS
+        FROM CD_LOC_INFO
+        <where>
+            <if test="cdLocInfo.locationType != null and cdLocInfo.locationType != ''">
+                LOCATION_TYPE = #{cdLocInfo.locationType}
+            </if>
+        </where>
+        ORDER BY CODE
+    </select>
+
+    <select id="getTypeByCode" resultType="string">
+		<![CDATA[
+
+                    select max(t.location_type) from cd_loc_info t where t.CODE = #{locCode}
+
+        ]]>
+	</select>
+</mapper>

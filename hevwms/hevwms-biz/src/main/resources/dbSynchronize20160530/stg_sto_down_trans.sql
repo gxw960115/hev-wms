@@ -1,0 +1,42 @@
+SELECT
+  ROW_ID
+, STO_NO
+, STO_ITEM_NO
+, GI_PLANT
+, GR_PLANT
+, PUR_ORG
+, STO_DOC_DATE
+, STO_LAST_MODIFY_DATE
+, STO_CREATE_BY
+, MATERIAL_NO
+, CUSTOMER_MODEL
+, MATERIAL_DESP
+, QTY
+, ITEM_DELTET
+, STO_CLOSE
+, GR_LOCATION
+, GR_DATE
+, GI_LOCATION
+, GI_DATE
+, DATE_FORMAT(
+		CREATE_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) CREATE_DATE
+, DATE_FORMAT(
+		MODIFY_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) MODIFY_DATE
+, VERSION
+, GI_FINISH_QTY
+, UNIT
+, DELIVER_DATE
+, GR_FINISH_QTY
+, GI_FINISH_FLAG
+, GR_FINISH_FLAG
+, FLAG
+, PRESCAN_FLAG
+, CREATE_BY
+, MODIFY_BY
+FROM stg_sto_down
+where MODIFY_DATE >DATE_ADD(NOW(),INTERVAL -30 DAY) and (GI_PLANT in (select fac.`code` from cd_factory fac where fac.country_code='6600')
+      or GR_PLANT in  (select fac.`code` from cd_factory fac where fac.country_code='6600'))

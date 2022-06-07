@@ -1,0 +1,6 @@
+SELECT
+  ROLE_ID
+, RESOURCE_ID
+, COUNTRY_CODE
+FROM role_resource
+where COUNTRY_CODE='6600'

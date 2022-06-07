@@ -1,0 +1,891 @@
+{{#component "transferOrder js-comp"}}
+	<style type="text/css">
+        #addTransForm{
+            padding-top:2px;
+            padding-left:30px;
+            font-size:14px;
+            color: #636E7B;
+        }
+        #addTransForm input{
+            height: 28px;
+            width: 140px;
+        }
+        #addTransForm table tr{
+            height: 32px;;
+        }
+        #addTransForm table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+	</style>
+    <div id="transferDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDiv" region="north" style="border:0">
+            <table id="searchTab1">
+                 <tr>
+                    <td style="text-align: right">Trans NO:</td>
+                    <td class="leftCls"><input id="transNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Plant:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="warehouse" type="text" class="easyui-combobox" style="border:0" data-options="border:false,
+                         width:155, height:30, editable:true,required:false,panelWidth:180"/></td>
+                    <td class="rightCls">GI Location:</td>
+                	<td class="leftCls"><input id="giLocation" type="text" class="easyui-combobox"
+                            data-options="editable:false,multiple:true,multiline:true,valueField:'id',textField:'id'" style="width:155px;height:30px"/></td>
+                    <td class="rightCls">GR Location:</td>
+                    <td class="leftCls"><input id="grLocation" type="text" class="easyui-combobox"
+                            data-options="editable:false,multiple:true,multiline:true,valueField:'id',textField:'id'" style="width:155px;height:30px"/></td>
+                </tr>
+                <tr>
+                	<td class="rightCls">Material No:</td>
+                    <td class="leftCls"><input id="materialNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Do Flag:</td>
+                    <td class="leftCls"><input id="doFlag" class="easyui-combobox flag" data-options="width:155,height:30,editable:false,panelHeight:'auto'" /></td>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                   	<td class="leftCls" colspan="3">
+                   		<input id="begin" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/> &nbsp;&nbsp;
+                        -&nbsp;&nbsp;<input id="end" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn">Add</a>
+                    <a href="javascript:void(0)" class="btnStyle deleteBtn" id="deleteOrder">Delete</a>
+					<a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+					<a href="javascript:void(0)" class="btnStyle paymentReconciliationBtn" onclick="postingTrans()">Posting</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn"  onclick="exportPlan()">Export</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border-top:0px;  overflow-y: hidden;">
+            <table id="dataGrid" style="width:100%;"></table>
+        </div>
+    </div>
+    <!-- 创建订单 -->
+    <div id="addTransWin" title="Add Inventory Transfer Order"
+         data-options="modal:true,closed:true,iconCls:'icon-add', top:10, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+         style="width: 735px; height: 450px; display:none">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style=" height: 210px; border:0">
+                <form id="addTransForm" method="post">
+                    <table  cellpadding="0" cellspacing="0" >
+                        <tr>
+                            <td align="right" valign="middle">Order No:&nbsp;&nbsp;</td>
+                            <td colspan="3"><input id="planNo" type="text" class="radiusCls" style='width:140px' readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td align="right" valign="middle">Plant:&nbsp;&nbsp;</td>
+                            <td width="190"><input id="warehouseCode" type="text" class="easyui-combobox" style="padding: 5px" 
+                    				data-options="border:false,width:140,height:30,editable:true,required:false,panelWidth:180"/><font color="red">*</font></td>
+                    		<td width="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>		
+                            <td align="left" valign="middle">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                            <td width="190">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr class="locTr">
+                            <td valign="top" align="right">Gi Location<font color="red">*</font>:</td>
+                            <td >
+                                <div style="height: 135px; border: 1px #ccc solid; width: 220px; overflow-y: scroll; overflow-x: auto;">
+                                    <ul id="locTree" class="easyui-tree"></ul>
+                                </div> <input id="locs" type="hidden" />
+                            </td>
+                        	<td></td>
+                            <td valign="top" align="right">Gr Location<font color="red">*</font>:</td>
+                            <td >
+                                <div style="height: 135px; border: 1px #ccc solid; width: 220px; overflow-y: scroll; overflow-x: auto;">
+                                    <ul id="locTree2" class="easyui-tree"></ul>
+                                </div> <input id="locs2" type="hidden" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div region="center">
+                <table id="selTransGrid" ></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 35px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveTrans();">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="closeTransWin();">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <div id="showMatWin" class="easyui-window" title="MatInfo"
+         data-options="modal:true,closed:true,iconCls:'icon-search',top:0, left:($(window).width() - 750) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false"
+         style="width: 750px; height: 450px; overflow-y: hidden">
+        <div class="easyui-layout" fit="true">
+            <div region="west" style=" width: 480px;overflow-y: hidden; border-right: 2px #ccc solid; border-left: 0;border-top: 0; border-bottom: 0">
+                <div id="matGridTool">
+                    Mat Code:<input type="text" id="matCodeP" value="" class="radiusCls" style="width:120px">|
+                	Mat Desc:<input type="text" id="matDespP" value="" class="radiusCls" style="width:120px">|
+                    <img onclick="searchMat()" src="/assets/images/serch-icon.png" id="serch-icon">
+                </div>
+                <table id="matGrid"></table>
+            </div>
+            <div region="center" style="overflow-y: hidden; ">
+                <table id="selMatGrid"></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 37px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveMat();">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="javascript:closeMat();">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var totalWidth = $('#dataGrid').width();
+    
+	function fixWidth(percent) { 
+    	return totalWidth * percent;   
+	}
+    var selTransColumns="";
+    var matColumns="";
+    var selMatColumns="";
+    $(function(){
+        $("#postTransfer").css("display","");
+    	$('#transferDiv').height(suitHeight);
+    	//初始化日期
+        var date=new Date();
+        var y=date.getFullYear();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(date,-7));
+        $('#end').val(date);
+        
+        var columns=[[{
+            field : 'ck',
+            checkbox : true,
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'transNo',
+            title : 'Order No',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'checkFlag',
+            title : 'Check Flag',
+            align : 'center',
+            sortable : true,
+            width: fixWidth(0.12),
+            formatter : function(val) {
+                if (val == '0') {
+                    return "<font color='red'>Not Confirmed</font>";
+                } else if (val == '1') {
+                    return "<font color='green'>Confirmed</font>";
+                }
+                return val;
+            }
+        },{
+            field : 'transItemNo',
+            title : 'Item No',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'qty',
+            title : 'QTY',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Finish Qty',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'UNIT',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'giLocation',
+            title : 'Gi Location',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'grLocation',
+            title : 'Gr Location',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.09),
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description ',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'createBy',
+            title : 'Create By',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        },{
+            field:'sapFlag',title:'Sap Flag',width:fixWidth(0.10),align:'center',sortable:true,
+            formatter: function(val){
+                if(val=='1'){
+                    return "<font color='green'>Posting Success</font>";
+                }else if(val=='2'){
+                    return"<font color ='red'>Posting Failure</font>";
+                }else{
+                    return "<font color='red'>UnDelivery</font>";
+                }
+            }
+        }, {
+            field:'sapMsg',
+            title:'Sap Msg',
+            width:fixWidth(0.20), 
+            align:'center',
+            sortable:true
+        }]];
+        selTransColumns = [ [ {
+            field : 'giLocation',
+            title : 'Gi Location',
+            align : 'center',
+            width : 100
+        }, {
+            field : 'materialNo',
+            title : 'MaterialNo',
+            align : 'center',
+            width : 120
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            align : 'center',
+            width : 80
+        }, {
+            field : 'basicUnit',
+            title : 'Unit',
+            align : 'center',
+            width : 50
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            width : 160
+        } ] ];
+        matColumns = [ [ {
+            field : 'materialNo',
+            title : 'Material Code',
+            width : 120,
+            align : 'center'
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width: 200,
+            align : 'center'
+        }, {
+            field : 'produceAttribute',
+            title : 'IDU/ODU',
+            width: 60,
+            align : 'center',
+            hidden: true
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            align : 'center',
+            width : 60,
+            editor:{
+                type:'numberbox'
+            },
+            styler: function (value, row, index) {
+                return 'background-color:#ffee00;color:red;';
+            }
+        },  {
+            field : 'basicUnit',
+            title : 'Unit',
+            align : 'center',
+            width : 50
+        } ] ];
+        selMatColumns = [ [ {
+            field : 'materialNo',
+            title : 'Material Code',
+            align : 'center',
+            width : 100
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            width : 100,
+            align : 'center'
+        } ] ];
+        var grid2 = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            remoteSort:false,  
+            method:'post',
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+            onLoadSuccess:function(){
+               $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid2);
+        $.ajax({
+        	url:'/plant/list/select',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                var dataRes = [];
+                if(data!=''||data!=null||data!=undefined){
+                   for(var i=0;i<data.length;i++){
+                       dataRes.push({ "text": data[i]['name'], "value": data[i]['code'], "rowId": data[i]['rowId'] });
+                    }           
+                }
+                $('#warehouse').combobox({
+                    data:dataRes
+                })
+                $('#warehouseCode').combobox({
+                    data:dataRes
+                })
+            }
+        });
+
+        // 加载Location数据
+        $(document).ready(function () {
+            $("#warehouse").combobox({
+                onChange: function (record) {
+                    $.ajax({
+                        url: '/loc/getLocationList',
+                        type: 'post',
+                        dataType: 'json',
+                        data: {
+                           rowId: record.rowId,
+                           // locationType: 0,
+                           parentId: record.rowId
+                        },
+                        success: function (data) {
+                            $("#giLocation").combobox({
+                                data:data
+                            });
+                            $("#grLocation").combobox({
+                                data:data
+                            });
+                        }
+                    })
+                }
+            });
+        });
+        $('#doFlag').combobox({
+                data:[{"text":"ALL","value":"-1"},{"text":"UnDelivered","value":"0"},{"text":"Posting Success","value":"1"},
+                {"text":"Posting Failed","value":"2"}],
+                value:'-1'
+        });
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#addBtn').on('click',function(){
+            addData();
+        })
+        $('#exportBtn').on('click',function(){
+            exportData();
+        })
+        $('#deleteOrder').on('click',function(){
+            deleteOrder();
+        })
+        $('#warehouseCode').combobox({
+        	panelWidth:180,
+            onSelect:function(record){
+                $.ajax({
+                    url:'/loc/select/tree',
+                    type:'post',
+                    dataType:'json',
+                    data:{
+                        rowId:record.rowId
+                    },
+                    success:function(data){
+                        $('#locTree').tree({
+                            //checkbox:true,
+                            data:data,
+                            onSelect:function(node){
+                            	$.ajax({
+                            		url:'/loc/select/treeWithLocation',
+                                    type:'post',
+                                    dataType:'json',
+                                    data:{
+                                    	parentId: record.rowId,
+                                        code:node.id
+                                    },
+                                    success:function(data){
+                                    	$('#locTree2').tree({
+                                            data:data,
+                                            onSelect:function(node){
+                                                $('#locs2').val(node.id);
+                                            }
+                                        }); 
+                                    }
+                            	})
+                                showMatWin();
+                                $('#locs').val(node.id);
+                            }
+                        });
+                        $('#locTree2').tree({
+                            data:data,
+                            onSelect:function(node){
+                                $('#locs2').val(node.id);
+                            }
+                        }); 
+                    }
+                });
+
+            }
+        });
+    });
+    
+    var editIndex = undefined;
+    function endEditing() {
+        if (editIndex == undefined) {
+            return true
+        }
+        if ($('#matGrid').datagrid('validateRow', editIndex)) {
+            $('#matGrid').datagrid('endEdit', editIndex);
+            editIndex = undefined;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    function onClickCell(index, field) {
+        if (endEditing()) {
+            if (field == 'qty') {
+                $('#matGrid').datagrid('selectRow', index).datagrid('beginEdit', index);
+                editIndex = index;
+                var ed = $(this).datagrid('getEditor', {index:index,field:field});
+                $(ed.target).focus();
+            }
+            editIndex = index;
+        }
+    }
+    
+    function showMatWin(){
+        var matGrid = $('#matGrid').datagrid(
+                {
+                    rownumbers : true,
+                    pagination : true,
+                    striped : true,
+                    singleSelect : false,
+                    height : 345,
+                    url : '/api/search',
+                    idField : 'rowId',
+                    fitColumns : false,
+                    pageNumber : 1,
+                    columns : matColumns,
+                    onClickCell:onClickCell,
+                    onLoadSuccess : function(data) {
+                        if (data.mess != null) {
+                            $.messager.alert('System Information',data.mess, 'warning');
+                            return;
+                        }
+                        if (data.total == 0 && data.rows.length == 0) {
+                            $.messager.alert('System Information', 'No records found.','warning');
+                        }
+                    },
+                    onDblClickRow : matCheck,
+                    onLoadError:function(){
+                       $.messager.alert('System Information','Network Abnormal!','warning');
+                    }
+                });
+        initPaginationForDialog(matGrid);
+        $('#selMatGrid').datagrid({
+            rownumbers : true,
+            striped : true,
+            singleSelect : false,
+            border:false,
+            height : 370,
+            idField : 'materialNo',
+            fitColumns : true,
+            columns : selMatColumns,
+            data:[]
+
+        });
+        $('#showMatWin').window('open');
+    }
+    function matCheck(index, row) {
+    	if (row.qty == undefined || row.qty == ''){
+    		$.messager.alert('System Information','Please input qty first!');
+    		return ;
+    	}
+        var selIndex = $('#selMatGrid').datagrid('getRowIndex', row);
+        if (selIndex == -1) {
+            $('#selMatGrid').datagrid('appendRow', row);
+        } else {
+            $.messager.alert('System Information','The Data already exists!');
+        }
+    }
+    function closeMat() {
+       /* var node= $('#locTree').tree('find',$('#locs').val());
+        var row = {
+            giLocation : node.id,
+            materialNo:'ALL'
+        };
+        var selIndex = $('#selTransGrid').datagrid('getRowIndex', row);
+        if (selIndex == -1) {
+            $('#selTransGrid').datagrid('appendRow', row);
+        } else {
+            $.messager.alert('System Information',
+                    'The Data already exists!');
+        } */
+        $('#showMatWin').window('close');
+    }
+    function saveMat() {
+        var node= $('#locTree').tree('find',$('#locs').val());
+        if (node != null) {
+            var rows = $('#selMatGrid').datagrid('getRows');
+            
+            for (var i = 0; i < rows.length; i++) { 
+	        	var plQty = rows[i]['qty'];
+	        	if (plQty == null || plQty == '' || plQty == 'undefined') {
+	        		$.messager.alert('System Information','You must input the Plan Qty!','warning'); 
+	        		return false;
+	        	}
+			}
+            
+            $.each(rows, function(index, value) {
+                value.giLocation = node.id;
+                var selIndex = $('#selTransGrid').datagrid('getRowIndex', value);
+                if (selIndex == -1) {
+                    $('#selTransGrid').datagrid('appendRow', value);
+                }
+            });
+        }
+        $('#showMatWin').window('close');
+    }
+    function queryData() {
+        var giLocationArr = $('#giLocation').combobox('getValues');
+        var grLocationArr = $('#grLocation').combobox('getValues');
+        var giLocations = getLocationStr(giLocationArr);
+        var grLocations = getLocationStr(grLocationArr);
+       var grid= $('#dataGrid').datagrid({
+            url:'/odsTransferInfo/list',
+            queryParams: {
+                begin:$('#begin').val(),
+                end:$('#end').val(),
+                transNo:$('#transNo').val(),
+                materialNo:$('#materialNo').val(),
+                warehouseCode:$('#warehouse').combobox('getValue'),
+                giLocation:giLocations,
+                grLocation:grLocations,
+                flag:'0',
+                finishFlag:$('#doFlag').combobox("getValue")
+            },
+            onLoadSuccess : function(data) {
+                $("#dataGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information','No records found.','warning');
+                }
+                $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid); 
+    }
+
+    function searchMat(){
+        var matGrid = $('#matGrid').datagrid({
+            url:'/api/search',
+            queryParams: {
+                materialNo:$('#matCodeP').val(),
+                materialDesp:$('#matDespP').val()
+            },
+            onLoadSuccess : function(data) {
+                $("#matGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information','No records found.','warning');
+                }
+            },
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+        initPaginationForDialog(matGrid);
+    }
+
+    function addData(){
+        $.post("/odsTransferInfo/sequenceNo", function(data) {
+             $("#planNo").val(data);
+             $('#warehouseCode').combobox('setValue','');
+             $('#selTransGrid').datagrid({
+                 rownumbers : true,
+                 striped : true,
+                 singleSelect : false,
+                 height : 190,
+                 idField : 'id',
+                 fitColumns : true,
+                 fit : true,
+                 columns : selTransColumns,
+                 data:[]
+             });
+             $('#addTransWin').show();
+             $('#addTransWin').window(); 
+             $('#addTransWin').window('open');
+         }).error(function() {
+                $.messager.alert('System Information','Network Abnormal!','warning');
+            });
+        $('#locTree').tree('loadData',[]);  
+        $('#locTree2').tree('loadData',[]); 
+    }
+
+    function updateOrderStatus(alert, orderNo, status) {
+        $.messager.confirm('System Information', alert, function(r) {
+            if (r) {
+                $.post('/stocktakingOrder/update', {
+                    'orderNo' : orderNo,
+                    'orderStatus' : status
+                }, function(data) {
+                    $.messager.alert('System Information',data, 'warning');
+                    queryData();
+                }).error(
+                    function() {
+                        $.messager.alert('System Information','Network Abnormal!','warning');
+                    });
+            }
+        });
+    }
+    
+   /* function transferPost() {
+        var rows = $('#dataGrid').datagrid('getSelections');
+        if (rows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return;
+        }
+        if (rows[0].sapFlag == '1') {
+            $.messager.alert('System Information',
+                    'The order already post to SAP. Please select the order which has not post.', 'warning');
+            return;
+        }
+      
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            url:'/order/postTransfer',
+            data:{
+                transNo:rows[0].transNo,
+                userName:$.session.get("userName")
+            },
+            success:function(data){
+                if (data.status == 'S') {
+                    $.messager
+                            .alert(
+                            'System Information',
+                            'Posting Success!',
+                            'warning');
+                } else {
+                    $.messager
+                            .alert(
+                            'System Information',
+                            'Failed Posting ! '+data.msg,
+                            'warning');
+                }
+                //unLoadMask($('#loading'));
+                $('#stgDnDownGrid')
+                        .datagrid('reload');
+            },
+            error: function() {
+                //unLoadMask($('#loading'));
+                $.messager
+                        .alert(
+                        'System Information',
+                        'Network Abnormal!',
+                        'warning');
+            }
+        });
+
+    }*/
+
+    function deleteOrder(){
+        var selectedRows = $("#dataGrid").datagrid('getChecked');
+        if (selectedRows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return false;
+        }
+        if (selectedRows[0].checkFlag == 1) {
+            $.messager.alert('System Information',
+                    'The data has been confirmed!', 'warning');
+            return false;
+        }
+        $.messager.confirm('System Information', 'Order Delete ?', function(r) {
+            if (r) {
+                $.post('/odsTransferInfo/deleteByTransNo', {
+                    'transNo' : selectedRows[0].transNo,
+                    'createBy':selectedRows[0].createBy
+                }, function(data) {
+                        $.messager.alert('System Information',
+                                data, 'warning');
+                    queryData();
+                }).error(
+                    function() {
+                    	$.messager.alert('System Information', 'Network Abnormal!','warning');
+                    }
+                );
+            }
+        });
+    }
+
+    function saveTrans(){
+        if (!$("#warehouseCode").combobox('getValue')) {
+            $.messager.alert('System Information','Plant Code can not be null');
+            return false;
+        }
+        if ($('#selTransGrid').datagrid('getRows').length == 0) {
+            $.messager.alert('System Information','Gi Location can not be null');
+            return false;
+        }
+        if ($('#locTree2').tree('find',$('#locs2').val()) == null) {
+        	$.messager.alert('System Information', 'GR Location can not be null');
+            return false;
+        }
+        
+        var grLocation= $('#locTree2').tree('find',$('#locs2').val()).id;
+        
+        $.maskLoading();
+        $.ajax({
+        	url:"/odsTransferInfo/add",
+        	type:'post',
+        	data:{
+        		'transNo' : $('#planNo').val(),
+	            'warehouseCode' : $("#warehouseCode").combobox('getValue'),
+	            'plant' :$("#warehouseCode").combobox('getValue'),
+	            'warehouseName' : $('#warehouseCode').combobox('getText'),
+	            'msg' : JSON.stringify($('#selTransGrid').datagrid('getRows')),
+	            'grLocation' : grLocation
+        	},
+        	success:function(val) {
+                $.maskEnd();
+                $.messager.alert('System Information',val, 'warning');
+                
+                closeTransWin();
+                queryData();
+            },
+			 error:function() {
+                $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+    }
+    function closeTransWin(){
+        $("#warehouseCode").combobox('setValue', '')
+        $('#addTransWin').window('close');
+    }
+
+    // 导出Excel
+    function exportPlan() {
+        var giLocationArr = $('#giLocation').combobox('getValues');
+        var grLocationArr = $('#grLocation').combobox('getValues');
+        var giLocations = getLocationStr(giLocationArr);
+        var grLocations = getLocationStr(grLocationArr);
+    	$.ajax({
+        	url:'/odsTransferInfo/searchTransInfosAmount',
+        	type:'post',
+        	dataType:'json',
+        	data:{
+        		transNo:$('#transNo').val(),
+        		materialNo:$('#materialNo').val(),
+        		giLocation:giLocations,
+        		grLocation:grLocations,
+        		begin:$('#begin').val(),
+        		end:$('#end').val(),
+        		finishFlag:$('#doFlag').combobox("getValue"),
+        		flag:0
+        	},
+        	success:function(data) {
+        		if (data == "success") {
+        			var url = "/odsTransferInfo/export?"
+        		        +'transNo='+$('#transNo').val()
+        		        +'&materialNo='+$('#materialNo').val()
+        		        +'&giLocation=' + giLocations
+        		        +'&grLocation=' + grLocations
+        		        +'&begin='+$('#begin').val()
+        		        +'&end='+$('#end').val()
+        		        +'&finishFlag='+$('#doFlag').combobox("getValue")
+        		        +'&flag='+'0'
+        		        window.location.href = url;
+        		}else {
+        			$.messager.alert('System Information',data,	'warning');
+        		}
+        	}
+        });
+    }
+    
+    function postingTrans() {
+        var row = $('#dataGrid').datagrid('getChecked');
+        if (row.length != 1) {
+            $.messager.alert('System Information', 'Please select one data!', 'warning');
+            return;
+        }
+
+        // 审核标记
+        if (row[0].checkFlag == '0') {
+            $.messager.alert('System Information', 'The data has not been confirmed! ', 'warning');
+            return;
+        }
+        if (row[0].finishFlag == '0') {
+            $.messager.alert('System Information', 'The data has not been finished! ', 'warning');
+            return;
+        }
+        if (row[0].sapFlag == '0') {
+            $.messager.alert('System Information', 'The data is unDelivery! ', 'warning');
+            return;
+        } else if(row[0].sapFlag == '1'){
+            $.messager.alert('System Information', 'The data has been Posting! ', 'warning');
+            return;
+        }
+        $.messager.confirm('System Information','Are You Sure Post Data?',
+            function(r) {
+                if (r) {
+                    $.post("/odsTransferDtl/orderPosting",
+                            {
+	                            orderNo : row[0].transNo,
+	                            createBy:row[0].createBy,
+								giLocation : row[0].giLocation,
+								grLocation : row[0].grLocation,
+								docType : 'TRANSFER',
+								sapFlag : row[0].sapFlag,
+								orderType : '2'
+	                        },
+                            function(data) {
+                                if (data == 'success') {
+                                    $.messager.alert('System Information','Posting Success!','warning');
+                                    searchOdsCustomerOrder();
+                                } else {
+                                    $.messager.alert('System Information','Posting Failure!,' + data, 'warning');
+                                }
+                            }
+                    ).error(
+                        function() {
+                            $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                            searchOdsCustomerOrder();
+                        }
+                    );
+                }
+            }
+        );
+    }
+    
+    </script>
+{{/component}}

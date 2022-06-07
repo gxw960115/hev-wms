@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+				  
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.OtcwmsOrderLoadDAO">
+	<select id="orderLoad" statementType="CALLABLE">
+		<![CDATA[
+		  {call orderUpload(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{in.qty,mode=IN,jdbcType=VARCHAR},
+		  #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{out.location,mode=OUT,jdbcType=VARCHAR},
+		  #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+	      #{out.poqty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="orderLoadPd" resultMap="stareaResultMap">
+		<![CDATA[
+			select t.location code from ODS_PD_INFO t 
+			where t.order_no = #{orderno} and t.flag = '0' and t.order_status= '1'
+			group by t.location
+		]]>
+	</select>
+	<resultMap id="stareaResultMap" type="starea">
+		<result property="code" column="code"/>
+	</resultMap>
+	<select id="otcwmsGetSubLocation" resultMap="sublocation">
+		<![CDATA[
+		 select t.name,t.code from cd_sub_location t where t.location = #{location}
+		]]>
+	</select>
+	<resultMap id="sublocation" type="sublocation">
+		<result property="code" column="code"/>
+		<result property="desc" column="name"/>
+	</resultMap>
+	<select id="otcwmsGetWlList" resultMap="wlList">
+		<include refid="searchotcwmsGetWlList" />
+	</select>
+	<sql id="searchotcwmsGetWlList">
+		<if test="loadIn.doctype == 'PO'"> 
+			select 
+				t.material_no mat,
+				(NVL(sum(t.qty),0)||','||NVL(sum(t.FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.PO_LOCATION||','||t.material_no) matDesc,
+				NVL(sum(t.qty),0) qty,
+				NVL(sum(t.FINISH_QTY),0) scanqty,
+				t.CUSTOMER_MODEL custModel,
+				t.PO_LOCATION location
+			from
+				STG_PO_DOWN t
+			where t.po_no = #{loadIn.orno} and t.INBOUND_FLAG is null  
+			group by t.material_no,t.CUSTOMER_MODEL,t.PO_LOCATION
+		</if>
+		<if test="loadIn.doctype == 'DN'">
+			select 
+				t.material_no mat,
+				(NVL(sum(t.qty),0)||','||NVL(sum(t.FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.LOCATION||'. Customer Name:'||t.CUSTOMER_NAME||','||t.material_no) matDesc,
+				NVL(sum(t.qty),0) qty,
+				NVL(sum(t.FINISH_QTY),0) scanqty,
+				(t.CUSTOMER_MODEL||'. '||t.CUSTOMER_NAME) custModel,
+				t.LOCATION location
+			from
+				STG_DN_DOWN t 
+			where t.DN_NO = #{loadIn.orno} 
+			group by t.material_no,t.CUSTOMER_MODEL,t.LOCATION,t.customer_Name
+		</if>
+		<if test="loadIn.doctype == 'STO' and loadIn.ordertype == 2">
+			select 
+				t.material_no mat,
+				(NVL(sum(t.qty),0)||','||NVL(sum(t.GI_FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.Gi_LOCATION||','||t.material_no) matDesc,
+				NVL(sum(t.qty),0) qty,
+				NVL(sum(t.GI_FINISH_QTY),0) scanqty,
+				t.CUSTOMER_MODEL custModel,
+				t.Gi_LOCATION location
+			from
+				STG_STO_DOWN t
+			where t.STO_NO = #{loadIn.orno} 
+			group by t.material_no,t.CUSTOMER_MODEL,t.Gi_LOCATION
+		</if> 
+		<if test="loadIn.doctype == 'STO' and loadIn.ordertype == 1">
+			select 
+				t.material_no mat,
+				(NVL(sum(t.qty),0)||','||NVL(sum(t.GR_FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.GR_LOCATION||','||t.material_no) matDesc,
+				NVL(sum(t.qty),0) qty,
+				NVL(sum(t.GR_FINISH_QTY),0) scanqty,
+				t.CUSTOMER_MODEL custModel,
+				t.GR_LOCATION location
+			from
+				STG_STO_DOWN t
+			where t.STO_NO = #{loadIn.orno} 
+			group by t.material_no,t.CUSTOMER_MODEL,t.GR_LOCATION
+		</if>
+		<if test="loadIn.doctype == 'GIFT'">
+			select 
+				t.material_no mat,
+				(NVL(sum(t.REQUIRE_QTY),0)||','||NVL(sum(t.FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.Location||','||t.material_no) matDesc,
+				NVL(sum(t.REQUIRE_QTY),0) qty,
+				NVL(sum(t.FINISH_QTY),0) scanqty,
+				t.CUSTOMER_MODEL custModel,
+				t.Location location
+			from
+				ODS_WMS_ORDER t 
+			where t.Wms_Order_No =  #{loadIn.orno} 
+			group by t.material_no,t.CUSTOMER_MODEL,t.Location
+		</if>
+		<if test="loadIn.doctype == 'SCRAP'">
+			select 
+				t.material_no mat,
+				(NVL(sum(t.REQUIRE_QTY),0)||','||NVL(sum(t.FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.Location||','||t.material_no) matDesc,
+				NVL(sum(t.REQUIRE_QTY),0) qty,
+				NVL(sum(t.FINISH_QTY),0) scanqty,
+				t.CUSTOMER_MODEL custModel,
+				t.Location location
+			from
+				ODS_WMS_ORDER t 
+			where t.Wms_Order_No = #{loadIn.orno}
+			group by t.material_no,t.CUSTOMER_MODEL,t.Location
+		</if>  
+		<if test="loadIn.doctype == 'INBOUND'">
+			select 
+				t.material_no mat,
+				(NVL(sum(t.qty),0)||','||NVL(sum(t.FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.INBOUND_LOCATION||','||t.material_no) matDesc,
+				NVL(sum(t.qty),0) qty,
+				NVL(sum(t.FINISH_QTY),0) scanqty,
+				t.CUSTOMER_MODEL custModel,
+				t.INBOUND_LOCATION location
+			from
+				STG_INBOUND_DOWN t
+			where t.INBOUND_DELIVERY_NO = #{loadIn.orno}  
+			group by t.material_no,t.CUSTOMER_MODEL,t.INBOUND_LOCATION
+		</if> 
+		<if test="loadIn.doctype == 'TRANSFER'">
+			select 
+				t.material_no mat,
+				(NVL(sum(t.qty),0)||','||NVL(sum(t.FINISH_QTY),0)||','||t.CUSTOMER_MODEL||','||t.Gi_LOCATION||','||t.material_no) matDesc,
+				NVL(sum(t.qty),0) qty,
+				NVL(sum(t.FINISH_QTY),0) scanqty,
+				t.CUSTOMER_MODEL custModel,
+				t.Gi_LOCATION location
+			from
+				ods_transfer_info t
+			where t.TRANS_NO = #{loadIn.orno} 
+			group by t.material_no,t.CUSTOMER_MODEL,t.Gi_LOCATION
+		</if>
+	</sql>
+	<resultMap id="wlList" type="wlList">
+		<result property="mat" column="mat"/>
+		<result property="matdesc" column="matDesc"/>
+		<result property="qty" column="qty"/>
+		<result property="scanqty" column="scanqty"/>
+		<result property="location" column="location"/>
+		<result property="custModel" column="custModel"/>
+	</resultMap>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+        
+	<!-- 使用dubbo协议暴露服务 -->
+	<bean id="systemConfigServiceClient"
+		class="com.haier.openplatform.wms.security.service.impl.SystemConfigServiceClientImpl">
+		<property name="systemConfigService" ref="systemConfigService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.SystemConfigServiceClient"
+		owner="Hevwms" ref="systemConfigServiceClient" protocol="dubbo" delay="-1"
+		registry="qingdaoRegistry690" version="5.0" />
+	
+	<bean id="databaseServiceClient"
+		class="com.haier.openplatform.wms.security.service.impl.DatabaseServiceClientImpl">
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.security.service.DatabaseServiceClient"
+		owner="Hevwms" ref="databaseServiceClient" protocol="dubbo" delay="-1"
+		registry="qingdaoRegistry690" version="5.0" />
+
+</beans>

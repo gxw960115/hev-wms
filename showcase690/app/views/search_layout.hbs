@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>1169权限管理与分配中心</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="baidu-site-verification" content="P7Xr6eyWnw" />
+    <script src="/assets/scripts/vendor.js"></script>
+
+    <style type="text/css">
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+
+        .sidebar-nav {
+            padding: 5px 0;
+        }
+
+        /*按钮变斜  开始*/
+        .title-block {
+            width: 120px;
+            /*height: 20px;*/
+            -webkit-transform: skew(-20deg);
+            -moz-transform: skew(-20deg);
+            -o-transform: skew(-20deg);
+            background: #51abdf;
+            margin-left: 30px;
+            content: "";
+            display: block;
+        }
+
+        .textbw {
+            text-align: center;
+            color: #FFFFFF;
+            line-height: 30px;
+        }
+
+        .title {
+            text-align: center;
+            list-style-type: none;
+        }
+        #menu ul, #menu ul * {
+            margin : 0px;
+            padding : 0px;
+            list-style-type : none;
+        }
+
+        #menu ul li {
+            float : right;
+            position : relative;
+        }
+        #menu ul a {
+            display : block;
+            position : relative;
+        }
+        #menu ul li:first-child a{
+            padding : 8px 19px 0;
+        }
+        #menu ul li a{
+            position : relative;
+            z-index : 999;
+            padding : 8px 18px 0;
+            color : #868686;
+            text-decoration : none;
+            white-space : nowrap;
+            height : 20px;
+        }
+    </style>
+    <link rel="shortcut icon" href="http://10.135.13.113:8081/hac/assets/default/images/haier.ico">
+    <link rel="stylesheet" href="/assets/styles/app.css">
+    <link rel="stylesheet" href="/assets/styles/vendor.css">
+</head>
+<body style="padding-bottom: 0px;">
+
+<div style="padding-left: 0px;padding-right: 0px;background-color: #PINK;"> 
+
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="sidebar-nav">
+                {{{block "rightBody"}}}
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/scripts/app.js"></script>
+<script src="/assets/scripts/vendor.js"></script>
+<script src="/assets/scripts/eevee/vendor.js"></script>
+<script src="/assets/scripts/j.suggest.js"></script>
+<script>require("app")()</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+{{#component "plantList js-comp"}}
+<div class="easyui-layout" style="width:800px;height:400px;">
+        <div data-options="region:'north'" style="height:70px">
+			<h2>Query Condition</h2>
+			<div class="fitem">
+			<form id="query_fm" method="post" novalidate>
+                <label>Plant Code:</label>
+                <input name="plantCode" id="plantCode" class="easyui-textbox" >
+				<label>Plant Name:</label>
+                <input name="plantName" id="plantName"class="easyui-textbox" >
+			</form>
+			</div>
+		</div>
+        <div data-options="region:'center',split:true" style="height:370px;">
+			<table id="dg" title="" class="easyui-datagrid" style="height:100%"
+           
+            toolbar="#toolbar" pagination="true"
+            rownumbers="true" fitColumns="true" singleSelect="true">
+				<thead>
+					<tr>
+						<th field="code" width="50">Plant Code</th>
+						<th field="name" width="50">Plant Name</th>
+						<th field="purCode" width="50">PurCode</th>
+						<th field="purName" width="50">PurName</th>
+						<th field="salesCode" width="50">Sales Code</th>
+						<th field="salesName" width="50">Sales Name</th>
+						<th field="modifyBy" width="50">Modify By</th>
+						<th field="modifyDate" width="50">Modify Date</th>
+					</tr>
+				</thead>
+            </table>
+		</div>
+	</div>
+
+    <div id="toolbar">
+			<a id="search-btn" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="queryPlant()">Search</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newPlant()">Add</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editPlant()">Edit</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyPlant()">Remove</a>
+    </div>
+    <div id="dlg" class="easyui-dialog" style="width:660px;height:230px;padding:10px 20px"
+            closed="true" buttons="#dlg-buttons">
+        <div class="ftitle">Plant Information</div>
+        <form id="fm" method="post" novalidate>
+            <div class="fitem">
+                <label>Plant Name:</label>
+                <input name="plantName" class="easyui-textbox" required="true">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>Plant Code:</label>
+                <input name="plantCode" class="easyui-textbox" required="true">
+            </div>
+            <div class="fitem">
+                <label>PurName:</label>
+                <input name="purName" class="easyui-textbox" required="true">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>PurCode:</label>
+                <input name="purCode" class="easyui-textbox" required="true">
+            </div>
+			<div class="fitem">
+                <label>Sales Name:</label>
+                <input name="salesName" class="easyui-textbox" required="true">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>Sales Code:</label>
+                <input name="salesCode" class="easyui-textbox" required="true">
+            </div>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+    </div>
+	<script type="text/javascript">
+$(function(){
+    var grid = $('#dg').datagrid({
+        rownumbers:true,
+        scrollbarSize : 0,
+        singleSelect:false,
+        pagination:true,
+        url:'/plant/list',
+        method:'post'
+    });
+
+    var pager = grid.datagrid('getPager');  // get the pager of datagrid
+    pager.pagination({
+        showPageList:false,
+        showRefresh:false,
+        layout:['first','prev','links','next','last'],
+        displayMsg : ""
+    });
+    
+    
+    //查询列表
+    $("#search-btn").click(function(){
+        //grid.datagrid("reload",getQueryParam());
+        grid.datagrid("reload",{plantCode:P1001});
+    });
+
+    //组织查询参数
+    function getQueryParam(){
+        var data = {};
+        var plantCode = $("#plantCode").val();
+        if(plantCode != ""){
+            data.plantCode = plantCode;
+        }
+        var plantName = $("#plantName").val();
+        if(plantName != ""){
+            data.plantName = plantName;
+        }
+        return data;
+    }
+
+    //重置表单
+    $(".bigBtn").click(function(){
+        $("#search-form")[0].reset();
+    });
+    
+    //删除国家数据
+    $("#list-delete-btn").click(function(){
+        var selRows = grid.datagrid('getChecked');
+        if(selRows == 0){
+            $.messager.alert(I18n.t("codeInfomanage-tips"),I18n.t("codeInfomanage-selectData"),'warning');
+            return;
+        }
+        $.messager.confirm(I18n.t("codeInfomanage-conf"), I18n.t("codeInfomanage-whetherDeleteProject"), function(r){
+            if (r){
+                var code = "";
+                for(var i=0;i<selRows.length;i++){
+                    code += selRows[i].countryCode + ",";
+                }
+                $.ajax({
+                    type : "post",  
+                    url : "/country/delete",
+                    data : {code:code},
+                    success : function(data){
+                        if(data == "success"){
+                            $.messager.alert(I18n.t("codeInfomanage-remind"),I18n.t("codeInfomanage-deleteSuccess"));
+                            grid.datagrid("reload");
+                        }else{
+                            $.messager.alert(I18n.t("codeInfomanage-tips"),I18n.t("codeInfomanage-deleteFailTryAgain"),'warning');
+                        }
+                    }
+                });
+            }});
+    });
+    
+})
+    
+        var url;
+        
+        function newPlant(){
+            $('#dlg').dialog('open').dialog('center').dialog('setTitle','New Plant');
+            $('#fm').form('clear');
+            url = '/plant/add';
+        }
+        function editPlant(){
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                $('#dlg').dialog('open').dialog('center').dialog('setTitle','Edit Plant');
+                $('#fm').form('load',row);
+                url = 'update_user.php?id='+row.id;
+            }
+        }
+        function savePlant(){
+            $('#fm').form('submit',{
+                url: url,
+                onSubmit: function(){
+                    return $(this).form('validate');
+                },
+                success: function(result){
+                    var result = eval('('+result+')');
+                    if (result.errorMsg){
+                        $.messager.show({
+                            title: 'Error',
+                            msg: result.errorMsg
+                        });
+                    } else {
+                        $('#dlg').dialog('close');        // close the dialog
+                        $('#dg').datagrid('reload');    // reload the user data
+                    }
+                }
+            });
+        }
+        function destroyPlant(){
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                $.messager.confirm('Confirm','Are you sure you want to destroy this user?',function(r){
+                    if (r){
+                        $.post('/plant/delete',{id:row.id},function(result){
+                            if (result.success){
+                                $('#dg').datagrid('reload');    // reload the user data
+                            } else {
+                                $.messager.show({    // show error message
+                                    title: 'Error',
+                                    msg: result.errorMsg
+                                });
+                            }
+                        },'json');
+                    }
+                });
+            }
+        }
+    </script>
+	<style type="text/css">
+        #fm{
+            margin:0;
+            padding:10px 30px;
+        }
+        .ftitle{
+            font-size:14px;
+            font-weight:bold;
+            padding:5px 0;
+            margin-bottom:10px;
+            border-bottom:1px solid #ccc;
+        }
+        .fitem{
+            margin-bottom:5px;
+        }
+        .fitem label{
+            display:inline-block;
+            width:80px;
+        }
+        .fitem input{
+            width:155px;
+        }
+    </style>
+
+{{/component}}

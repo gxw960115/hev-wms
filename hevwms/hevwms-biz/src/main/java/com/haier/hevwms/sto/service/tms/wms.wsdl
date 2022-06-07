@@ -1,0 +1,219 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://wms.services.webservice.api.tms.haier.com/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="WmsWebServiceImplService" targetNamespace="http://wms.services.webservice.api.tms.haier.com/">
+  <wsdl:types>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified" targetNamespace="http://wms.services.webservice.api.tms.haier.com/" version="1.0">
+
+  <xs:element xmlns:ns1="http://wms.services.webservice.api.tms.haier.com/" name="pushLoadInfo" type="ns1:pushLoadInfo" />
+
+  <xs:complexType name="pushLoadInfo">
+    <xs:sequence>
+      <xs:element xmlns:ns2="http://wms.services.webservice.api.tms.haier.com/" minOccurs="0" name="arg0" type="ns2:LoadParam" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="LoadParam">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="tradeId" type="xs:string" />
+      <xs:element xmlns:ns3="http://wms.services.webservice.api.tms.haier.com/" maxOccurs="unbounded" minOccurs="0" name="loadList" nillable="true" type="ns3:Load" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Load">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="dn" type="xs:string" />
+      <xs:element minOccurs="0" name="train" type="xs:string" />
+      <xs:element minOccurs="0" name="docType" type="xs:string" />
+      <xs:element minOccurs="0" name="orderCode" type="xs:string" />
+      <xs:element xmlns:ns4="http://wms.services.webservice.api.tms.haier.com/" maxOccurs="unbounded" minOccurs="0" name="materialList" nillable="true" type="ns4:Material" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Material">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="materialCode" type="xs:string" />
+      <xs:element minOccurs="0" name="qty" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element xmlns:ns5="http://wms.services.webservice.api.tms.haier.com/" name="pushLoadInfoResponse" type="ns5:pushLoadInfoResponse" />
+
+  <xs:complexType name="pushLoadInfoResponse">
+    <xs:sequence>
+      <xs:element xmlns:ns6="http://wms.services.webservice.api.tms.haier.com/" minOccurs="0" name="return" type="ns6:StatusResult" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StatusResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="status" type="xs:string" />
+      <xs:element minOccurs="0" name="msg" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element xmlns:ns7="http://wms.services.webservice.api.tms.haier.com/" name="finishDn" type="ns7:finishDn" />
+
+  <xs:complexType name="finishDn">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="arg0" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element xmlns:ns8="http://wms.services.webservice.api.tms.haier.com/" name="finishDnResponse" type="ns8:finishDnResponse" />
+
+  <xs:complexType name="finishDnResponse">
+    <xs:sequence>
+      <xs:element xmlns:ns9="http://wms.services.webservice.api.tms.haier.com/" minOccurs="0" name="return" type="ns9:StatusResult" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element xmlns:ns10="http://wms.services.webservice.api.tms.haier.com/" name="getDn" type="ns10:getDn" />
+
+  <xs:complexType name="getDn">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="arg0" type="xs:string" />
+      <xs:element minOccurs="0" name="arg1" type="xs:string" />
+      <xs:element minOccurs="0" name="arg2" type="xs:string" />
+      <xs:element minOccurs="0" name="arg3" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element xmlns:ns11="http://wms.services.webservice.api.tms.haier.com/" name="getDnResponse" type="ns11:getDnResponse" />
+
+  <xs:complexType name="getDnResponse">
+    <xs:sequence>
+      <xs:element xmlns:ns12="http://wms.services.webservice.api.tms.haier.com/" maxOccurs="unbounded" minOccurs="0" name="return" type="ns12:DnResult" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="DnResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="dnCode" type="xs:string" />
+      <xs:element minOccurs="0" name="train" type="xs:string" />
+      <xs:element minOccurs="0" name="orderType" type="xs:string" />
+      <xs:element minOccurs="0" name="orderCode" type="xs:string" />
+      <xs:element minOccurs="0" name="deliveryCode" type="xs:string" />
+      <xs:element minOccurs="0" name="deliveryName" type="xs:string" />
+      <xs:element minOccurs="0" name="deliveryAddress" type="xs:string" />
+      <xs:element minOccurs="0" name="deliveryPhone" type="xs:string" />
+      <xs:element minOccurs="0" name="soPlant" type="xs:string" />
+      <xs:element minOccurs="0" name="dnItem" type="xs:string" />
+      <xs:element minOccurs="0" name="materialCode" type="xs:string" />
+      <xs:element minOccurs="0" name="materialDesp" type="xs:string" />
+      <xs:element minOccurs="0" name="sellOrderType" type="xs:string" />
+      <xs:element minOccurs="0" name="shouldQty" type="xs:string" />
+      <xs:element minOccurs="0" name="qty" type="xs:string" />
+      <xs:element minOccurs="0" name="unit" type="xs:string" />
+      <xs:element minOccurs="0" name="location" type="xs:string" />
+      <xs:element minOccurs="0" name="tmsCreated" type="xs:string" />
+      <xs:element minOccurs="0" name="customerNo" type="xs:string" />
+      <xs:element minOccurs="0" name="customerName" type="xs:string" />
+      <xs:element minOccurs="0" name="deliveryDate" type="xs:string" />
+      <xs:element minOccurs="0" name="billing" type="xs:string" />
+      <xs:element minOccurs="0" name="billingItem" type="xs:string" />
+      <xs:element minOccurs="0" name="city" type="xs:string" />
+      <xs:element minOccurs="0" name="region" type="xs:string" />
+      <xs:element minOccurs="0" name="customerPo" type="xs:string" />
+      <xs:element minOccurs="0" name="pickingDate" type="xs:string" />
+      <xs:element minOccurs="0" name="vendorCode" type="xs:string" />
+      <xs:element minOccurs="0" name="vendorName" type="xs:string" />
+      <xs:element minOccurs="0" name="stoGrPlant" type="xs:string" />
+      <xs:element minOccurs="0" name="stoGrLocation" type="xs:string" />
+      <xs:element minOccurs="0" name="stoGrDate" type="xs:string" />
+      <xs:element minOccurs="0" name="stoGiPlant" type="xs:string" />
+      <xs:element minOccurs="0" name="stoGiLocation" type="xs:string" />
+      <xs:element minOccurs="0" name="stoGiDate" type="xs:string" />
+      <xs:element minOccurs="0" name="stoType" type="xs:string" />
+      <xs:element minOccurs="0" name="orderItem" type="xs:string" />
+      <xs:element minOccurs="0" name="stoNo" type="xs:string" />
+      <xs:element minOccurs="0" name="stodnNo" type="xs:string" />
+      <xs:element minOccurs="0" name="stodnItem" type="xs:string" />
+      <xs:element minOccurs="0" name="plant" type="xs:string" />
+      <xs:element minOccurs="0" name="materialNo" type="xs:string" />
+      <xs:element minOccurs="0" name="stoCdate" type="xs:string" />
+      <xs:element minOccurs="0" name="stoEdate" type="xs:string" />
+      <xs:element minOccurs="0" name="stoCreater" type="xs:string" />
+      <xs:element minOccurs="0" name="waybillCode" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="finishDnResponse">
+    <wsdl:part element="tns:finishDnResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="finishDn">
+    <wsdl:part element="tns:finishDn" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="pushLoadInfoResponse">
+    <wsdl:part element="tns:pushLoadInfoResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="pushLoadInfo">
+    <wsdl:part element="tns:pushLoadInfo" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getDn">
+    <wsdl:part element="tns:getDn" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getDnResponse">
+    <wsdl:part element="tns:getDnResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="WmsWebService">
+    <wsdl:operation name="pushLoadInfo">
+      <wsdl:input message="tns:pushLoadInfo" name="pushLoadInfo">
+    </wsdl:input>
+      <wsdl:output message="tns:pushLoadInfoResponse" name="pushLoadInfoResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="finishDn">
+      <wsdl:input message="tns:finishDn" name="finishDn">
+    </wsdl:input>
+      <wsdl:output message="tns:finishDnResponse" name="finishDnResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getDn">
+      <wsdl:input message="tns:getDn" name="getDn">
+    </wsdl:input>
+      <wsdl:output message="tns:getDnResponse" name="getDnResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WmsWebServiceImplServiceSoapBinding" type="tns:WmsWebService">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="pushLoadInfo">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="pushLoadInfo">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="pushLoadInfoResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="finishDn">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="finishDn">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="finishDnResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getDn">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="getDn">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="getDnResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WmsWebServiceImplService">
+    <wsdl:port binding="tns:WmsWebServiceImplServiceSoapBinding" name="WmsWebServiceImplPort">
+      <soap:address location="https://vntms.haier.net/api/tms/ws/wms" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

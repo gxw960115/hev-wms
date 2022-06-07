@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.security.dao.GroupDAO">
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<resultMap id="groupResultMap" type="group">
+	    <id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="name" column="NAME"/>
+		<result property="description" column="DESCRIPTION"/>
+		<result property="gmtCreate" column="GMT_CREATE"/>
+		<result property="gmtModified" column="GMT_MODIFIED"/>
+		<result property="createBy" column="CREATE_BY"/>
+		<result property="lastModifiedBy" column="LAST_MODIFIED_BY"/>
+	</resultMap>
+	
+	<resultMap id="userGroupResultMap" type="userGroup">
+		<result property="admin" column="ADMIN"/>
+		<result property="user.id" column="USER_ID" javaType="long" jdbcType="NUMERIC"/>
+		<result property="group.id" column="GROUP_ID" javaType="long" jdbcType="NUMERIC"/>
+	</resultMap>
+	
+	<resultMap id="userGroupResultMap2" type="userGroup">
+		<result property="admin" column="IS_ADMIN" javaType="int" jdbcType="NUMERIC"/>
+		<result property="user.nickName" column="NICK_NAME"/>
+		<result property="user.lastLoginTime" column="last_login_time"/>
+		<result property="user.currentLoginIp" column="CURRENT_LOGIN_IP"/>
+		<result property="user.status" column="STATUS"/>
+		<result property="user.type" column="TYPE" javaType="int" jdbcType="NUMERIC"/>
+		<result property="user.email" column="EMAIL"/>
+		<result property="user.name" column="NAME"/>
+		<result property="user.id" column="ID" javaType="long" jdbcType="NUMERIC"/>
+	</resultMap>
+	
+	<resultMap id="roleGroupResultMap" type="roleGroup">
+		<result property="role.id" column="ROLE_ID"/>
+		<result property="group.id" column="GROUP_ID"/>
+	</resultMap>
+	
+	<!-- 查询OPERATION_LOG表的所有字段 -->
+	<sql id="selectAllGroupInfoColumns">
+		<![CDATA[
+		select group_.DESCRIPTION,
+		       group_.NAME,
+		       group_.id,
+			   group_.gmt_create,
+			   group_.gmt_modified,
+			   group_.create_by,
+			   group_.last_modified_by
+		  from group_info group_
+		 where 1 = 1
+		  ]]>
+	</sql>
+	
+	<!-- 根据ID查询用户记录 -->
+	<select id="get" parameterType="long" resultMap="groupResultMap">
+		<include refid="selectAllGroupInfoColumns" />
+		<![CDATA[
+		and group_.ID = #{id}
+		]]>
+	</select>
+	
+	<!-- 根据ID删除用户记录 -->
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from group_info where ID = #{id}
+		]]>
+	</delete>
+	
+	<!-- 更行信息 -->
+	<update id="update" parameterType="group">
+		<![CDATA[
+		update group_info
+		   set description      = #{description},
+		       name             = #{name},
+		       gmt_modified     = sysdate,
+		       last_modified_by = #{lastModifiedBy}
+		 where id = #{id}
+		]]>
+	</update>
+	
+	<!-- 根据用户名查询用户记录 -->
+	<select id="getGroupByName" parameterType="string" resultMap="groupResultMap">
+		<include refid="selectAllGroupInfoColumns" />
+		<![CDATA[
+		and group_.NAME = #{name}
+		]]>
+	</select>
+	
+	<!-- 保存日志信息 -->
+	<insert id="save" parameterType="group">
+	    <selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_GROUP_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into group_info
+		  (id,
+		   description,
+		   name,
+		   gmt_create,
+		   gmt_modified,
+		   create_by,
+		   last_modified_by)
+		values
+		  (#{id},
+		   #{description},
+		   #{name},
+		   sysdate,
+		   sysdate,
+		   #{createBy},
+		   #{lastModifiedBy})
+		]]>
+	</insert>
+	
+	<!-- 分页查询业务日志 -->
+	<sql id="searchGroup_fragement">
+		<include refid="selectAllGroupInfoColumns" />
+		<if test="group.name != null and group.name != '' ">
+			and group_.name like '%'||#{group.name}||'%'
+		</if>
+		<if test="group.description != null and group.description != '' ">
+			and group_.description like '%'||#{group.description}||'%'
+		</if>
+	</sql>
+	<select id="getAllGroupsByPager" resultMap="groupResultMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchGroup_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="getAllGroupsByPagerCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchGroup_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	
+	<!-- 查询组内管理员 -->
+	<sql id="getAdminByGroupId_fragement">
+		select ui.id,
+		       ui.name,
+		       ui.email,
+		       ui.type,
+		       ui.status,
+		       ui.current_login_ip,
+		       ui.last_login_time,
+		       ui.nick_name,
+		       ug.is_admin
+		  from user_info ui
+		  left join user_group ug
+		    on ui.id = ug.user_id
+		   and ug.group_id = #{user.groupId}
+		 where ug.is_admin = 1
+		   <if test="user.name != null">
+		   		and ui.name like '%'||#{user.code}||'%'
+		   </if>
+		   <if test="user.nickName != null">
+		   		and ui.nick_name like '%'||#{user.nickName}||'%'
+		   </if>
+		   <if test="user.email != null">
+		   		and ui.email like '%'||#{user.email}||'%'
+		   </if>		
+	</sql>
+	<select id="getAdminByGroupId" resultMap="userGroupResultMap2">
+		<include refid="pagination_Head"/>
+		<include refid="getAdminByGroupId_fragement"/>
+			order by ug.is_admin desc
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="getAdminByGroupIdCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="getAdminByGroupId_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	
+	<!-- 根据组合用户ID 删除组中的用户 -->
+	<delete id="deleteUserFromGroup">
+		delete from user_group
+		where group_id = #{groupId}
+		and user_id = #{userIds}
+		<!-- <foreach item="item" index="index" collection="userIds" open="('" separator="','" close="')">
+		      #{item}
+		</foreach> -->
+	</delete>
+	
+	<!-- 根据组合用户ID 删除组中的角色 -->
+	<delete id="deleteRoleFromGroup">
+		delete from role_group
+		where group_id =#{groupId} and role_id =#{roleIds}
+		<!-- <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+	        #{item}
+		</foreach> -->
+	</delete>
+	
+	<insert id="addUserGroup" parameterType="userGroup">
+		insert into user_group (user_id, group_id, is_admin) values (#{user.id}, #{group.id}, #{admin})
+	</insert>
+	
+	<!-- 将角色添加到组 -->
+	<insert id="addRoleGroup" parameterType="roleGroup">
+		insert into role_group (role_id,group_id) values (#{role.id},#{group.id})
+	</insert>
+
+	<update id="updateUserGroup" parameterType="userGroup">
+		update user_group set is_admin = #{admin} where group_id = #{group.id} and user_id = #{user.id}
+	</update>
+	
+	<!-- 查找组内是否存在角色 -->
+	<select id="getRoleCountInGroup" resultType="long" parameterType="long">
+		select count(*) from role_group ug where group_id = #{groupId}
+	</select>
+	
+	<select id="searchUserGroup" parameterType="userGroup" resultMap="userGroupResultMap">
+		select user_id, group_id, is_admin
+		from user_group
+		where 1 = 1
+		<if test="user.id != null and user.id >0">
+			and user_id = #{user.id}
+		</if>
+		<if test="admin ==1 or admin == 0" >
+			and is_admin = #{admin}
+		</if>
+		<if test="group.id != null and group.id > 0">
+			and group_id = #{group.id}
+		</if>
+	</select>
+	
+	<select id="searchRoleGroup" parameterType="roleGroup" resultMap="roleGroupResultMap">
+		select rg.role_id,rg.group_id 
+		from role_group rg 
+		where 1=1
+		<if test="role.id != null and role.id >0">
+			and role_id = #{role.id}
+		</if>
+		<if test="group.id != null and group.id >0">
+			and group_id = #{group.id}
+		</if>
+	</select>
+</mapper>

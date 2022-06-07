@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.security.dao.RoleDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllRoleColumns">
+		<![CDATA[
+		select role.id,
+		       role.name,
+		       role.description,
+		       role.gmt_create,
+		       role.gmt_modified,
+		       role.create_by,
+		       role.last_modified_by
+		  from role
+		 where 1 = 1
+		]]>
+	</sql>
+	
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="roleMap" type="role">
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="name" column="NAME"/>
+		<result property="description" column="DESCRIPTION"/>
+		<result property="gmtCreate" column="GMT_CREATE"/>
+		<result property="gmtModified" column="GMT_MODIFIED"/>
+		<result property="createBy" column="CREATE_BY"/>
+		<result property="lastModifiedBy" column="LAST_MODIFIED_BY"/>
+	</resultMap>
+	
+	<!-- =========================================================== -->
+    <!-- DAO方法中的增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+	<!-- 查询所有角色 -->
+	<select id="getAllRole" resultMap="roleMap">
+		<include refid="selectAllRoleColumns"/>
+	</select>
+	
+	<!-- 查询单个角色 -->
+	<select id="getRoleById" resultMap="roleMap" parameterType="long">
+		<include refid="selectAllRoleColumns"/>
+		<![CDATA[
+		and role.id = #{id}
+		]]>	
+	</select>
+	<!-- 查询单个角色 -->
+	<select id="get" resultMap="roleMap" parameterType="long">
+		<include refid="selectAllRoleColumns"/>
+		<![CDATA[
+		and role.id = #{id}
+		]]>	
+	</select>
+	<!-- 删除角色 -->
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from role where id = #{id}
+		]]>	
+	</delete>
+	
+	<!-- 通过名称查找记录 -->
+	<select id="getRoleByName" resultMap="roleMap" parameterType="string">
+		<include refid="selectAllRoleColumns"/>
+		<![CDATA[
+		and role.name = #{name}
+		]]>	
+	</select>
+	
+	<!-- 保存角色信息 -->
+	<insert id="save" parameterType="role">	
+	    <selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_ROLE_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into role
+		  (id,
+		   name,
+		   description,
+		   gmt_create,
+		   gmt_modified,
+		   create_by,
+		   last_modified_by)
+		values
+		  (#{id},
+		   #{name},
+		   #{description},
+		   #{gmtCreate},
+		   #{gmtModified},
+		   #{createBy},
+		   #{lastModifiedBy})
+	    ]]>	
+	</insert>
+	
+	<!-- 更新信息 -->
+	<update id="update" parameterType="role">
+		<![CDATA[
+		update role
+		   set name             = #{name},
+		       description      = #{description},
+		       gmt_modified     = sysdate,
+		       last_modified_by = #{lastModifiedBy}
+		 where id = #{id}
+		]]>
+	</update>
+	<!-- 分页查询角色 -->
+	<sql id="searchRole_fragement">
+		<include refid="selectAllRoleColumns" />
+		<if test="role.name != null and role.name != '' ">
+			and role.name like '%'||#{role.name}||'%'
+		</if>
+		<if test="role.description != null and role.description != '' ">
+			and role.description like '%'||#{role.description}||'%'
+		</if>
+	</sql>
+	<select id="searchRoles" resultMap="roleMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchRole_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchRolesCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchRole_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	
+	<!--  -->
+	<sql id="getRolesByGroupId_fragement">
+		select r.id,
+		       r.name,
+		       r.description,
+		       r.create_by,
+		       r.gmt_create,
+		       r.last_modified_by,
+		       r.gmt_modified
+		  from role r, role_group rg
+		 where r.id = rg.role_id
+		   and rg.group_id=#{role.groupId}	
+		<if test="role.name != null and role.name != '' ">
+			and r.name like '%'||#{role.name}||'%' 
+		</if>
+		<if test="role.description != null and role.description != '' ">
+			and r.description like '%'||#{role.description}||'%' 
+		</if>
+	</sql>
+	<select id="getRolesByGroupId" resultMap="roleMap">
+		<include refid="pagination_Head"/>
+		<include refid="getRolesByGroupId_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="getRolesByGroupIdCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="getRolesByGroupId_fragement"/>
+		<include refid="count_Tail"/>
+	</select>	
+	
+	<!-- 删除角色对应的资源 -->
+	<delete id="delRoleResourcce" parameterType="long">
+		<![CDATA[
+		delete from role_resource where role_id = #{roleId}
+		]]>	
+	</delete>
+	<!-- 保存角色和资源的对应关系 -->
+	<insert id="saveRoleResourcce">
+		<![CDATA[
+		insert into role_resource
+		  (role_id,
+		   resource_id)
+		values
+		  (#{roleId},
+		   #{resourceId})
+	    ]]>	
+	</insert>
+	<select id="getRoleResources" resultMap="roleMap" parameterType="long">
+		select t.resource_id name from role_resource t where t.role_id=${roleId}
+	</select>
+	
+	<select id="getRoleResourceById" resultMap="roleMap">
+		select * from role_resource t where t.role_id=${roleId} and t.resource_id=${resourceId}
+	</select>
+</mapper>

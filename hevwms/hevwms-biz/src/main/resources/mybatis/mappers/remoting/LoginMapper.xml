@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.WmsLoginDAO">
+
+	<!-- 根据用户名查询用户记录 -->
+	<select id="getRfUserByName" parameterType="string" resultMap="userResultMap">
+		<![CDATA[
+		select
+			user_.id,
+			user_.name,
+			user_.password,
+			user_.nick_name,
+			user_.rf_sign,
+			user_.DUTY_TYPE
+		from user_info user_
+		where user_.status = 1 and user_.NAME = #{name}
+		]]>
+	</select>
+
+	<resultMap id="userResultMap" type="user">
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="name" column="NAME"/>
+		<result property="password" column="PASSWORD"/>
+		<result property="nickName" column="NICK_NAME"/>
+		<result property="rfSign" column="RF_SIGN"/>
+		<result property="dutyType" column="DUTY_TYPE"/>
+	</resultMap>
+	<!-- 更行信息 -->
+	<update id="update" parameterType="user">
+		<![CDATA[
+		update user_info
+		   set last_login_ip                = #{lastLoginIp},
+		       current_login_ip             = #{currentLoginIp},
+		       last_login_time              = #{lastLoginTime},
+		       rf_sign                      = #{rfSign}
+		 where id = #{id}
+		]]>
+	</update>
+
+	<!-- 查询仓库编码 -->
+	<select id="getUserWarehouse" parameterType="string" resultMap="warehouseResultMap">
+		<![CDATA[
+			select t.user_id,t.ck_id,t.ck_cd,t.ck_nm from user_warehouse t where t.user_id=#{userid} and rownum=1
+		]]>
+	</select>
+
+	<resultMap id="warehouseResultMap" type="userWarehouse">
+		<result property="userid" column="USER_ID"/>
+		<result property="ckid" column="CK_ID"/>
+		<result property="ckcd" column="CK_CD"/>
+		<result property="cknm" column="CK_NM"/>
+	</resultMap>
+
+	<!-- 查询存储区域 -->
+	<select id="getUserLocation"  resultMap="stareaResultMap">
+			select t.name,t.code from cd_loc_info t,cd_user_wh_loc u where u.user_id = #{userid} and t.row_id =u.LOC_ID
+	</select>
+	<!-- 查询存储区域 -->
+	<select id="getUserLocationWH"  resultMap="stareaResultMap">
+			select t.name, t.code
+			  from CD_WH_INFO t,(select max(u.user_id) user_id,u.wh_id from cd_user_wh_loc u group by u.wh_id) z
+			 where z.user_id = #{userid}
+			   and t.row_id = z.wh_id
+	</select>
+	<select id="getUserType" parameterType="string" resultType="java.lang.String">
+		<![CDATA[
+			select t.duty_type from user_info t where t.id = #{userid}
+		]]>
+	</select>
+	<resultMap id="stareaResultMap" type="starea">
+		<result property="code" column="code"/>
+		<result property="desc" column="name"/>
+	</resultMap>
+
+	<!-- 查询用户菜单 -->
+	<select id="getUserMenu" parameterType="string" resultMap="menuResultMap">
+		<![CDATA[
+        select
+              ri.url, ri.name
+        from user_group ug,
+             role_group rg,
+             role_resource rr,
+             resource_info ri
+        where ug.user_id =  #{userid}
+        and ug.group_id = rg.group_id
+        and rg.role_id = rr.role_id
+        and rr.resource_id = ri.id
+        and ri.status<>'0'
+        and ri.type<>'1'
+        and ri.module_name = 'RF Resource'
+        group by ri.url, ri.name
+        order by max(ri.order_index)
+		]]>
+	</select>
+
+	<resultMap id="menuResultMap" type="menu">
+	    <!--图标  -->
+		<result property="code" column="url"/>
+		<!--显示的菜单名  -->
+		<result property="name" column="name"/>
+	</resultMap>
+
+</mapper>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.takestock.dao.OdsPdTempDtlDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllColumns">
+		<![CDATA[
+				SELECT
+					t.ROW_ID,
+					t.ORDER_NO,
+					t.PLANT,
+					t.LOCATION,
+					t.MATERIAL_NO,
+					t.BARCODE,
+					t.QTY,
+					t.MOVE_TO_PLANT,
+					t.MOVE_TO_LOCATION,
+					t.STATUS,
+					t.SAP_DOC_NO,
+					t.CREATE_BY,
+					t.CREATE_DATE,
+					t.MODIFY_BY,
+					t.MODIFY_DATE
+				FROM
+					ods_pd_temp_detail t
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsPdTempDtlMap" type="odsPdTempDtlDTO">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="plant" column="PLANT" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="barcode" column="BARCODE" />
+		<result property="qty" column="QTY" />
+		<result property="moveToPlant" column="MOVE_TO_PLANT" />
+		<result property="moveToLocation" column="MOVE_TO_LOCATION" />
+		<result property="status" column="STATUS" />
+		<result property="sapDocNo" column="SAP_DOC_NO" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="get" resultMap="odsPdTempDtlMap" parameterType="long">
+		<include refid="selectAllColumns" />
+		<![CDATA[
+		where t.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ods_pd_temp_detail where row_id = #{rowId}
+		]]>
+	</delete>
+
+	<insert id="add" parameterType="odsPdTempDtlDTO">
+		<![CDATA[
+		insert into ods_pd_temp_detail
+		  (		ORDER_NO
+				,PLANT
+				,LOCATION
+				,MATERIAL_NO
+				,BARCODE
+				,QTY
+				,SAP_DOC_NO
+				,CREATE_BY
+		   )
+		values
+		  (#{pdTempDtl.orderNo}
+				,#{pdTempDtl.plant}
+				,#{pdTempDtl.location}
+				,#{pdTempDtl.materialNo}
+				,#{pdTempDtl.barcode}
+				,#{pdTempDtl.qty}
+				,#{pdTempDtl.sapDocNo}
+				,#{pdTempDtl.createBy}
+		   )
+	    ]]>
+	</insert>
+	<update id="updateOrderStatus" parameterType="odsPdTempDtlDTO">
+		UPDATE ods_pd_temp_detail
+			SET STATUS= #{pdTempDtl.status}
+				,MODIFY_BY= #{pdTempDtl.modifyBy}
+		WHERE ROW_ID= #{pdTempDtl.rowId}
+	</update>
+
+	<sql id="searchOdsPdTempDtlDTOs_condition">
+		<include refid="selectAllColumns" />
+		<![CDATA[WHERE T.STATUS <> '3']]>
+		<if test="pdTempDtl.orderNo != null and pdTempDtl.orderNo != ''">
+			AND T.ORDER_NO= #{pdTempDtl.orderNo}
+		</if>
+		<if test="pdTempDtl.location != null and pdTempDtl.location != ''">
+			AND t.LOCATION =#{pdTempDtl.location}
+		</if>
+		<if test="pdTempDtl.barcode != null and pdTempDtl.barcode != '' ">
+			AND t.BARCODE = #{pdTempDtl.barcode}
+		</if>
+		<if test="pdTempDtl.materialNo != null and pdTempDtl.materialNo != '' ">
+			AND t.MATERIAL_NO = #{pdTempDtl.materialNo}
+		</if>
+		<if test="pdTempDtl.begin != null and pdTempDtl.begin != ''">
+			AND T.CREATE_DATE >= TO_DATE(concat(#{pdTempDtl.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		<if test="pdTempDtl.end != null and pdTempDtl.end != ''">
+			<![CDATA[
+				AND T.CREATE_DATE <= TO_DATE(concat(#{pdTempDtl.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+			order by t.CREATE_DATE desc
+	</sql>
+	<select id="searchOdsPdTempDtlDTOs" resultMap="odsPdTempDtlMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsPdTempDtlDTOs_condition" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsPdTempDtlDTOsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsPdTempDtlDTOs_condition" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getScanQty" resultType="long">
+		SELECT
+			sum(t.QTY)
+		FROM
+			ods_pd_temp_detail t
+		WHERE
+			t.ORDER_NO = #{orderNo}
+	</select>
+	
+	<select id="barcodeCheck" resultType="int">
+		<![CDATA[
+		select count(*) 
+		from ods_pd_temp_detail
+		where ORDER_NO = #{orderNo} and BARCODE = #{barcode} and STATUS <> '3'
+		]]>
+	</select>
+	<select id="materialExisted" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			md_mat_info t
+		WHERE
+			t.MATERIAL_NO = #{materialNo}
+		OR t.MATERIAL_NO = SUBSTR(#{materialNo}, 1, 9)
+	</select>
+	<select id="getListByparam" resultMap="odsPdTempDtlMap">
+		<include refid="searchOdsPdTempDtlDTOs_condition"/>
+	</select>
+	
+	<delete id="deleteById">
+		delete from ods_pd_temp_detail where row_id=#{rowId}
+	</delete>
+	<select id="cusModel" resultType="string">
+		SELECT max(CUSTOMER_MODEL) 
+		from md_mat_info t 
+		where t.MATERIAL_NO = #{materialNo} OR t.MATERIAL_NO = SUBSTR(#{materialNo}, 1, 9)
+	</select>
+	
+	<select id="getUnit" resultType="string">
+		select max(BASIC_UNIT) 
+		FROM md_mat_info 
+		where MATERIAL_NO =#{materialNo} OR MATERIAL_NO= SUBSTR(#{materialNo},1,8)
+			OR  MATERIAL_NO= SUBSTR(#{materialNo},1,9)
+	</select>
+	<select id="getById" resultMap="odsPdTempDtlMap">
+		<include refid="selectAllColumns"/>
+		<![CDATA[
+		where t.row_id = #{rowId}
+		]]>
+	</select>
+	<update id="deleteByorderNo" >
+		UPDATE ods_pd_temp_detail SET STATUS='3' 
+		WHERE ORDER_NO=(
+			select t.ORDER_NO 
+			FROM ods_pd_temp t 
+			where t.row_id=#{rowId}
+		)
+	</update>
+</mapper>

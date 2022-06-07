@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.report.dao.SalesReturnReportDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<resultMap id="salesReturnReportMap" type="salesReturnReport">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="dnNo" column="DN_NO" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="location" column="LOCATION" />
+		<result property="barcode" column="BARCODE" />
+		<result property="responsibleDepartment" column="RESP_DEPT" />
+		<result property="goodsClass" column="GOODS_CLASS" />
+		<result property="crmComplainNo" column="CRM_NO" />
+		<result property="reason" column="REASON" />
+		<result property="createUser" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+	</resultMap>
+	
+	<sql id="searchSalesReturnReportInfo_fragement">
+		SELECT 
+			distinct
+			t.dn_no as dnNo,
+			t.material_no as materialNo,
+			t.customer_model as customerModel,
+			t.material_desp as materialDesp,
+			t.location,
+			t.barcode,
+			t.resp_dept as responsibleDepartment,
+			t.goods_class as goodsClass,
+			t.crm_no as crmComplainNo,
+			t.reason,
+			t.create_by as createUser,
+			t.create_date as createDate
+		FROM
+			ODS_SALES_REN_REPORT t
+		WHERE 1=1
+		<if test="salesReturnReportDTO.dnNo != null and salesReturnReportDTO.dnNo != ''">
+		    <![CDATA[ AND dn_no = #{salesReturnReportDTO.dnNo} ]]>
+		</if>
+		<if test="salesReturnReportDTO.materialNo != null and salesReturnReportDTO.materialNo != ''">
+		    <![CDATA[ AND material_no = #{salesReturnReportDTO.materialNo} ]]>
+		</if>
+		<if test="salesReturnReportDTO.location != null and salesReturnReportDTO.location != ''">
+		    <![CDATA[ AND location = #{salesReturnReportDTO.location} ]]>
+		</if>
+		<if test="salesReturnReportDTO.begin != null and salesReturnReportDTO.begin != ''">
+		    <![CDATA[
+				AND create_date >= TO_DATE(concat(#{salesReturnReportDTO.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="salesReturnReportDTO.end != null and salesReturnReportDTO.end != ''">
+		    <![CDATA[
+				AND create_date <= TO_DATE(concat(#{salesReturnReportDTO.end},'23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+	</sql>
+	<select id="searchSalesReturnReportInfos" resultMap="salesReturnReportMap">
+		<include refid="pagination_Head" />
+		<include refid="searchSalesReturnReportInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchSalesReturnReportInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchSalesReturnReportInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getSalesReturnReportInfos" resultMap="salesReturnReportMap">
+		<include refid="searchSalesReturnReportInfo_fragement" />
+	</select>
+</mapper>

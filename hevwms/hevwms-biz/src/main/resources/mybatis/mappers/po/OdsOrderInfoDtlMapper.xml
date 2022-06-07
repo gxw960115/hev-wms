@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <typeAlias alias="odsOrderInfoDtl" type="com.haier.hevwms.order.domain.OdsOrderInfoDtl" /> -->
+<mapper namespace="com.haier.hevwms.po.dao.OdsOrderInfoDtlDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllOdsOrderInfoDtlColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			ORDER_TYPE,
+			PO_NO,
+			PO_ITEM_NO,
+			BIN,
+			BATCH_NO,
+			PLANT,
+			t.CUSTOMER_MODEL,
+			LOCATION,
+			ods_order_info_dtl.MATERIAL_NO,
+			t.MATERIAL_DESP,
+			UNIT,
+			BARCODE,
+			VENDOR_CODE,
+			VENDOR_NAME,
+			DELIVERY_CODE,
+			DELIVERY_NAME,
+			SCANNED_BY,
+			SCANNED_DATE,
+			DELIVERY_DATE,
+			ORDER_ID,
+			ORDER_NO,
+			CAR_NO,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			VERSION,
+			QTY,
+			ORDER_ITEM,
+			SERIAL_NO,
+			FINISH_FLAG,
+			IN_OUT_FLAG,
+			IN_OUT_MSG
+		from 
+			ODS_ORDER_INFO_DTL ods_order_info_dtl
+			LEFT JOIN (select CUSTOMER_MODEL,MATERIAL_NO, MATERIAL_DESP from md_mat_info) t 
+						on t.MATERIAL_NO=ods_order_info_dtl.MATERIAL_NO
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsOrderInfoDtlMap" type="odsOrderInfoDtl">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderType" column="ORDER_TYPE" />
+		<result property="poNo" column="PO_NO" />
+		<result property="poItemNo" column="PO_ITEM_NO" />
+		<result property="bin" column="BIN" />
+		<result property="batchNo" column="BATCH_NO" />
+		<result property="plant" column="PLANT" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="unit" column="UNIT" />
+		<result property="barcode" column="BARCODE" />
+		<result property="vendorCode" column="VENDOR_CODE" />
+		<result property="vendorName" column="VENDOR_NAME" />
+		<result property="deliveryCode" column="DELIVERY_CODE" />
+		<result property="deliveryName" column="DELIVERY_NAME" />
+		<result property="scannedBy" column="SCANNED_BY" />
+		<result property="scannedDate" column="SCANNED_DATE" />
+		<result property="deliveryDate" column="DELIVERY_DATE" />
+		<result property="orderId" column="ORDER_ID" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="carNo" column="CAR_NO" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="qty" column="QTY" />
+		<result property="orderItem" column="ORDER_ITEM" />
+		<result property="serialNo" column="SERIAL_NO" />
+		<result property="finishFlag" column="FINISH_FLAG" />
+		<result property="inOutFlag" column="IN_OUT_FLAG" />
+		<result property="inOutMsg" column="IN_OUT_MSG" />
+		<result property="usedFlag" column="used_flag"/>
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="odsOrderInfoDtlMap">
+		<include refid="selectAllOdsOrderInfoDtlColumns" />
+	</select>
+	<select id="get" resultMap="odsOrderInfoDtlMap" parameterType="long">
+		<include refid="selectAllOdsOrderInfoDtlColumns" />
+		<![CDATA[
+		where ods_order_info_dtl.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_ORDER_INFO_DTL where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_ORDER_INFO_DTL where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="odsOrderInfoDtl">
+		<![CDATA[
+		insert into ODS_ORDER_INFO_DTL
+		  (row_id
+				,ORDER_TYPE
+				,PO_NO
+				,PO_ITEM_NO
+				,BIN
+				,BATCH_NO
+				,PLANT
+				,CUSTOMER_MODEL
+				,LOCATION
+				,MATERIAL_NO
+				,MATERIAL_DESP
+				,UNIT
+				,BARCODE
+				,VENDOR_CODE
+				,VENDOR_NAME
+				,DELIVERY_CODE
+				,DELIVERY_NAME
+				,SCANNED_BY
+				,SCANNED_DATE
+				,DELIVERY_DATE
+				,ORDER_ID
+				,ORDER_NO
+				,CAR_NO
+				,CREATE_BY
+				,CREATE_DATE 
+				,QTY
+				,ORDER_ITEM
+				,SERIAL_NO
+				,FINISH_FLAG
+				,IN_OUT_FLAG
+				,IN_OUT_MSG
+				,used_flag
+		   )
+		values
+		  (#{rowId}
+				,#{orderType}
+				,#{poNo}
+				,#{poItemNo}
+				,#{bin}
+				,#{batchNo}
+				,#{plant}
+				,#{customerModel}
+				,#{location}
+				,#{materialNo}
+				,#{materialDesp}
+				,#{unit}
+				,#{barcode}
+				,#{vendorCode}
+				,#{vendorName}
+				,#{deliveryCode}
+				,#{deliveryName}
+				,#{scannedBy}
+				,#{scannedDate}
+				,#{deliveryDate}
+				,#{orderId}
+				,#{orderNo}
+				,#{carNo}
+				,#{createBy}
+				,#{createDate} 
+				,#{qty}
+				,#{orderItem}
+				,#{serialNo}
+				,#{finishFlag}
+				,#{inOutFlag}
+				,#{inOutMsg}
+				,#{usedFlag}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="odsOrderInfoDtl">
+		<![CDATA[
+		update ODS_ORDER_INFO_DTL
+		   set 1=1
+				,ORDER_TYPE = #{orderType}
+				,PO_NO = #{poNo}
+				,PO_ITEM_NO = #{poItemNo}
+				,BIN = #{bin}
+				,BATCH_NO = #{batchNo}
+				,PLANT = #{plant}
+				,CUSTOMER_MODEL = #{customerModel}
+				,LOCATION = #{location}
+				,MATERIAL_NO = #{materialNo}
+				,MATERIAL_DESP = #{materialDesp}
+				,UNIT = #{unit}
+				,BARCODE = #{barcode}
+				,VENDOR_CODE = #{vendorCode}
+				,VENDOR_NAME = #{vendorName}
+				,DELIVERY_CODE = #{deliveryCode}
+				,DELIVERY_NAME = #{deliveryName}
+				,SCANNED_BY = #{scannedBy}
+				,SCANNED_DATE = #{scannedDate}
+				,DELIVERY_DATE = #{deliveryDate}
+				,ORDER_ID = #{orderId}
+				,ORDER_NO = #{orderNo}
+				,CAR_NO = #{carNo}
+				,CREATE_BY = #{createBy}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate}
+				,FLAG = #{flag}
+				,VERSION = #{version}
+				,QTY = #{qty}
+				,ORDER_ITEM = #{orderItem}
+				,SERIAL_NO = #{serialNo}
+				,FINISH_FLAG = #{finishFlag}
+				,IN_OUT_FLAG = #{inOutFlag}
+				,IN_OUT_MSG = #{inOutMsg}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchOdsOrderInfoDtl_fragement">
+		<include refid="selectAllOdsOrderInfoDtlColumns" />
+		where 1=1
+		<if test="odsOrderInfoDtl.orderType != null">
+			and ORDER_TYPE like '%'||#{odsOrderInfoDtl.orderType}||'%'
+		</if>
+		<if test="odsOrderInfoDtl.poNo != null and odsOrderInfoDtl.poNo != ''">
+			and PO_NO like '%'||#{odsOrderInfoDtl.poNo}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.poItemNo != null">
+			and PO_ITEM_NO like '%'||#{odsOrderInfoDtl.poItemNo}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.bin != null and odsOrderInfoDtl.bin != ''">
+			and BIN like '%'||#{odsOrderInfoDtl.bin}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.batchNo != null">
+			and BATCH_NO like '%'||#{odsOrderInfoDtl.batchNo}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.plant != null">
+			and PLANT like '%'||#{odsOrderInfoDtl.plant}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.customerModel != null">
+			and CUSTOMER_MODEL like '%'||#{odsOrderInfoDtl.customerModel}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.userType != null and odsOrderInfoDtl.userType != 1 ">
+		    and plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and u.user_id= #{odsOrderInfoDtl.userId})
+			and location in (select loc_code from cd_user_wh_loc where user_id=#{odsOrderInfoDtl.userId})
+		</if>
+		<if test="odsOrderInfoDtl.materialNo != null and odsOrderInfoDtl.materialNo != ''">
+			and ods_order_info_dtl.MATERIAL_NO like '%'||#{odsOrderInfoDtl.materialNo}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.materialDesp != null">
+			and MATERIAL_DESP like '%'||#{odsOrderInfoDtl.materialDesp}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.unit != null">
+			and UNIT like '%'||#{odsOrderInfoDtl.unit}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.barcode != null and odsOrderInfoDtl.barcode != ''">
+			and BARCODE like '%'||#{odsOrderInfoDtl.barcode}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.location != null and odsOrderInfoDtl.location != ''">
+			and LOCATION like '%'|| #{odsOrderInfoDtl.location}||'%'   
+		</if>
+		<if test="odsOrderInfoDtl.vendorCode != null">
+			and VENDOR_CODE like '%'||#{odsOrderInfoDtl.vendorCode}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.vendorName != null">
+			and VENDOR_NAME like '%'||#{odsOrderInfoDtl.vendorName}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.deliveryCode != null">
+			and DELIVERY_CODE like '%'||#{odsOrderInfoDtl.deliveryCode}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.deliveryName != null">
+			and DELIVERY_NAME like '%'||#{odsOrderInfoDtl.deliveryName}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.scannedBy != null">
+			and SCANNED_BY like '%'||#{odsOrderInfoDtl.scannedBy}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.scannedDate != null">
+			<!-- and SCANNED_DATE like concat(#{odsOrderInfoDtl.scannedDate} ,'%') -->
+		</if>
+		<if test="odsOrderInfoDtl.deliveryDate != null">
+			<!-- and DELIVERY_DATE like concat(#{odsOrderInfoDtl.deliveryDate} ,'%') -->
+		</if>
+		<if test="odsOrderInfoDtl.orderId != null">
+			and ORDER_ID like '%'||#{odsOrderInfoDtl.orderId}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.orderNo != null and odsOrderInfoDtl.orderNo !=''">
+			and ORDER_NO = #{odsOrderInfoDtl.orderNo}
+		</if>
+		<if test="odsOrderInfoDtl.carNo != null">
+			and CAR_NO like '%'||#{odsOrderInfoDtl.carNo}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.createBy != null">
+			and CREATE_BY like '%'||#{odsOrderInfoDtl.createBy}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.createDate != null">
+			<!-- and CREATE_DATE like concat( #{odsOrderInfoDtl.createDate}||'%'   -->
+		</if>
+		<if test="odsOrderInfoDtl.modifyBy != null">
+			and MODIFY_BY like '%'||#{odsOrderInfoDtl.modifyBy}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.modifyDate != null">
+			<!-- and MODIFY_DATE like concat(#{odsOrderInfoDtl.modifyDate}||'%'   -->
+		</if>
+		<if test="odsOrderInfoDtl.flag != null">
+			and FLAG = #{odsOrderInfoDtl.flag}
+		</if>
+		<if test="odsOrderInfoDtl.version != null">
+			and VERSION like '%'||#{odsOrderInfoDtl.version}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.qty != null">
+			and QTY like '%'||#{odsOrderInfoDtl.qty}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.orderItem != null">
+			and ORDER_ITEM like '%'||#{odsOrderInfoDtl.orderItem}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.serialNo != null">
+			and SERIAL_NO like '%'||#{odsOrderInfoDtl.serialNo}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.finishFlag != null">
+			and FINISH_FLAG like '%'||#{odsOrderInfoDtl.finishFlag}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.inOutFlag != null">
+			and IN_OUT_FLAG like '%'||#{odsOrderInfoDtl.inOutFlag}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.inOutMsg != null">
+			and IN_OUT_MSG like '%'||#{odsOrderInfoDtl.inOutMsg}||'%' 
+		</if>
+		<if test="odsOrderInfoDtl.begin != null and odsOrderInfoDtl.begin != ''">
+		<![CDATA[
+			and create_date >= TO_DATE(concat(#{odsOrderInfoDtl.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+		<if test="odsOrderInfoDtl.end != null and odsOrderInfoDtl.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsOrderInfoDtl.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		order by create_date DESC
+	</sql>
+	<select id="searchOdsOrderInfoDtls" resultMap="odsOrderInfoDtlMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsOrderInfoDtl_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsOrderInfoDtlsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsOrderInfoDtl_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getListByParam" resultMap="odsOrderInfoDtlMap">
+		<include refid="searchOdsOrderInfoDtl_fragement" />
+	</select>
+	<delete id="deleteOdsOrderInfoDtlByNo">
+		delete from Ods_Order_Info_Dtl  where
+		PO_NO=#{stoNo} 
+	</delete>
+	<!-- 根绝stodnno和itemno获取扫描出库成功但没进行入库扫描的明细 -->
+	<select id="searchOgpDetailsByStodnNo" resultMap="odsOrderInfoDtlMap">
+		SELECT
+			outDetail.row_id,
+			outDetail.order_no,
+			outDetail.PO_ITEM_NO,
+			outDetail.barcode,
+			outDetail.unit,
+			outDetail.qty,
+			outDetail.plant,
+			outDetail.location 
+		FROM
+			ods_order_info outMain
+			LEFT JOIN ods_order_info_dtl outDetail ON (
+			outMain.order_no = outDetail.order_no 
+			AND outMain.PO_ITEM_NO = outDetail.PO_ITEM_NO 
+			AND outMain.SAP_FLAG = '1' 
+			AND outMain.order_type = '2' 
+			)
+			LEFT JOIN ods_order_info_dtl inDetail ON ( outDetail.PO_NO = inDetail.PO_NO 
+				AND outDetail.barcode = inDetail.barcode AND inDetail.order_type = '1' ) 
+		WHERE
+			inDetail.barcode IS NULL
+		<if test="odsOrderInfoDtl.orderNo != null and odsOrderInfoDtl.orderNo !='' ">
+			and outMain.PO_NO  = #{odsOrderInfoDtl.orderNo} 
+		</if>
+		<if test="odsOrderInfoDtl.orderItem != null and odsOrderInfoDtl.orderItem !='' ">
+			and outMain.PO_ITEM_NO  = #{odsOrderInfoDtl.orderItem} 
+		</if>
+	</select>
+	
+	<select id="searchOgpDetailsByStodnNoCount" resultType="long">
+		<include refid="count_Head" />
+			SELECT outDetail.row_id, outDetail.order_no, outDetail.PO_ITEM_NO, outDetail.barcode, outDetail.unit
+				, outDetail.qty, outDetail.plant, outDetail.location
+			FROM ods_order_info outMain
+			LEFT JOIN ods_order_info_dtl outDetail ON outMain.order_no = outDetail.order_no
+			AND outMain.PO_ITEM_NO = outDetail.PO_ITEM_NO
+			AND outMain.SAP_FLAG = '1'
+			AND outMain.order_type = '2' 
+				LEFT JOIN ods_order_info_dtl inDetail ON outDetail.PO_NO = inDetail.PO_NO
+			AND outDetail.barcode = inDetail.barcode
+			AND inDetail.order_type = '1' 
+			WHERE inDetail.barcode IS NULL
+		<if test="odsOrderInfoDtl.orderNo != null and odsOrderInfoDtl.orderNo !='' ">
+			and outMain.PO_NO  = #{odsOrderInfoDtl.orderNo} 
+		</if>
+		<if test="odsOrderInfoDtl.orderItem != null and odsOrderInfoDtl.orderItem !='' ">
+			and outMain.PO_ITEM_NO  = #{odsOrderInfoDtl.orderItem} 
+		</if>
+		<include refid="count_Tail" />
+	</select>
+	
+	<update id="updateOrderDtlLocation" parameterType="odsOrderInfoDtl">
+		<![CDATA[
+		update ods_order_info_dtl
+		   set 
+				 LOCATION = #{location},
+				 IN_OUT_FLAG = '1'
+		 where PO_NO = #{poNo}
+		]]>
+	</update>
+	<delete id="deleteOrderDtlBySapOrderNo" parameterType="string">
+		delete from Ods_Order_Info_Dtl  where PO_NO=#{poNo}
+	</delete>
+	
+	<select id="searchOrderDtlBySapOrderNo" parameterType="string" resultMap="odsOrderInfoDtlMap">
+		<![CDATA[
+			select plant,location,barcode,qty 
+			from ods_order_info_dtl
+			where PO_NO = #{poNo}
+		]]>
+	</select>
+
+	<select id="directDispatchCollect" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_direct_dispatch_collect(
+		  #{stodnNo,mode=IN,jdbcType=VARCHAR},
+		  #{dnNo,mode=IN,jdbcType=VARCHAR},
+		  #{userName,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.igpOrderNo,mode=OUT,jdbcType=VARCHAR},
+		  #{out.ogpOrderNo,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+</mapper>

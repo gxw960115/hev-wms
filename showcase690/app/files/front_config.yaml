@@ -1,0 +1,521 @@
+app: aixforce690-showcase
+
+components:
+  "header": # component path     修改角色     已通
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "页面头部"
+    desc: "页面头部" # 可选
+  "footer": # component path     修改角色     已通
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "页面尾部"
+    desc: "页面尾部" # 可选
+  "menu": # component path     修改角色     已通
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "菜单"
+    desc: "菜单" # 可选
+
+  "search_hac_app1": # component path     应用查询
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "应用查询"
+    service: "aixforce690-showcase:searchHacAppSpecialService" # app:serviceKey
+    desc: "应用查询" # 可选
+  "update_hac_app": # component path   
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "应用修改"
+    service: "aixforce690-showcase:getHacAppByIdService" # app:serviceKey
+    desc: "应用修改" # 可选
+  "create_hac_app": # component path     修改角色     已通
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "应用新增"
+    desc: "应用新增" # 可选
+  "noAuth": # component path     无权限跳转页面
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "noAuth"
+    #service: "aixforce690-showcase:searchHacUserService" # app:serviceKey
+    desc: "noAuth" # 可选
+
+  "chart": # component path     修改角色     已通
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "chart"
+    desc: "chart" # 可选
+  "pie": # component path     修改角色     已通
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "pie"
+    desc: "pie" # 可选
+  "search": # component path     修改角色     已通
+    category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+    name: "search"
+    desc: "search" # 可选    
+  "login": # component path     修改角色     已通
+      category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+      name: "login"
+      desc: "login" # 可选
+
+  "search": # component path     修改角色     已通
+      category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+      name: "login"
+      service: "aixforce690-showcase:searchIndex" # app:serviceKey
+      desc: "login" # 可选
+  "demo2": # component path     应用查询
+      category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+      name: "应用查询"
+      service: "aixforce690-showcase:searchBarcodes" # app:serviceKey
+      desc: "应用查询" # 可选
+  "plant_manage": # component path     应用查询
+      category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+      name: "应用查询"
+      service: "aixforce690-showcase:searchPlantByCodeAndName" # 页面加载时调用该dubbo方法
+      desc: "应用查询" # 可选
+  "plant_manage2": # component path     应用查询
+      category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+      name: "应用查询"
+      desc: "应用查询" # 可选
+  "stocktaking_order": # component path     应用查询
+      category: "OFFICIAL" # category: OFFICIAL, TEMPLATE, SHOP, ITEM, ITEM_TEMPLATE
+      name: "应用查询"
+      desc: "应用查询" # 可选
+
+mappings:
+
+  - pattern: "api/createHacApp"
+    methods:
+      - GET
+    service: "aixforce690-showcase:createHacAppService"
+    desc: "应用新增" # 可选
+    
+  - pattern: "api/searchHacApp"
+    methods:
+      - GET
+    service: "aixforce690-showcase:getHacAppByIdService"
+    desc: "应用修改查询动作" # 可选
+    
+  - pattern: "api/updateHacApp"
+    methods:
+      - GET
+    service: "aixforce690-showcase:updateHacAppService"
+    desc: "应用修改" # 可选
+    
+  - pattern: "api/deleteHacApp"
+    methods:
+      - GET
+    service: "aixforce690-showcase:delHacAppService"
+    desc: "应用删除" # 可选
+    
+  - pattern: "api/mission"
+    methods:
+      - GET
+    service: "aixforce690-showcase:mission"
+    desc: "应用删除" # 可选
+    
+  - pattern: "api/getUserById"
+    methods:
+      - GET
+    service: "aixforce690-showcase:getUserById"
+    desc: "查询公司账套对应关系" # 可选
+    
+  - pattern: "api/getUserByIdAndName"
+    methods:
+      - GET
+    service: "aixforce690-showcase:getUserByIdAndName"
+    desc: "查询公司账套对应关系" # 可选
+    
+  - pattern: "api/confirmUser"
+    methods:
+      - GET
+    service: "aixforce690-showcase:confirmUser"
+    desc: "查询公司账套对应关系" # 可选
+
+  - pattern: "/user/login"
+    methods:
+       - GET
+    service: "aixforce690-showcase:UserServiceClient"
+    desc: "用户登录" # 可选 plant/searchPlantByCodeAndName
+
+  - pattern: "stocktakingOrder/update"
+    methods:
+       - POST
+    service: "aixforce690-showcase:StocktakingOrderUpdate"
+    desc: "增加库存盘点单" # 新增库存盘点单 时， 调用该service   
+
+  - pattern: "stocktakingOrderNo/sequence"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SelectStocktakingOrderNo"
+    desc: "获取库存盘点单的单号" # 新增库存盘点单 时， 调用该service  
+
+  - pattern: "stocktakingOrder/add"
+    methods:
+       - POST
+    service: "aixforce690-showcase:StocktakingOrderAdd"
+    desc: "" # 新增库存盘点单 时， 调用该service 
+    
+  - pattern: "stocktakingOrder/delete"
+    methods:
+       - POST
+    service: "aixforce690-showcase:StocktakingOrderdelete"
+    desc: "" # 删除库存盘点单 时， 调用该service
+
+  - pattern: "stocktaking/details/diff"
+    methods:
+       - POST
+    service: "aixforce690-showcase:StocktakingDetailsDiff"
+    desc: "" # 新增库存盘点单 时， 调用该service  
+    
+  - pattern: "transferInventoryOrderNo/sequence"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SelectInventoryTransferOrderNo"
+    desc: "获取311移库单号" # 新增311移库单 时
+    
+  - pattern: "transferInventoryOrder/add"
+    methods:
+       - POST
+    service: "aixforce690-showcase:TransferInventoryOrderAdd"
+    desc: "" # 新增311移库单 时 
+    
+  - pattern: "transferInventoryOrder/delete"
+    methods:
+       - POST
+    service: "aixforce690-showcase:TransferInventoryOrderdelete"
+    desc: "" # 删除311移库单 
+  
+  - pattern: "security/createUser"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityCreateUser"
+    desc: "安全管理" # 新增用户， 调用该service
+
+  - pattern: "security/updateUser"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityUpdateUser"
+    desc: "安全管理" # 更新用户， 调用该service
+    
+  - pattern: "security/group/createGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityCreateGroup"
+    desc: "安全管理" # 新增组， 调用该service 
+
+  - pattern: "security/group/deleteGroupInfo"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteGroup"
+    desc: "安全管理" # 删除组， 调用该service
+    
+  - pattern: "security/group/updateGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityUpdateGroup"
+    desc: "安全管理" # 更新组， 调用该service  
+    
+  - pattern: "security/group/addUserToGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityAddUserToGroup"
+    desc: "安全管理" # 添加组内用户， 调用该service  
+    
+  - pattern: "security/group/deleteUserFromGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteUserFromGroup"
+    desc: "安全管理" # 删除组内用户， 调用该service  
+    
+  - pattern: "security/group/addRoleToGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityAddRoleToGroup"
+    desc: "安全管理" # 添加组内角色， 调用该service 
+    
+  - pattern: "security/group/deleteRoleFromGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteRoleFromGroup"
+    desc: "安全管理" # 删除组内角色， 调用该service 
+    
+  - pattern: "security/group/addAdminToGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityAddAdminToGroup"
+    desc: "安全管理" # 添加组管理员， 调用该service 
+    
+  - pattern: "security/group/deleteAdminFromGroup"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteAdminFromGroup"
+    desc: "安全管理" # 删除组管理员， 调用该service
+    
+  - pattern: "security/user/deleteUserInfo"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteUser"
+    desc: "安全管理" # 删除用户， 调用该service
+    
+  - pattern: "security/role/createRole"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityCerateRole"
+    desc: "安全管理" # 创建角色， 调用该service 
+    
+  - pattern: "security/updateRole"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityUpdateRole"
+    desc: "安全管理" # 创建角色， 调用该service
+
+  - pattern: "security/getRoleResources"
+    methods:
+       - POST
+    service: "aixforce690-showcase:getRoleResources"
+    desc: "安全管理" # 创建角色， 调用该service
+  
+  - pattern: "security/role/deleteRoleMessage"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteRole"
+    desc: "安全管理" # 删除角色， 调用该service
+    
+  - pattern: "security/resource/deleteResourceMessage"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteResource"
+    desc: "安全管理" # 删除资源， 调用该service
+    
+  - pattern: "security/resource/createResource"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityCreateResource"
+    desc: "安全管理" # 创建资源， 调用该service 
+    
+  - pattern: "security/resource/updateResource"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityUpdateResource"
+    desc: "安全管理" # 更新资源， 调用该service
+    
+  - pattern: "security/user/updatePassword"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityUpdatePassword"
+    desc: "安全管理" # 更新密码， 调用该service
+    
+  - pattern: "security/notice/saveSystemNotice"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecuritySaveSystemNotice"
+    desc: "安全管理" # 发布公告， 调用该service
+    
+  - pattern: "security/files/deleteFiles"
+    methods:
+       - POST
+    service: "aixforce690-showcase:SecurityDeleteFiles"
+    desc: "安全管理" # 删除文件， 调用该service
+  
+  #订单相关  
+  - pattern: "basic/mdDictionary/save"
+    methods:
+       - POST
+    service: "aixforce690-showcase:MdDictionarySave"
+    desc: "字典保存" # 新增字典， 调用该service 
+
+  - pattern: "basic/mdDictionary/update"
+    methods:
+       - POST
+    service: "aixforce690-showcase:MdDictionaryUpdate"
+    desc: "字典修改保存" # 修改字典， 调用该service 
+
+  - pattern: "basic/plant/save"
+    methods:
+       - POST
+    service: "aixforce690-showcase:PlantSave"
+    desc: "字典修改保存" # 修改字典， 调用该service
+
+  - pattern: "basic/plant/update"
+    methods:
+       - POST
+    service: "aixforce690-showcase:PlantUpdate"
+    desc: "字典修改保存" # 修改字典， 调用该service
+
+  - pattern: "basic/plant/delete"
+    methods:
+       - GET
+    service: "aixforce690-showcase:PlantDelete"
+    desc: "字典修改保存" # 修改字典， 调用该service
+    
+  - pattern: "order/closeStgDnDown"
+    methods:
+       - POST
+    service: "aixforce690-showcase:closeStgDnDown"
+    desc: "dnclose" # dnclose manualclose 调用此service
+    
+  - pattern: "order/openStgDnDown"
+    methods:
+       - POST
+    service: "aixforce690-showcase:openStgDnDown"
+    desc: "dnopen" # dnopen manualopen 调用此service
+    
+  - pattern: "order/closeStgStoDown"
+    methods:
+       - POST
+    service: "aixforce690-showcase:closeStgStoDown"
+    desc: "stoclose" # stoclose manualclose 调用此service
+    
+  - pattern: "order/openStgStoDown"
+    methods:
+       - POST
+    service: "aixforce690-showcase:openStgStoDown"
+    desc: "stoopen" # stoopen manualopen 调用此service (暂时没打开)
+
+  - pattern: "basic/location/save"
+    methods:
+       - POST
+    service: "aixforce690-showcase:LocationSave"
+    desc: "库存地点保存" # 新建库存地点， 调用该service
+
+
+  - pattern: "basic/location/update"
+    methods:
+       - POST
+    service: "aixforce690-showcase:LocationUpdate"
+    desc: "库存地点保存" # 修改库存地点， 调用该service
+
+  - pattern: "basic/location/delete"
+    methods:
+       - GET
+    service: "aixforce690-showcase:LocationDelete"
+    desc: "库存地点删除" # 删除库存地点， 调用该service
+
+  - pattern: "portal/getInventoryPieData"
+    methods:
+       - POST
+    service: "aixforce690-showcase:getInventoryPieData"
+    desc: "portal页面" # 得到inventory饼状图数据， 调用该service
+
+  - pattern: "portal/getToDoChartsData"
+    methods:
+       - POST
+    service: "aixforce690-showcase:getToDoChartsData"
+    desc: "portal页面" # 得到inventory饼状图数据， 调用该service
+
+  - pattern: "fileUpload/getfileNameShow"
+    methods:
+       - POST
+    service: "aixforce690-showcase:getfileNameShow"
+    desc: "portal页面" # 得到文件列表， 调用该service
+
+  - pattern: "portal/getNoticeData"
+    methods:
+       - POST
+    service: "aixforce690-showcase:getNoticeData"
+    desc: "portal页面" # 得到notice数据， 调用该service
+
+  - pattern: "basic/warehouse/save"
+    methods:
+       - POST
+    service: "aixforce690-showcase:WarehouseSave"
+    desc: "仓库保存" # 新建仓库， 调用该service
+
+  - pattern: "basic/warehouse/update"
+    methods:
+       - POST
+    service: "aixforce690-showcase:WarehouseUpdate"
+    desc: "仓库保存" # 修改仓库， 调用该service
+
+  - pattern: "basic/warehouse/delete"
+    methods:
+       - GET
+    service: "aixforce690-showcase:WarehouseDelete"
+    desc: "仓库删除" # 删除仓库， 调用该service
+    
+  - pattern: "inventory/downInventoryFromSap"
+    methods:
+       - POST
+    service: "aixforce690-showcase:downInventoryFromSap"
+    desc: "opsi删除" # 调用该service
+
+  - pattern: "order/findOrderNo"
+    methods:
+       - POST
+    service: "aixforce690-showcase:findOrderNo"
+    desc: "gift order add生成OGP/IGP NO" # 调用该service
+
+  - pattern: "order/in/outwarehousee"
+    methods:
+       - POST
+    service: "aixforce690-showcase:inOutWarehouse"
+    desc: "gift order add生成OGP/IGP NO" # 调用该service  
+    
+  - pattern: "stockAgeReport/update"
+    methods:
+       - POST
+    service: "aixforce690-showcase:barcodeRemarkUpdate"
+    desc: "对库存中的条码做备注" # 调用该service  
+
+  - pattern: "basic/barcode/print"
+    methods:
+       - POST
+    service: "aixforce690-showcase:printMdBarcode"
+
+  - pattern: "basic/findCdUserLoc"
+    methods:
+       - POST
+    service: "aixforce690-showcase:findCdUserLoc"
+  
+  - pattern: "basic/downloadData"
+    methods:
+       - POST
+    service: "aixforce690-showcase:downloadData"
+
+  - pattern: "grgi/stoConfirm"
+    methods:
+       - POST
+    service: "aixforce690-showcase:stoConfirm"
+    
+  - pattern: "queryPdTempOrder"
+    methods:
+       - POST
+    service: "aixforce690-showcase:queryPdTempOrder"
+    
+  - pattern: "pdTempOrder/add"
+    methods:
+       - POST
+    service: "aixforce690-showcase:addPdTempOrder"    
+    
+  - pattern: "getPdTempOrderNo"
+    methods:
+       - POST
+    service: "aixforce690-showcase:getPdTempOrderNo"
+    
+  - pattern: "updateStatusForTempPd"
+    methods:
+       - POST
+    service: "aixforce690-showcase:updateStatusForTempPd"     
+    
+  - pattern: "queryPdTempOrderDetail"
+    methods:
+       - POST
+    service: "aixforce690-showcase:queryPdTempOrderDetail"     
+    
+  - pattern: "pdTempDtl/moveBarcodes"
+    methods:
+       - POST
+    service: "aixforce690-showcase:moveBarcodes"      
+    
+  - pattern: "updateBarcodeStatusForTempPdDtl"
+    methods:
+       - POST
+    service: "aixforce690-showcase:updateBarcodeStatusForTempPdDtl"
+
+    
+auths:
+  # protectedList:
+  #   - pattern: "/api/buyer/.*" # 正则表达式
+  #     roles:
+  #       - ADMIN_ROLE
+  #       - BUYER_ROLE
+  # whiteList:
+  #   - pattern: "*" # 正则表达式
+  #     methods: # methods 多选: ALL, GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE
+  #       - ALL
+
+

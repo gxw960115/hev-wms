@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.report.dao.ConsignmentReportDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="consignmentReportMap" type="consignmentReport">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="soldToParty" column="CUSTOMER_NO" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="shipToAddress" column="DELIVERY_NAME" />
+		<result property="soldToName" column="CUSTOMER_NAME" />
+		<result property="division" column="DIVISION" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="unit" column="UNIT" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="fillupQty" column="QTY" />
+		<result property="plt" column="PLANT" />
+		<result property="loc" column="LOCATION" />
+		<result property="pickupQty" column="QTY" />
+		<result property="issueQty" column="QTY" />
+		<result property="stockQty" column="QTY" />
+	</resultMap>
+	
+	<sql id="searchConsignmentReportInfo_fragement">
+		SELECT
+			cus.customer_no AS soldToParty,
+			cus.material_no AS materialNo,
+			cus.delivery_name AS shipToAddress,
+			cus.customer_name AS soldToName,
+			m.division,
+			m.customer_model AS customerModel,
+			m.basic_unit AS unit,
+			m.material_desp AS materialDesp,
+			cus.fillupQty,
+			cus.plant AS plt,
+			cus.location AS loc,
+			cus.pickupQty,
+			cus.issueQty,
+			con.qty AS stockQty
+		FROM
+			(
+				SELECT
+					t.customer_no,
+					t.material_no,
+					t.delivery_code,
+					t.delivery_name,
+					t.customer_name,
+					max(t.plant) AS plant,
+					max(t.location) AS location,
+					CASE t.sell_order_type
+				WHEN 'ZKA' THEN
+					t.QTY
+				ELSE
+					0
+				END AS pickupQty,
+				CASE t.sell_order_type
+			WHEN 'ZKB' THEN
+				t.QTY
+			ELSE
+				0
+			END AS fillupQty,
+			CASE t.sell_order_type
+		WHEN 'ZKE' THEN
+			t.QTY
+		ELSE
+			0
+		END AS issueQty
+		FROM
+			stg_dn_down t
+		WHERE
+			t.sell_order_type IN ('ZKA', 'ZKB', 'ZKE')
+		GROUP BY
+			t.customer_no,
+			t.customer_name,
+			t.delivery_code,
+			t.delivery_name,
+			t.material_no
+			) cus
+		LEFT JOIN (
+			SELECT
+				c.customer_code,
+				c.material_no,
+				sum(c.qty) AS qty
+			FROM
+				ods_consignment_dtl c
+			GROUP BY
+				c.customer_code,
+				c.material_no
+		) con ON (
+			con.customer_code = cus.customer_no
+			AND cus.material_no = con.material_no
+		)
+		LEFT JOIN md_mat_info m ON m.material_no = cus.material_no
+		WHERE
+			1 = 1 
+	<if test="consignmentReportDTO.materialNo != null and consignmentReportDTO.materialNo != ''">
+        <![CDATA[
+			and  cus.material_no = #{consignmentReportDTO.materialNo}
+		]]>
+    </if>
+    <if test="consignmentReportDTO.customerNo != null and consignmentReportDTO.customerNo != ''">
+        <![CDATA[
+			and cus.customer_no = #{consignmentReportDTO.customerNo}
+		]]>
+    </if>
+	<if test="consignmentReportDTO.division != null and consignmentReportDTO.division != ''">
+        <![CDATA[
+			and m.division = #{consignmentReportDTO.division}
+		]]>
+    </if>
+	</sql>
+	<select id="searchConsignmentReportInfos" resultMap="consignmentReportMap">
+		<include refid="pagination_Head" />
+		<include refid="searchConsignmentReportInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchConsignmentReportInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchConsignmentReportInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getConsignmentReportInfos" resultMap="consignmentReportMap">
+		<include refid="searchConsignmentReportInfo_fragement" />
+	</select>
+</mapper>

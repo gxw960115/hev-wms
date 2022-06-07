@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.basic.dao.CdFactoryDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                       -->
+    <!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllCdFactoryColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			CODE,
+			NAME,
+			DEPT_CODE,
+			DEPT_NAME,
+			SALES_CODE,
+			SALES_NAME,
+			PUR_CODE,
+			PUR_NAME,
+			CREATED_BY,
+			CREATED_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			VERSION,
+			1
+		from 
+			CD_FACTORY cd_factory_
+		]]>
+	</sql>
+	<sql id="selectAllSales">
+		<![CDATA[
+			select
+				SALES_CODE
+			from 
+				CD_FACTORY cd_factory_
+			GROUP BY 
+				CD_FACTORY_.SALES_CODE
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="cdFactoryMap" type="cdFactory">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="code" column="CODE"/>
+		<result property="name" column="NAME"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="deptName" column="DEPT_NAME"/>
+		<result property="purCode" column="PUR_CODE"/>
+		<result property="purName" column="PUR_NAME"/>
+		<result property="salesCode" column="SALES_CODE"/>
+		<result property="salesName" column="SALES_NAME"/>
+		<result property="createdBy" column="CREATED_BY"/>
+		<result property="createdDate" column="CREATED_DATE"/>
+		<result property="modifyBy" column="MODIFY_BY"/>
+		<result property="modifyDate" column="MODIFY_DATE"/>
+		<result property="version" column="VERSION"/>
+	</resultMap>
+	<!-- =========================================================== -->
+    <!-- DAO方法中的基本增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+    <select id="getAll" resultMap="cdFactoryMap">
+		<include refid="selectAllCdFactoryColumns"/>
+		order by cd_factory_.name
+	</select>
+	<select id="get" resultMap="cdFactoryMap" parameterType="long">
+		<include refid="selectAllCdFactoryColumns"/>
+		<![CDATA[ where cd_factory_.row_id = #{rowId} ]]>	
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[ delete from CD_FACTORY where row_id = #{rowId} ]]>	
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[ delete from CD_FACTORY where row_id in ]]>	
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</delete>
+    <insert id="save" parameterType="cdFactory">
+    	<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_CD_FACTORY_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into CD_FACTORY
+		  (	     ROW_ID
+		  		,CODE
+				,NAME
+				,DEPT_CODE
+				,DEPT_NAME
+				,SALES_CODE
+				,SALES_NAME
+				,PUR_CODE
+				,PUR_NAME
+				,CREATED_BY
+				,CREATED_DATE
+				,MODIFY_BY
+				,MODIFY_DATE
+		   )
+		values
+		  (      #{rowId}
+		  		,#{code}
+				,#{name}
+				,#{deptCode}
+				,#{deptName}
+				,#{salesCode}
+				,#{salesName}
+				,#{purCode}
+				,#{purName}
+				,#{createdBy}
+				,TO_DATE(#{createdDate},'yyyy-mm-dd hh24:mi:ss')
+				,#{modifyBy}
+				,TO_DATE(#{modifyDate},'yyyy-mm-dd hh24:mi:ss')
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="cdFactory">
+		<![CDATA[
+		update CD_FACTORY
+		   set CODE = #{code}
+				,NAME = #{name}
+				,DEPT_CODE = #{deptCode}
+				,DEPT_NAME = #{deptName}
+				,SALES_CODE = #{salesCode}
+				,SALES_NAME = #{salesName}
+				,PUR_CODE = #{purCode}
+				,PUR_NAME = #{purName}
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = TO_DATE(#{modifyDate},'yyyy-mm-dd hh24:mi:ss')
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchCdFactory_fragement">
+		<include refid="selectAllCdFactoryColumns" />
+		where 1=1
+			<if test="cdFactory.code != null and cdFactory.code != '' ">
+			and CODE like '%'||#{cdFactory.code}||'%' 
+			</if>
+			<if test="cdFactory.name != null and cdFactory.name != ''">
+			and NAME like '%'||#{cdFactory.name}||'%' 
+			</if>
+			<if test="cdFactory.deptCode != null">
+			and DEPT_CODE like '%'||#{cdFactory.deptCode}||'%' 
+			</if>
+			<if test="cdFactory.deptName != null">
+			and DEPT_NAME like '%'||#{cdFactory.deptName}||'%' 
+			</if>
+			<if test="cdFactory.salesCode != null">
+			and SALES_CODE like '%'||#{cdFactory.salesCode}||'%' 
+			</if>
+			<if test="cdFactory.salesName != null">
+			and SALES_NAME like '%'||#{cdFactory.salesName}||'%' 
+			</if>
+			<if test="cdFactory.purCode != null">
+			and PUR_CODE like '%'||#{cdFactory.purCode}||'%' 
+			</if>
+			<if test="cdFactory.purName != null">
+			and PUR_NAME like '%'||#{cdFactory.purName}||'%' 
+			</if>
+	</sql>
+	<select id="searchCdFactorys" resultMap="cdFactoryMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchCdFactory_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchCdFactorysCount" resultType="long"> 
+		<include refid="count_Head"/>
+		<include refid="searchCdFactory_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	<select id="getAllFactoryAndSales" resultMap="cdFactoryMap"> 
+		<include refid="selectAllCdFactoryColumns"/>
+	</select>
+	<select id="getAllFactoryAndSales2" resultMap="cdFactoryMap"> 
+		<include refid="pagination_Head"/>
+		<include refid="selectAllCdFactoryColumns"/>
+		<![CDATA[
+		) row_ where rownum <= #{end} ) where rownum_ >= #{begin}
+		]]>
+	</select>
+	<!-- edit by linzx @20151209 -->
+	<select id="getAllSales" resultMap="cdFactoryMap"> 
+		SELECT 
+			CODE,
+			PUR_CODE 
+		FROM
+			CD_FACTORY cd_factory_ 
+		GROUP BY
+			CODE,PUR_CODE
+	</select>
+	<select id="getAllSales4" resultMap="cdFactoryMap"> 
+		<include refid="pagination_Head"/>
+		<![CDATA[
+		select CODE, PUR_CODE
+		from CD_FACTORY cd_factory_
+		group by CODE, PUR_CODE
+		) row_ where rownum <= #{end} ) where rownum_ >= #{begin}
+		]]>
+	</select>
+	<select id="getAllSales2" resultMap="cdFactoryMap"> 
+		select SALES_CODE, PUR_CODE
+		from CD_FACTORY cd_factory_
+		group by SALES_CODE, PUR_CODE
+	</select>
+	<select id="getAllSales3" resultMap="cdFactoryMap"> 
+		<include refid="pagination_Head"/>
+		<![CDATA[
+		select 
+			SALES_CODE, PUR_CODE
+		from 
+			CD_FACTORY cd_factory_
+		group by 
+			SALES_CODE, PUR_CODE
+		) row_ where rownum <= #{end} ) where rownum_ >= #{begin}
+		]]>
+	</select>
+</mapper>

@@ -1,0 +1,36 @@
+SELECT
+  ROW_ID
+, PO_NO
+, PO_ITEM_NO
+, PO_TYPE
+, INBOUND_FLAG
+, PLANT
+, PO_DOC_DATE
+, PO_LAST_MODIFY_DATE
+, PO_CREATE_BY
+, MATERIAL_NO
+, CUSTOMER_MODEL
+, MATERIAL_DESP
+, QTY
+, PO_LOCATION
+, ITEM_DELTET
+, PO_CLOSE
+, DATE_FORMAT(
+		CREATE_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) CREATE_DATE
+, DATE_FORMAT(
+		MODIFY_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) MODIFY_DATE
+, VERSION
+, FINISH_QTY
+, UNIT
+, DELIVER_DATE
+, FINISH_FLAG
+, FLAG
+, CREATE_BY
+, MODIFY_BY
+FROM stg_po_down
+where plant in (select fac.code from cd_factory fac where fac.country_code='6600')
+and MODIFY_DATE >DATE_ADD(NOW(),INTERVAL -30 DAY)

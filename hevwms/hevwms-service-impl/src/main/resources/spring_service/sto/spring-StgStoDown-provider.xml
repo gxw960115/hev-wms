@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 使用dubbo协议暴露服务 -->
+
+	<!-- <dubbo:service interface="com.haier.openplatform.showcase.security.service.UserServiceClient" 
+		owner="hop" ref="userServiceClient" version="1.0" protocol="dubbo,rest" delay="-1" 
+		registry="qingdaoRegistry690"/> -->
+
+	<bean id="stgStoDownServiceClient"
+		class="com.haier.openplatform.wms.sto.impl.StgStoDownServiceClientImpl">
+		<property name="stgStoDownService" ref="stgStoDownService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.sto.service.StgStoDownServiceClient" version="5.0"
+		owner="Hevwms" ref="stgStoDownServiceClient" protocol="dubbo" delay="-1"
+		registry="qingdaoRegistry690" />
+
+</beans>

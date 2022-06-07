@@ -1,0 +1,372 @@
+{{#component "ogipDetail js-comp"}}
+    <div id="oigDeDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivher" region="north">
+            <table id="searchTab1" style="margin-left: -20px">
+                <tr>
+                    <td style="text-align: right">OGP/IGP NO:&nbsp;&nbsp;</td> <td class="leftCls"><input id="orderNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Material NO:&nbsp;&nbsp;</td><td class="leftCls"><input id="materialNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls"> BarCode:&nbsp;&nbsp;</td><td class="leftCls"><input id="barcode" class="radiusCls" type="text" /></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right">SAP Order No:&nbsp;&nbsp;</td><td class="leftCls"><input id="sapOrderNo" class="radiusCls" type="text" /></td>
+                    <td style="text-align: right">Warehouse:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="plant" type="text" class="easyui-combobox" style="border:0" data-options="border:false,
+                         width:155,height:30,editable:true,required:false"/></td>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td><td class="leftCls"><input id="locationP" class="radiusCls" class="radiusCls" type="text"/></td>
+                </tr>
+                <tr>
+                	<td class="rightCls">Document Type:&nbsp;&nbsp;</td><td class="leftCls"><input id="docType"  class="easyui-combobox flag" data-options="width:155,height:30,editable:false,panelHeight:'auto'" /></td>
+                    <td class="rightCls">Scanned Date: &nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="5"><input id="begin" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/> &nbsp;&nbsp;
+                        -  &nbsp;&nbsp;<input id="end" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" id="exportBtn">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle printBtn" id="printBtn">Print</a>
+              	    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="dataGrid">
+
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+    $(function(){
+    	$('#oigDeDiv').height(suitHeight);
+        $('#docType').combobox({
+                data:[{"text":"All","value":"-1"},{"text":"PO","value":"PO"},
+                {"text":"Inbound","value":"INBOUND"},
+                {"text":"STO","value":"STO"},
+                {"text":"Billing","value":"DN"},
+                {"text":"Transfer","value":"TRANSFER"},
+                {"text":"Gift","value":"GIFT"},
+                {"text":"Scrap","value":"SCRAP"}],
+                value:'-1'
+            });
+        //初始化日期
+        var date=new Date();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        var begin=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(begin,-1));
+        date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#end').val(date);
+        var columns=[[ {
+            field : 'ck',
+            checkbox : true,
+            width : 80,
+            align : 'center'
+        }, {
+            field : 'orderNo',
+            title : 'OGP/IGP No',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'orderType',
+            title : 'Order Type',
+            align : 'center',
+            sortable : true,
+            formatter : function(val) {
+                if (val=='1') {
+                    return 'IN';
+                }else if(val=='2'){
+                    return 'OUT';
+                }
+                return val;
+            }
+        }, {
+            field : 'docType',
+            title : 'Doc Type',
+            align : 'center',
+            sortable : true,
+            formatter : function(val) {
+                if (val=='DN') {
+                    return 'Billing';
+                }else{
+                    return val;
+                }
+            }
+        }, {
+            field : 'sapOrderNo',
+            title : 'SAP Order No',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'sapOrderItem',
+            title : 'SAP Order Item',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'batchNo',
+            title : 'Batch No',
+            align : 'center',
+            hidden : true,
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Warehouse',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            sortable : true,
+            hidden: true
+        }, {
+            field : 'qty',
+            title : 'Qty',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'barcode',
+            title : 'Barcode',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'carNo',
+            title : 'Car No',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'vendorCode',
+            title : 'Gift Vendor Code',
+            align : 'center',
+            sortable : true,
+            hidden: true
+        }, {
+            field : 'vendorName',
+            title : 'Gift Vendor Name',
+            align : 'left',
+            sortable : true,
+            hidden: true
+        }, {
+            field : 'deliveryCode',
+            title : 'Gift ShipTo Code',
+            align : 'center',
+            sortable : true,
+            hidden: true
+        }, {
+            field : 'deliveryName',
+            title : 'Gift ShipTo Name',
+            align : 'left',
+            sortable : true,
+            hidden: true
+        }, {
+            field : 'scannedBy',
+            title : 'Scanned By',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'scannedDate',
+            title : 'Scanned Date',
+            align : 'center',
+            sortable : true,
+			formatter : formatY_M_D
+        }, {
+            field : 'deliveryDate',
+            title : 'ShipTo Dt',
+            align : 'center',
+            sortable : true,
+            hidden : true
+        } ]];
+        var grid = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            url:'',
+            method:'post',
+//             url : '/order/searchOdsOrderInfoDtl',
+//             queryParams : {
+//                 'flag' : '0',
+//                 'orderNo' : $('#orderNo').val(),
+//                 'barcode' : $('#barcode').val(),
+//                 'materialNo' : $('#materialNo').val(),
+//                 'sapOrderNo' : $('#sapOrderNo').val(),
+//                 'location' : $('#locationP').val(),
+//                 'begin' : $('#begin').val(),
+//                 'end' : $('#end').val(),
+//                 'docType' : $('#docType').combobox("getValue")
+//             },
+            onLoadError:function(){
+                         $.messager.alert('System Information','Network Abnormal!','warning');
+                    },
+            onLoadSuccess:function(){
+                	$(this).datagrid("fixRownumber");
+                }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+        
+        $.ajax({
+            url:'/warehouse/searchAvailableWh',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                var dataRes = [];
+               // dataRes.push({ "text": " ", "value": " " });
+                if(data!=''||data!=null||data!=undefined){
+                   for(var i=0;i<data.length;i++){
+                       dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                    }           
+                }
+                $('#plant').combobox({
+                    data:dataRes
+                })
+            }
+        });
+        
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#printBtn').on('click',function(){
+            printData();
+        })
+        $('#exportBtn').on('click',function(){
+            exportData();
+        })
+    })
+    /**
+     * 查询
+     */
+    function queryData(){
+    	var plant=$('#plant').combobox('getValue');
+    	if((plant==undefined||plant=="undefined")&&$('#plant').combobox('getText')!=""){
+           	  $.messager.alert('System Information',
+                                        'Please input the correct plant',
+                                        'warning');
+              return;
+           }
+       if(plant==undefined||plant=="undefined"){
+       		 plant="";
+        }
+    
+       var grid= $('#dataGrid').datagrid({
+            url : '/order/searchOdsOrderInfoDtl',
+            queryParams : {
+            	'plant' : plant,
+                'flag' : '0',
+                'orderNo' : $('#orderNo').val(),
+                'barcode' : $('#barcode').val(),
+                'materialNo' : $('#materialNo').val(),
+                'sapOrderNo' : $('#sapOrderNo').val(),
+                'location' : $('#locationP').val(),
+                'begin' : $('#begin').val(),
+                'end' : $('#end').val(),
+                'docType' : $('#docType').combobox("getValue")
+            },
+            onLoadSuccess : function(data) {
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                             gridScroll(grid);
+                }
+                $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid);
+    }
+    /**
+     * 打印
+     */
+    function printData(){
+        var selectedRows = $("#dataGrid").datagrid('getChecked');
+        if (selectedRows.length < 1) {
+            $.messager.alert('System Information',
+                    'Please select at least one data!', 'warning');
+            return false;
+        }
+
+        var codes = new Array();
+        var orderNos = new Array();
+        for ( var i = 0; i < selectedRows.length; i++) {
+            codes.push(selectedRows[i].barcode);
+            orderNos.push(selectedRows[i].sapOrderNo);
+        }
+        var url='/order/printOgpIgpDetail?barcodes='+codes.join()+'&orderNos='+orderNos.join();
+        window.open(url);
+    }
+    /**
+     * 导出
+     */
+    function exportData(){
+        /*var url = '/ordsearchOrderInfoDtlAmount/exporter/exportOdsOrderInfoDtl?a=1'
+                + '&flag=' + '0' + '&orderNo='
+                + $('#orderNo').val() + '&materialNo='
+                + $('#materialNo').val() + '&sapOrderNo='
+                + $('#sapOrderNo').val() + '&barcode='
+                + $('#barcode').val() + '&begin='
+                + $('#begin').val() + '&end=' + $('#end').val()
+                + '&plant=' + $('#plant').combobox("getValue")
+                + '&location=' + $('#locationP').val()
+                + '&docType=' + $('#docType').combobox("getValue");
+        window.location.href = url;*/
+       
+       $.ajax({
+                url:'/order/searchOrderInfoDtlAmount',
+                type:'post',
+                dataType:'json',
+                data:{
+                		a:1,
+                		flag:0,
+                		orderNo:$('#orderNo').val(),
+	            		materialNo:$('#materialNo').val(),
+	            		sapOrderNo:$('#sapOrderNo').val(),
+	            		barcode:$('#barcode').val(),
+	            		begin:$('#begin').val(),
+	            		end:$('#end').val(),
+	            		plant:$('#plant').combobox("getValue"),
+	            		location:$('#locationP').val(),
+	            		docType:$('#docType').combobox("getValue")
+	            	},
+                success:function(data){
+                	if(data == "success") {
+                		var url = '/order/exportOdsOrderInfoDtl?a=1'
+			                + '&flag=' + '0' + '&orderNo='
+			                + $('#orderNo').val() + '&materialNo='
+			                + $('#materialNo').val() + '&sapOrderNo='
+			                + $('#sapOrderNo').val() + '&barcode='
+			                + $('#barcode').val() + '&begin='
+			                + $('#begin').val() + '&end=' + $('#end').val()
+			                + '&plant=' + $('#plant').combobox("getValue")
+			                + '&location=' + $('#locationP').val()
+			                + '&docType=' + $('#docType').combobox("getValue");
+			        		window.location.href = url;
+                	}else {
+                		$.messager.alert('System Information',data,	'warning');
+                	}
+                }
+            });
+    }
+    </script>
+{{/component}}

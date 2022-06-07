@@ -1,0 +1,625 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.so.dao.StgDnDownDAO">
+	<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[) n]]>
+	</sql>
+
+    <sql id="Base_Column_List">
+        ROW_ID, DN_NO, DN_ITEM_NO, SELL_NO, SELL_ORDER_TYPE, PLANT, DN_DOC_DATE,
+        DN_LAST_MODIFY_DATE,
+        DN_CREATE_BY, MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP, QTY, LOCATION,
+        CUSTOMER_NO,
+        CUSTOMER_NAME, DELIVERY_CODE, DELIVERY_NAME, DELIVERY_DATE, CREATE_DATE,
+        MODIFY_DATE,
+        VERSION, DN_CLOSE, FINISH_QTY, UNIT, DELIVER_DATE, BILLING, BILLING_ITEM,
+        FINISH_FLAG,
+        FLAG, CREATE_BY, MODIFY_BY, REGION, CITY, STNO, DEAL_FLAG, DEAL_TIME,
+        DEAL_DESC,
+        COST_FLAG, COST_MSG, SAP_FLAG, SAP_MSG, SAP_DOC_NO, SAP_SEND_ID, POSTING_DATE,
+		PICKING_DATE, VENDOR_CODE, VENDOR_NAME, CUSTOMER_PO, DELIVERY_ADDRESS
+    </sql>
+
+	<sql id="selectAllStgDnDown">
+		select
+		<include refid="Base_Column_List" />
+		from STG_DN_DOWN
+	</sql>
+	<sql id="selectAllStgDnReverse">
+		SELECT
+			ROW_ID,DN_NO,DN_ITEM_NO, SELL_NO, SELL_ORDER_TYPE, PLANT,MATERIAL_NO, MATERIAL_DESP, QTY,
+			LOCATION,FINISH_QTY, UNIT, FINISH_FLAG,FLAG, CREATE_BY,STNO, POSTING_DATE,PICKING_DATE,
+			(SELECT SAP_FLAG FROM ODS_SO_GR_INFO G WHERE G.DN_NO = STG_DN_DOWN.DN_NO AND G.DN_ITEM_NO = STG_DN_DOWN.DN_ITEM_NO) sapFlagStatus
+		from STG_DN_DOWN
+	</sql>
+
+	<resultMap id="stgDnDownMap" type="stgDnDown">
+        <id column="ROW_ID" property="rowId" />
+        <result column="DN_NO" property="dnNo" />
+        <result column="DN_ITEM_NO" property="dnItemNo" />
+        <result column="SELL_NO" property="sellNo" />
+        <result column="SELL_ORDER_TYPE" property="sellOrderType" />
+        <result column="PLANT" property="plant" />
+        <result column="DN_DOC_DATE" property="dnDocDate" />
+        <result column="DN_LAST_MODIFY_DATE" property="dnLastModifyDate" />
+        <result column="DN_CREATE_BY" property="dnCreateBy" />
+        <result column="MATERIAL_NO" property="materialNo" />
+        <result column="CUSTOMER_MODEL" property="customerModel" />
+        <result column="MATERIAL_DESP" property="materialDesp" />
+        <result column="QTY" property="qty" />
+        <result column="LOCATION" property="location" />
+        <result column="CUSTOMER_NO" property="customerNo" />
+        <result column="CUSTOMER_NAME" property="customerName" />
+        <result column="DELIVERY_CODE" property="deliveryCode" />
+        <result column="DELIVERY_NAME" property="deliveryName" />
+        <result column="DELIVERY_DATE" property="deliveryDate" />
+        <result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+        <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+        <result column="VERSION" property="version" />
+        <result column="DN_CLOSE" property="dnClose" />
+        <result column="FINISH_QTY" property="finishQty" />
+        <result column="UNIT" property="unit" />
+        <result column="DELIVER_DATE" property="deliverDate" />
+        <result column="BILLING" property="billing" />
+        <result column="BILLING_ITEM" property="billingItem" />
+        <result column="FINISH_FLAG" property="finishFlag" />
+        <result column="FLAG" property="flag" />
+        <result column="CREATE_BY" property="createBy" />
+        <result column="MODIFY_BY" property="modifyBy" />
+        <result column="REGION" property="region" />
+        <result column="CITY" property="city" />
+        <result column="STNO" property="stno" />
+        <result column="DEAL_FLAG" property="dealFlag" />
+        <result column="DEAL_TIME" property="dealTime" jdbcType="DATE" />
+        <result column="DEAL_DESC" property="dealDesc" />
+        <result column="COST_FLAG" property="costFlag" />
+        <result column="COST_MSG" property="costMsg" />
+        <result column="SAP_FLAG" property="sapFlag" />
+        <result column="SAP_MSG" property="sapMsg" />
+        <result column="SAP_DOC_NO" property="sapDocNo" />
+        <result column="SAP_SEND_ID" property="sapSendId" />
+        <result column="POSTING_DATE" property="postingDate" />
+		<result column="CUSTOMER_PO" property="customerPo" />
+		<result column="DELIVERY_ADDRESS" property="deliveryAddress" />
+		<result column="PICKING_DATE" property="pickingDate" />
+		<result column="VENDOR_CODE" property="vendorCode" />
+		<result column="VENDOR_NAME" property="vendorName" />
+		<result column="COME_FROM_TMS" property="comeFromTms" />
+	</resultMap>
+	<resultMap id="matListMap" type="wlList">
+		<result property="mat" column="MAT"/>
+		<result property="matdesc" column="MATDESC"/>
+		<result property="qty" column="QTY"/>
+		<result property="scanqty" column="SCANQTY"/>
+		<result property="location" column="LOCATION"/>
+		<result property="custModel" column="CUSTMODEL"/>
+	</resultMap>
+
+	<resultMap id="matInfo" type="orderDelDetial">
+		<result property="qty" column="QTY"/>
+		<result property="location" column="LOCATION"/>
+		<result property="barcode" column="BARCODE"/>
+		<result property="firstInDate" column="FIRST_IN_DATE"/>
+	</resultMap>
+
+	<select id="getAll" resultMap="stgDnDownMap">
+		<include refid="selectAllStgDnDown" />
+	</select>
+	<select id="get" resultMap="stgDnDownMap" parameterType="long">
+		<include refid="selectAllStgDnDown" />
+		where ROW_ID = #{rowId}
+	</select>
+
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from STG_DN_DOWN where ROW_ID = #{rowId}
+		]]>
+	</delete>
+
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from STG_DN_DOWN where ROW_ID in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<insert id="save" parameterType="stgDnDown">
+	   <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+           SELECT SEQ_SO_DOWN_ID.NEXTVAL AS ID FROM DUAL
+       </selectKey>
+        insert into STG_DN_DOWN
+        (
+            ROW_ID, DN_NO, DN_ITEM_NO,
+            SELL_NO, SELL_ORDER_TYPE, PLANT,
+            DN_DOC_DATE, DN_LAST_MODIFY_DATE, DN_CREATE_BY,
+            MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP,
+            QTY, LOCATION, CUSTOMER_NO,
+            CUSTOMER_NAME, DELIVERY_CODE, DELIVERY_NAME,
+            DELIVERY_DATE, CREATE_DATE, MODIFY_DATE,
+            VERSION, DN_CLOSE, FINISH_QTY,
+            UNIT, DELIVER_DATE, BILLING,
+            BILLING_ITEM, FINISH_FLAG, FLAG,
+            CREATE_BY, MODIFY_BY, REGION,
+            CITY, STNO, DEAL_FLAG, DEAL_TIME,
+            DEAL_DESC, COST_FLAG, COST_MSG,
+            SAP_FLAG, SAP_MSG, SAP_DOC_NO,
+            SAP_SEND_ID, POSTING_DATE,PICKING_DATE,
+            VENDOR_CODE,VENDOR_NAME,CUSTOMER_PO, DELIVERY_ADDRESS, COME_FROM_TMS
+        )
+        values
+        (
+            #{rowId}, #{dnNo},
+            #{dnItemNo},
+            #{sellNo}, #{sellOrderType}, #{plant},
+            #{dnDocDate}, #{dnLastModifyDate},
+            #{dnCreateBy},
+            #{materialNo}, #{customerModel}, #{materialDesp},
+            #{qty}, #{location},
+            #{customerNo},
+            #{customerName}, #{deliveryCode}, #{deliveryName},
+            #{deliveryDate}, #{createDate,jdbcType=DATE},
+            #{modifyDate,jdbcType=DATE},
+            #{version}, #{dnClose}, #{finishQty},
+            #{unit}, #{deliverDate},
+            #{billing},
+            #{billingItem}, #{finishFlag}, #{flag},
+            #{createBy}, #{modifyBy},
+            #{region},
+            #{city}, #{stno}, #{dealFlag},
+            #{dealTime,jdbcType=DATE},
+            #{dealDesc}, #{costFlag}, #{costMsg},
+            #{sapFlag}, #{sapMsg},#{sapDocNo},
+            #{sapSendId}, #{postingDate},#{pickingDate},
+            #{vendorCode},#{vendorName},#{customerPo},#{deliveryAddress},#{comeFromTms}
+        )
+	</insert>
+
+	<update id="update" parameterType="stgDnDown">
+		<![CDATA[
+		update STG_DN_DOWN
+		   set
+				 DN_NO = #{dnNo}
+				,DN_ITEM_NO = #{dnItemNo}
+				,SELL_NO = #{sellNo}
+				,SELL_ORDER_TYPE = #{sellOrderType}
+				,PLANT = #{plant}
+				,DN_DOC_DATE = #{dnDocDate}
+				,DN_LAST_MODIFY_DATE = #{dnLastModifyDate}
+				,DN_CREATE_BY = #{dnCreateBy}
+				,MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,QTY = #{qty}
+				,LOCATION = #{location}
+				,CUSTOMER_NO = #{customerNo}
+				,CUSTOMER_NAME = #{customerName}
+				,DELIVERY_CODE = #{deliveryCode}
+				,DELIVERY_NAME = #{deliveryName}
+				,DELIVERY_DATE = #{deliveryDate}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_DATE = #{modifyDate}
+				,BILLING = #{billing}
+				,BILLING_ITEM = #{billingItem}
+				,VERSION = #{version}
+				,UNIT = #{unit}
+				,MODIFY_BY = #{modifyBy}
+				,CITY = #{city}
+				,REGION = #{region}
+				,SAP_FLAG = #{sapFlag}
+				,SAP_MSG = #{sapMsg}
+				,SAP_DOC_NO = #{sapDocNo}
+				,SAP_SEND_ID = #{sapSendId}
+		        ,POSTING_DATE = #{postingDate}
+		        ,PICKING_DATE = #{pickingDate}
+		        ,VENDOR_CODE = #{vendorCode}
+		        ,VENDOR_NAME = #{vendorName}
+		        ,CUSTOMER_PO = #{customerPo}
+		        ,DELIVERY_ADDRESS = #{deliveryAddress}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+
+	<sql id="searchStgDnDown_fragement">
+		where 1=1
+		<if test="stgDnDown.location != null and stgDnDown.location != ''">
+			and LOCATION IN (${stgDnDown.location})
+		</if>
+		<if test="stgDnDown.dnNo != null and stgDnDown.dnNo != ''">
+			and DN_NO like '%'||#{stgDnDown.dnNo}||'%'
+		</if>
+		<if test="stgDnDown.dnItemNo != null and stgDnDown.dnItemNo != ''">
+			and DN_ITEM_NO = #{stgDnDown.dnItemNo}
+		</if>
+		<if test="stgDnDown.sellNo != null and stgDnDown.sellNo != ''">
+			and SELL_NO like '%'||#{stgDnDown.sellNo}||'%'
+		</if>
+		<if test="stgDnDown.sellOrderType == '-1'">
+			and SELL_ORDER_TYPE != 'VFOP'
+		</if>
+		<if test="stgDnDown.sellOrderType != null and stgDnDown.sellOrderType != '' and stgDnDown.sellOrderType != '-1'">
+			and SELL_ORDER_TYPE = #{stgDnDown.sellOrderType}
+		</if>
+		<if test="stgDnDown.plant != null and stgDnDown.plant != ''">
+			and PLANT like '%'||#{stgDnDown.plant}||'%'
+		</if>
+		<if test="stgDnDown.dnDocDate != null and stgDnDown.dnDocDate !=''">
+			and DN_DOC_DATE like '%'||#{stgDnDown.dnDocDate}||'%'
+		</if>
+		<if test="stgDnDown.materialNo != null and stgDnDown.materialNo != ''">
+			and MATERIAL_NO like '%'||#{stgDnDown.materialNo}||'%'
+		</if>
+		<if test="stgDnDown.materialDesp != null and stgDnDown.materialDesp != ''">
+			and MATERIAL_DESP like '%'||#{stgDnDown.materialDesp}||'%'
+		</if>
+		<if test="stgDnDown.customerNo != null and stgDnDown.customerNo != ''">
+			and (CUSTOMER_NO like '%'||#{stgDnDown.customerNo}||'%' OR CUSTOMER_NAME like '%'||#{stgDnDown.customerNo}||'%')
+		</if>
+		<if test="stgDnDown.deliveryCode != null and stgDnDown.deliveryCode != ''">
+			and (DELIVERY_CODE like '%'||#{stgDnDown.deliveryCode}||'%' OR DELIVERY_NAME like '%'||#{stgDnDown.deliveryCode}||'%')
+		</if>
+		<if test="stgDnDown.vendorCode != null and stgDnDown.vendorCode != ''">
+			and (VENDOR_CODE like '%'||#{stgDnDown.vendorCode}||'%' OR VENDOR_NAME like '%'||#{stgDnDown.vendorCode}||'%')
+		</if>
+		<if test="stgDnDown.begin != null and stgDnDown.begin != ''">
+			<![CDATA[
+				and CREATE_DATE >= TO_DATE(CONCAT(#{stgDnDown.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="stgDnDown.end != null and stgDnDown.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(CONCAT(#{stgDnDown.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		ORDER BY CREATE_DATE DESC, DN_NO, DN_ITEM_NO
+	</sql>
+	<!-- 分页查询 -->
+	<select id="searchStgDnDownListByPage" resultMap="stgDnDownMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllStgDnDown" />
+		<include refid="searchStgDnDown_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<!-- 分页查询 -->
+	<select id="searchStgDnReverse" resultMap="stgDnDownMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllStgDnReverse" />
+		<include refid="searchStgDnDown_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<!-- 条件统计 -->
+	<select id="searchStgDnDownsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllStgDnDown" />
+		<include refid="searchStgDnDown_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<!-- 条件查询 -->
+	<select id="getStgDnDownListByParam" resultMap="stgDnDownMap">
+		<include refid="selectAllStgDnDown" />
+		<include refid="searchStgDnDown_fragement" />
+	</select>
+
+	<!--手持SO_ 订单入库扫描检查-->
+	<select id="checkSoExist" resultType="string">
+		<![CDATA[
+		select CASE
+	      WHEN t.dn_close = '1' THEN 'Close'
+	      WHEN t.sell_order_type = 'VRE' THEN 'SO Return'
+	      WHEN t.sell_order_type = 'VKA' THEN 'Con Pick-up'
+	      WHEN t.sell_order_type = 'VKB' THEN 'Con Issue'
+	      WHEN t.sell_order_type = 'VFOP' THEN 'Gift Delivery'
+	      WHEN t.sell_order_type = 'VOR'  OR t.sell_order_type = 'VFOC'  OR t.sell_order_type = 'VSAM'
+	        OR t.SELL_ORDER_TYPE = 'VOR1' OR t.SELL_ORDER_TYPE = 'VOR2' OR t.SELL_ORDER_TYPE = 'VSPE'
+	        OR t.SELL_ORDER_TYPE = 'V3RD' OR t.SELL_ORDER_TYPE = 'VRE2' OR t.SELL_ORDER_TYPE = 'VFC0'
+	        THEN 'SO Delivery'
+	      ELSE 'Not Support'  end
+	    from STG_DN_DOWN t
+		where t.DN_NO = #{inpara.orno}
+			AND rownum=1
+		]]>
+	</select>
+	<!--手持SO_ 订单入库扫描检查-->
+	<select id="checkSoLoc" resultType="string">
+		<![CDATA[
+		SELECT CASE
+		        WHEN COUNT(0) > 0 THEN 'Y'
+		        ELSE 'N'
+		    END
+		FROM STG_DN_DOWN t
+		WHERE t.DN_NO = #{inpara.orno}
+			AND T.DN_CLOSE = '0'
+		    AND t.plant IN (
+		        SELECT DISTINCT w.code
+		        FROM cd_user_wh_loc u, cd_wh_info w
+		        WHERE w.row_id = u.wh_id
+		            AND u.user_id = #{userId}
+		    )
+		    AND t.LOCATION IN (
+		        SELECT loc_code
+		        FROM CD_USER_WH_LOC
+		        WHERE user_id = #{userId}
+		    )
+ 		]]>
+	</select>
+	<!--手持下载后回显-->
+	<select id="getSoMaterialList" resultMap="matListMap">
+	    SELECT T.MATERIAL_NO MAT,
+		       (NVL(SUM(T.QTY), 0) || ',' || NVL(SUM(T.FINISH_QTY), 0) || ',' ||
+		       T.CUSTOMER_MODEL || ',' || T.LOCATION || ',' || T.MATERIAL_NO) MATDESC,
+		       NVL(SUM(T.QTY), 0) QTY,
+		       NVL(SUM(T.FINISH_QTY), 0) SCANQTY,
+		       T.CUSTOMER_MODEL CUSTMODEL,
+		       T.LOCATION LOCATION
+		  FROM STG_DN_DOWN T
+		 WHERE T.DN_NO = #{orderNo}
+		 GROUP BY T.MATERIAL_NO, T.CUSTOMER_MODEL, T.LOCATION
+	</select>
+
+	<!--FIFO获取物料列表-->
+	<select id="getSoMaterialListByFIFO" resultMap="matListMap">
+		select distinct MATERIAL_NO MAT,LOCATION,PLANT from STG_DN_DOWN where DN_NO = #{orderNo}
+	</select>
+
+	<!-- 根据SONO获取行项目编号 -->
+	<select id="getSoItemsNoBySoNo" resultType="string">
+		select distinct so.dn_item_no from stg_dn_down so
+		where so.DN_NO = #{stgDnDown.dnNo}
+	</select>
+	<!-- 判断是否已经开始进行入库扫描 -->
+	<select id="ifScanningStart" resultType="long">
+	    select count(0) from stg_dn_down so
+	    where so.FINISH_QTY > 0
+	    and so.DN_NO = #{stgDnDown.dnNo}
+	    and so.DN_ITEM_NO = #{stgDnDown.dnItemNo}
+	</select>
+
+	<insert id="bankupDeletedItems" parameterType="stgDnDown">
+		<!--<selectKey keyProperty="rowId" order="BEFORE" resultType="long">-->
+			<!--SELECT SEQ_SO_DOWN_ID.NEXTVAL AS ID FROM DUAL-->
+		<!--</selectKey>-->
+		<![CDATA[
+		insert into STG_DN_DOWN_DELETE
+		  (
+		  	ROW_ID,DN_NO, DN_ITEM_NO,
+            SELL_NO, SELL_ORDER_TYPE, PLANT,
+            DN_DOC_DATE, DN_LAST_MODIFY_DATE, DN_CREATE_BY,
+            MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP,
+            QTY, LOCATION, CUSTOMER_NO,
+            CUSTOMER_NAME, DELIVERY_CODE, DELIVERY_NAME,
+            DELIVERY_DATE, CREATE_DATE, MODIFY_DATE,
+            VERSION, DN_CLOSE, FINISH_QTY,
+            UNIT, DELIVER_DATE, BILLING,
+            BILLING_ITEM, FINISH_FLAG, FLAG,
+            CREATE_BY, MODIFY_BY, REGION,
+            CITY, STNO, DEAL_FLAG, DEAL_TIME,
+            DEAL_DESC, COST_FLAG, COST_MSG,
+            SAP_FLAG, SAP_MSG, SAP_DOC_NO,
+            SAP_SEND_ID, POSTING_DATE,PICKING_DATE,
+            VENDOR_CODE,VENDOR_NAME,CUSTOMER_PO, DELIVERY_ADDRESS
+		   )
+		SELECT
+		   	ROW_ID,DN_NO, DN_ITEM_NO,
+            SELL_NO, SELL_ORDER_TYPE, PLANT,
+            DN_DOC_DATE, DN_LAST_MODIFY_DATE, DN_CREATE_BY,
+            MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP,
+            QTY, LOCATION, CUSTOMER_NO,
+            CUSTOMER_NAME, DELIVERY_CODE, DELIVERY_NAME,
+            DELIVERY_DATE, CREATE_DATE, MODIFY_DATE,
+            VERSION, DN_CLOSE, FINISH_QTY,
+            UNIT, DELIVER_DATE, BILLING,
+            BILLING_ITEM, FINISH_FLAG, FLAG,
+            CREATE_BY, MODIFY_BY, REGION,
+            CITY, STNO, DEAL_FLAG, DEAL_TIME,
+            DEAL_DESC, COST_FLAG, COST_MSG,
+            SAP_FLAG, SAP_MSG, SAP_DOC_NO,
+            SAP_SEND_ID, POSTING_DATE,PICKING_DATE,
+            VENDOR_CODE,VENDOR_NAME,CUSTOMER_PO, DELIVERY_ADDRESS
+		from STG_DN_DOWN
+		WHERE DN_NO = #{stgDnDown.dnNo}
+		AND DN_ITEM_NO = #{stgDnDown.dnItemNo}
+	    ]]>
+	</insert>
+	<delete id="deleteByDnItems" parameterType="stgDnDown">
+	    DELETE FROM STG_DN_DOWN
+	    	WHERE DN_NO = #{stgDnDown.dnNo}
+			AND DN_ITEM_NO = #{stgDnDown.dnItemNo}
+	</delete>
+	<select id="getExistingDnItem" resultMap="stgDnDownMap">
+		<include refid="selectAllStgDnDown" />
+			WHERE DN_NO = #{stgDnDown.dnNo}
+			AND DN_ITEM_NO = #{stgDnDown.dnItemNo}
+	</select>
+	<update id="updateByDnItem" parameterType="stgDnDown" >
+		<![CDATA[
+		update STG_DN_DOWN
+		   set DN_NO = #{stgDnDown.dnNo}
+				,DN_ITEM_NO = #{stgDnDown.dnItemNo}
+				,SELL_ORDER_TYPE = #{stgDnDown.sellOrderType}
+				,PLANT = #{stgDnDown.plant}
+				,DN_LAST_MODIFY_DATE = #{stgDnDown.dnLastModifyDate}
+				,DN_CREATE_BY = #{stgDnDown.dnCreateBy}
+				,MATERIAL_NO = #{stgDnDown.materialNo}
+				,CUSTOMER_MODEL = #{stgDnDown.customerModel}
+				,MATERIAL_DESP = #{stgDnDown.materialDesp}
+				,QTY = #{stgDnDown.qty}
+				,LOCATION = #{stgDnDown.location}
+				,DN_CLOSE = #{stgDnDown.dnClose}
+				,BILLING = #{stgDnDown.billing}
+				,BILLING_ITEM = #{stgDnDown.billingItem}
+				,CITY = #{stgDnDown.city}
+				,REGION = #{stgDnDown.region}
+				,UNIT = #{stgDnDown.unit}
+				,DN_DOC_DATE = #{stgDnDown.dnDocDate}
+				,POSTING_DATE = #{stgDnDown.postingDate}
+		        ,PICKING_DATE = #{stgDnDown.pickingDate}
+		        ,VENDOR_CODE = #{stgDnDown.vendorCode}
+		        ,VENDOR_NAME = #{stgDnDown.vendorName}
+		        ,CUSTOMER_PO = #{stgDnDown.customerPo}
+		        ,CUSTOMER_NO = #{stgDnDown.customerNo}
+				,CUSTOMER_NAME = #{stgDnDown.customerName}
+				,DELIVERY_CODE = #{stgDnDown.deliveryCode}
+				,DELIVERY_NAME = #{stgDnDown.deliveryName}
+				,DELIVERY_DATE = #{stgDnDown.deliveryDate}
+		        ,DELIVERY_ADDRESS = #{stgDnDown.deliveryAddress}
+				,MODIFY_DATE = #{stgDnDown.modifyDate}
+				,MODIFY_BY=#{stgDnDown.modifyBy}
+				,COME_FROM_TMS=#{stgDnDown.comeFromTms}
+		 where DN_NO = #{stgDnDown.dnNo}
+			AND DN_ITEM_NO = #{stgDnDown.dnItemNo}
+			
+			
+		]]>
+	</update>
+
+	   <!-- 预留过账功能-->
+    <update id="updateErrorNoNotSuc" parameterType="stgDnDown">
+        <![CDATA[
+            update stg_dn_down set SAP_FLAG = '2'
+            where DN_NO = #{stgDnDown.dnNo} and  SAP_FLAG <> '1'
+        ]]>
+    </update>
+    <!-- 预留过账功能 -->
+    <update id="updatePostSuccess" parameterType="stgDnDown">
+        <![CDATA[
+            update stg_dn_down set SAP_FLAG = '1', MODIFY_BY = #{stgDnDown.modifyBy}
+            where DN_NO = #{stgDnDown.dnNo} and  SAP_FLAG <> '1'
+        ]]>
+    </update>
+
+	<select id="getLocationNameListByDnNo" resultType="string">
+		SELECT DISTINCT NAME FROM CD_LOC_INFO WHERE CODE IN (
+			SELECT LOCATION FROM STG_DN_DOWN WHERE DN_NO = #{dnNo}
+		)
+	</select>
+
+	<select id="getFifoList" resultMap="matInfo">
+		<![CDATA[
+		WITH
+		DTL AS
+		(SELECT FIRST_IN_DATE,BARCODE,QTY,LOCATION,BIN,MATERIAL_NO
+		FROM ODS_INVENTORY_INFO_DTL
+		WHERE MATERIAL_NO = #{materialNo}
+		and LOCATION = #{location} )
+		SELECT FIRST_IN_DATE,BARCODE,QTY,LOCATION,BIN,MATERIAL_NO
+		FROM DTL
+		WHERE FIRST_IN_DATE >= (SELECT TRUNC(MIN(FIRST_IN_DATE)) FROM DTL S)
+		  AND FIRST_IN_DATE < (SELECT TRUNC(MIN(FIRST_IN_DATE + (SELECT MIN(FIFO_PERIOD) FROM FIFO_CONFIG))) FROM DTL S)
+		order by FIRST_IN_DATE
+		]]>
+	</select>
+
+	<select id="dnReverse" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_SO_REVERSE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+
+
+	<sql id="selectAllStgDnDownColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			DN_NO,
+			DN_ITEM_NO,
+			SELL_NO,
+			SELL_ORDER_TYPE,
+			PLANT,
+			DN_DOC_DATE,
+			DN_LAST_MODIFY_DATE,
+			DN_CREATE_BY,
+			MATERIAL_NO,
+			CUSTOMER_MODEL,
+			MATERIAL_DESP,
+			QTY,
+			LOCATION,
+			CUSTOMER_NO,
+			CUSTOMER_NAME,
+			DELIVERY_CODE,
+			DELIVERY_NAME,
+			DELIVERY_DATE,
+			CREATE_DATE,
+			MODIFY_DATE,
+			BILLING,
+			BILLING_ITEM,
+			VERSION,
+			UNIT,
+			FINISH_QTY,
+			FINISH_FLAG,
+			CITY,
+			REGION,
+			FLAG,
+			SAP_FLAG,
+			SAP_MSG,
+			SAP_DOC_NO,
+			SAP_SEND_ID,
+			POSTING_DATE
+		from
+			STG_DN_DOWN dn
+		]]>
+	</sql>
+
+	<select id="searchDirectDispatchDn" resultMap="stgDnDownMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllStgDnDownColumns" />
+		where 1=1 and dn.finish_qty = 0 and dn.finish_flag = '0'
+		<if test="stgDnDown.plant != null and stgDnDown.plant != ''">
+			and dn.plant = #{stgDnDown.plant}
+		</if>
+		<if test="stgDnDown.location != null and stgDnDown.location != ''">
+			and dn.location = #{stgDnDown.location}
+		</if>
+		<if test="stgDnDown.dnNo != null and stgDnDown.dnNo != ''">
+			and dn.dn_no like concat('%',#{stgDnDown.dnNo},'%')
+		</if>
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchDirectDispatchDnCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllStgDnDownColumns" />
+		where 1=1 and dn.finish_qty = 0 and dn.finish_flag = '0'
+		<if test="stgDnDown.plant != null and stgDnDown.plant != ''">
+			and dn.plant = #{stgDnDown.plant}
+		</if>
+		<if test="stgDnDown.location != null and stgDnDown.location != ''">
+			and dn.location = #{stgDnDown.location}
+		</if>
+		<if test="stgDnDown.dnNo != null and stgDnDown.dnNo != ''">
+			and dn.dn_no like concat('%',#{stgDnDown.dnNo},'%')
+		</if>
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="getComeFromTMS" resultType="string">
+		SELECT dn.COME_FROM_TMS
+		  FROM ODS_SO_GR_INFO so
+	 LEFT JOIN STG_DN_DOWN dn
+	        ON so.DN_NO = dn.DN_NO
+		 WHERE so.ORDER_NO = #{orderNo}
+		   AND ROWNUM = 1
+	</select>
+
+</mapper>

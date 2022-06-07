@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<settings>
+		<setting name="cacheEnabled" value="true" />
+		<setting name="lazyLoadingEnabled" value="true" />
+		<setting name="multipleResultSetsEnabled" value="true" />
+		<setting name="useColumnLabel" value="true" />
+		<setting name="useGeneratedKeys" value="false" />
+		<setting name="autoMappingBehavior" value="PARTIAL" />
+		<setting name="defaultExecutorType" value="SIMPLE" /><!-- SIMPLE REUSE BATCH -->
+		<!-- <setting name="defaultExecutorType" value="BATCH" /> -->
+		<setting name="defaultStatementTimeout" value="25000" />
+		<setting name="safeRowBoundsEnabled" value="false" />
+		<setting name="mapUnderscoreToCamelCase" value="false" />
+		<setting name="localCacheScope" value="SESSION" />
+		<!-- <setting name="jdbcTypeForNull" value="OTHER" /> -->
+		<setting name="jdbcTypeForNull" value="NULL" />
+		<setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString" />
+	</settings>
+	
+	<typeAliases>
+		<!-- =========================================================== -->
+	    <!-- security模块   -->
+	    <!-- =========================================================== -->
+		<typeAlias alias="operationLog" type="com.haier.openplatform.wms.security.dto.OperationLogDTO" />
+		<typeAlias alias="operationLogSearchModel" type="com.haier.hevwms.security.domain.OperationLogSearchModel"/>
+		<typeAlias alias="uploadFile" type="com.haier.openplatform.wms.security.domain.UploadFile"/>
+		<typeAlias alias="resource" type="com.haier.openplatform.wms.security.dto.ResourceDTO" />
+		<!-- basic data add by songyinglong 2015/10/15 -->
+		<typeAlias alias="mdDictionary" type="com.haier.hevwms.basic.domain.MdDictionary" />
+		<typeAlias alias="mdMatInfo" type="com.haier.openplatform.wms.basicdata.dto.MdMatInfoDTO" />
+		<typeAlias alias="cdFactory" type="com.haier.hevwms.basic.domain.CdFactory" />
+		<typeAlias alias="cdLocInfo" type="com.haier.openplatform.wms.basicdata.dto.CdLocInfoDTO" />
+		<typeAlias alias="cdWhInfo" type="com.haier.openplatform.wms.basicdata.dto.CdWhInfoDTO" />
+		<typeAlias alias="odsHistoryLog" type="com.haier.hevwms.basic.domain.OdsHistoryLog" />
+		<typeAlias alias="mdBarcode" type="com.haier.hevwms.basic.domain.MdBarcode" />
+		<typeAlias alias="giftBarcode" type="com.haier.openplatform.wms.basicdata.dto.GiftBarcodeDTO" />
+		<typeAlias alias="user" type="com.haier.openplatform.wms.security.dto.UserDTO" />
+		<typeAlias alias="userWarehouse" type="com.haier.hevwms.remoting.rf.domain.login.UserWarehouse" />
+		<typeAlias alias="starea" type="com.haier.hevwms.remoting.rf.domain.login.Location" />
+		<typeAlias alias="menu" type="com.haier.hevwms.remoting.rf.domain.login.Menu" />
+		<typeAlias alias="wlList" type="com.haier.hevwms.remoting.rf.domain.order.WmsOrderWlList" />	
+		<typeAlias alias="matList" type="com.haier.openplatform.wms.remoting.dto.OrderMatListDTO" />
+		<typeAlias alias="group" type="com.haier.openplatform.wms.security.dto.GroupDTO" />
+	    <typeAlias alias="userGroup" type="com.haier.openplatform.wms.security.domain.UserGroup" />
+		<typeAlias alias="role" type="com.haier.openplatform.wms.security.dto.RoleDTO" />
+		<typeAlias alias="roleGroup" type="com.haier.openplatform.wms.security.domain.RoleGroup" />
+	    <typeAlias alias="sublocation" type="com.haier.hevwms.remoting.rf.domain.order.SubLocation" />
+		<typeAlias alias="cdBinDTO" type="com.haier.openplatform.wms.bin.dto.CdBinDTO" />
+	    <!-- 待删 wllist -->
+	    <!-- =========================================================== -->
+	    <!-- inventory模块  -->
+	    <!-- =========================================================== -->
+	    <typeAlias alias="odsBarcodeHistory" type="com.haier.openplatform.wms.inventory.dto.OdsBarcodeHistoryDTO" />
+	  
+	    <typeAlias alias="odsInventoryInfo" type="com.haier.openplatform.wms.inventory.dto.OdsInventoryInfoDTO" />
+
+	    <typeAlias alias="odsInventoryInfoDtl" type="com.haier.hevwms.inventory.domain.OdsInventoryInfoDtl" />
+		<typeAlias alias="stgSapStock" type="com.haier.openplatform.wms.inventory.dto.StgSapStockDTO" />
+		<typeAlias alias="odsMoveInventory" type="com.haier.hevwms.inventory.domain.OdsMoveInventory" />
+	    <!-- 盘点模块 -->
+        <typeAlias alias="odsPdDiffDtl" type="com.haier.hevwms.takestock.domain.OdsPdDiffDtl" />
+        <typeAlias alias="odsPdInfoDtl" type="com.haier.hevwms.takestock.domain.OdsPdInfoDtl" />
+        <typeAlias alias="odsPdInfo" type="com.haier.hevwms.takestock.domain.OdsPdInfo" />
+
+	    <!-- added by guolulu, 20151027 -->
+		<typeAlias alias="odscarlist" type="com.haier.hevwms.remoting.rf.domain.order.WmsOrderCarList" />
+		<!-- 订单模块, 20151104 -->
+		<typeAlias alias="stgDnDownTemp" type="com.haier.hevwms.order.domain.StgDnDownTemp" />
+		<typeAlias alias="orderDelDetial" type="com.haier.openplatform.wms.remoting.dto.OrderDelDetialDTO"/>
+		<!-- =========================================================== -->
+	    <!-- PO模块  --> 
+	    <typeAlias alias="odsPoScanInfoDTO" type="com.haier.openplatform.wms.po.dto.OdsPoScanInfoDTO" />    
+	    <typeAlias alias="stgPoDown" type="com.haier.openplatform.wms.po.dto.StgPoDownDTO" />
+	    <typeAlias alias="odsPoGrInfo" type="com.haier.openplatform.wms.po.dto.OdsPoGrInfoDTO" />
+	    <!-- SO模块  -->
+	    <typeAlias alias="stgDnDown" type="com.haier.openplatform.wms.so.dto.StgDnDownDTO" />
+	    <typeAlias alias="odsSoGrInfo" type="com.haier.openplatform.wms.so.dto.OdsSoGrInfoDTO" />
+	    <typeAlias alias="odsSoScanInfo" type="com.haier.openplatform.wms.so.dto.OdsSoScanInfoDTO"/>
+	    <!-- STO模块  --> 
+	    <typeAlias alias="stgStoDown" type="com.haier.openplatform.wms.sto.dto.StgStoDownDTO" />
+	    <typeAlias alias="stgStodnDown" type="com.haier.openplatform.wms.sto.dto.StgStodnDownDTO" />
+	    <typeAlias alias="stgStoDnDTO" type="com.haier.openplatform.wms.sto.dto.StgStoDnDTO" />
+	    <typeAlias alias="odsStoScanInfo" type="com.haier.openplatform.wms.sto.dto.OdsStoScanInfoDTO"/>
+	    <typeAlias alias="odsStodnScanInfo" type="com.haier.openplatform.wms.sto.dto.OdsStodnScanInfoDTO"/>
+	    <typeAlias alias="odsStoGigrInfo" type="com.haier.openplatform.wms.sto.dto.OdsStoGigrInfoDTO"/>
+	    <typeAlias alias="odsStoDnGigrInfo" type="com.haier.openplatform.wms.sto.dto.OdsStodnGigrInfoDTO"/>
+	    <typeAlias alias="odsStoCust" type="com.haier.openplatform.wms.sto.dto.OdsStoCustDTO"/>
+	    <typeAlias alias="odsStoCustScanInfo" type="com.haier.openplatform.wms.sto.dto.OdsStoCustScanInfoDTO"/>
+		<!-- Scrap 模块 -->
+	    <typeAlias alias="odsScrapScanInfo" type="com.haier.openplatform.wms.scrap.dto.OdsScrapScanInfoDTO"/>
+	    <typeAlias alias="odsScrapOrder" type="com.haier.openplatform.wms.scrap.dto.OdsScrapOrderDTO"/>
+	    <!-- Consume 模块 -->
+	    <typeAlias alias="odsConsumeScanInfo" type="com.haier.openplatform.wms.consume.dto.OdsConsumeScanInfoDTO"/>
+	    <typeAlias alias="odsConsumeOrder" type="com.haier.openplatform.wms.consume.dto.OdsConsumeOrderDTO"/>
+	    
+	    <!-- =========================================================== -->
+	    
+		<!-- added by liujian, 20151103 -->
+		
+		<typeAlias alias="odsOrderInfoDtl" type="com.haier.openplatform.wms.po.dto.OdsOrderInfoDtlDTO" />
+		<typeAlias alias="odsWmsOrder" type="com.haier.openplatform.wms.order.dto.OdsWmsOrderDTO" />
+		<typeAlias alias="dnForTemp" type="com.haier.hevwms.order.domain.StgDnDownTemp" />
+		<typeAlias alias="odsOrderInfo" type="com.haier.openplatform.wms.order.dto.OdsOrderInfoDTO" />
+		<!-- added by liujian, 20151103 -->
+		
+		<!-- added by yanfengdan, 20171110 -->
+		<typeAlias alias="odsTransferInventoryDTO" type="com.haier.openplatform.wms.order.dto.OdsTransferInventoryDTO" />
+		<!-- sunyanfei -->
+		
+		<typeAlias alias="stgInboundDown" type="com.haier.openplatform.wms.order.dto.StgInboundDownDTO" />
+		<!-- add by linzx @20151203 -->
+		<typeAlias alias="stgInboundDownTemp" type="com.haier.hevwms.order.domain.StgInboundDownTemp" />
+		<typeAlias alias="inboundForTemp" type="com.haier.hevwms.order.domain.InboundForTemp" />
+		<!-- sunyanfei -->
+		
+		<!-- rf added by songyinglong 20151103 -->
+		<typeAlias alias="delRes" type="com.haier.hevwms.remoting.rf.domain.login.DelRes" />
+		<typeAlias alias="xjxclist" type="com.haier.hevwms.remoting.rf.domain.order.WmsOrderXjxcList" />
+		<typeAlias alias="movelist" type="com.haier.hevwms.remoting.rf.domain.order.WmsOrderMoveList" />
+		<typeAlias alias="rfLog" type="com.haier.hevwms.remoting.rf.domain.RfLog"/>
+	  	<!-- portal added by liyun 20151201-->
+	    <typeAlias alias="noticeInfoDTO" type="com.haier.openplatform.wms.portal.dto.NoticeInfoDTO" />
+		
+		<!-- Report模块  added by yanfengdan 20151130 -->
+		<typeAlias alias="psiReport" type="com.haier.openplatform.wms.report.dto.PsiReportDTO" />
+		
+		<typeAlias alias="salesReturnReport" type="com.haier.openplatform.wms.report.dto.SalesReturnReportDTO" />
+		<typeAlias alias="stoIntransitReport" type="com.haier.openplatform.wms.report.dto.StoIntransitReportDTO" />
+		<typeAlias alias="consignmentReport" type="com.haier.openplatform.wms.report.dto.ConsignmentReportDTO" />
+		<typeAlias alias="stgOrdersWhenPDDTO" type="com.haier.openplatform.wms.remoting.dto.StgOrdersWhenPDDTO"/>
+		<typeAlias alias="stgInoutBarcodeWhenPDDTO" type="com.haier.openplatform.wms.remoting.dto.StgInoutBarcodeWhenPDDTO"/>
+		<typeAlias alias="odsPdTempDTO" type="com.haier.openplatform.wms.stocktaking.dto.OdsPdTempDTO"/>
+		<typeAlias alias="odsPdTempDtlDTO" type="com.haier.openplatform.wms.stocktaking.dto.OdsPdTempDtlDTO"/>
+		
+		<!-- PDA 模块 -->
+		
+		<!-- Transfer 模块 -->
+		<typeAlias alias="odsTransferDtl" type="com.haier.openplatform.wms.transfer.dto.OdsTransferDtlDTO"/>
+		<typeAlias alias="odsTransferInfo" type="com.haier.openplatform.wms.transfer.dto.OdsTransferInfoDTO"/>
+		
+		<!-- Customer 模块 -->
+		<typeAlias alias="odsCustomerOrder" type="com.haier.openplatform.wms.customer.dto.OdsCustomerOrderDTO"/>
+		<typeAlias alias="odsCustomerScanInfo" type="com.haier.openplatform.wms.customer.dto.OdsCustomerScanInfoDTO"/>
+		<typeAlias alias="odsCustomerStock" type="com.haier.openplatform.wms.customer.dto.OdsCustomerStockDTO"/>
+	</typeAliases>
+
+	<typeHandlers>
+		<typeHandler handler="com.haier.openplatform.dao.mybatis.SerializableTypeHandler"/>
+	</typeHandlers>
+</configuration>

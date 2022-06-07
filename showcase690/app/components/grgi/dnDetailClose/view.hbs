@@ -1,0 +1,369 @@
+{{#component "dnDetailClose js-comp"}}
+    <div id="dndCDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDiv" region="north"  style="border: 0 ">
+            <table id="searchTab" style="margin-left: -10px;">
+                <tr>
+                    <td style="text-align: right">Billing NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="dnNo" type="text" /></td>
+                    <td class="rightCls">Material No:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="materialNo" type="text" /></td>
+                </tr>
+                <tr>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="locationP" type="text" /></td>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="begin" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                        - <input id="end" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchStgDnDown()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle closBtn" onclick="closeStgDnDown()">Manual Close</a>
+                    <a href="javascript:void(0)" class="btnStyle openBtn" onclick="openStgDnDown()">Manual Open</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" onclick="exportStgDnDown();">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden;">
+            <table id="stgDnDownGrid"></table>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var columns=[];
+    $(function(){
+    	$('#dndCDiv').height(suitHeight);
+        //初始化日期
+        var date=new Date();
+        var m=date.getMonth()+1;
+        $('#begin').val(date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-01");
+        var d=date.getDate();
+        date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#end').val(date);
+        /**
+         * 表格头部
+         */
+        columns = [ [  {
+            field : 'ck',
+            checkbox : true,
+            width : 80,
+            align : 'center'
+        }, {
+            field : 'flag',
+            title : 'Close Flag',
+            align : 'center',
+            sortable : true,
+            width : 80,
+            formatter : function(val) {
+                if (val == 0) {
+                    return '<font color="green">Not Close</font>';
+                } else if (val == 1) {
+                    return '<font color="red">Closed</font>';
+                }
+                return val;
+            }
+        }, {
+            field : 'dnNo',
+            title : 'Billing NO',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'dnItemNo',
+            title : 'Billing Item',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'sellNo',
+            title : 'SaleOrder NO',
+            width : 130,
+            align : 'center',
+            hidden : true,
+            sortable : true
+        }, {
+            field : 'sellOrderType',
+            title : 'SaleOrder Type',
+            width : 120,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'qty',
+            title : 'Qty',
+            align : 'center',
+            width : 60,
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Finish qty',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            width : 60,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            width : 100,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            width : 120,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width : 140,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'dnDocDate',
+            title : 'Billing CreateDate',
+            align : 'center',
+            width : 120,
+            sortable : true
+        }, {
+            field : 'dnLastModifyDate',
+            title : 'Billing Last Change Date',
+            width : 140,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'dnCreateBy',
+            title : 'Billing CreateBy',
+            align : 'center',
+            width : 100,
+            sortable : true
+        }, {
+            field : 'customerNo',
+            title : 'Customer NO',
+            align : 'center',
+            width : 100,
+            sortable : true
+        }, {
+            field : 'customerName',
+            title : 'Customer Name',
+            width : 100,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'deliveryCode',
+            title : 'ShipToParty Code',
+            width : 140,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'deliveryName',
+            title : 'ShipToParty Name',
+            width : 140,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'deliveryDate',
+            title : 'Planned GI',
+            align : 'center',
+            width : 100,
+            sortable : true
+        } ] ];
+        searchStgDnDown();
+    })
+    /*查询*/
+    function searchStgDnDown() {
+       var grid= $('#stgDnDownGrid').datagrid({
+             rownumbers : true,
+             pagination : true,
+             striped : true,
+             singleSelect : false,
+             fit:true,
+             url : '/order/searchDn',
+             fitColumns : false,
+             pageNumber : 1,
+             fit : true,
+             columns : columns,
+             queryParams : {
+                'dnNo' : $('#dnNo').val(),
+                'materialNo' : $('#materialNo').val(),
+                'location' : $('#locationP').val(),
+                'begin' : $('#begin').val(),
+                'end' : $('#end').val(),
+                'finishFlag' : '0',
+                'flag' : '1'
+             },
+             onLoadSuccess : function(data) {
+                        if (data.mess != null) {
+                            $.messager.alert('System Information',
+                                    data.mess, 'warning');
+                            return;
+                        }
+                        $(this).datagrid("fixRownumber");
+                    },
+                    onLoadError:function(){
+                         $.messager.alert('System Information','Network Abnormal!','warning');
+                    }
+        });
+        initPagination(grid);
+    }
+    function exportStgDnDown() {
+        var url = '/order/exportStgDnDown?a=1'
+                + '&dnNo=' + $('#dnNo').val()
+                + '&materialNo=' + $('#materialNo').val()
+                + '&location=' + $('#locationP').val()
+                + '&begin=' + $('#begin').val()
+                + '&end='+ $('#end').val()
+                + '&finishFlag=0&flag=1';
+        window.location.href = url;
+    }
+    function closeStgDnDown() {
+        var rows = $('#stgDnDownGrid').datagrid('getSelections');
+        if (rows.length <= 0) {
+            $.messager.alert('System Information',
+                    'Please select at least one data!', 'warning');
+            return;
+        }
+        var sum=0;
+        for ( var i = 0; i < rows.length; i++) {
+            if (rows[i].flag == '0') {
+               sum=sum+1;
+            }
+        }
+        if(sum<1){
+            $.messager.alert('System Information',
+                    'Please select order not close!', 'warning');
+            return;
+        }
+        $.messager
+                .confirm(
+                'System Information',
+                'Please Sure Close the Dn ',
+                function(r) {
+                    if (r) {
+                        var codes = new Array();
+                        for ( var i = 0; i < rows.length; i++) {
+                            if (rows[i].flag == '0') {
+                                codes.push(rows[i].rowId);
+                            }
+                        }
+                        $
+                                .post(
+                                "/order/closeStgDnDown",
+                                {
+                                    'ids' : codes.join()
+                                },
+                                function(data) {
+                                    if (data == 'S') {
+                                        $.messager
+                                                .alert(
+                                                        'System Information',
+                                                        'Close Success',
+                                                        'warning');
+                                    } else {
+                                        $.messager
+                                                .alert(
+                                                        'System Information',
+                                                        'Close Failure',
+                                                        'warning');
+                                    }
+                                    $('#stgDnDownGrid')
+                                            .datagrid('reload');
+                                })
+                                .error(
+                                function() {
+                                    $.messager
+                                            .alert(
+                                                    'System Information',
+                                                    'Network Abnormal!',
+                                                    'warning');
+                                });
+                    }
+                    searchStgDnDown();
+                });
+    }
+
+    function openStgDnDown() {
+        var rows = $('#stgDnDownGrid').datagrid('getSelections');
+        if (rows.length <= 0) {
+            $.messager.alert('System Information',
+                    'Please select at least one data!', 'warning');
+            return;
+        }
+        var sum=0;
+        for ( var i = 0; i < rows.length; i++) {
+            if (rows[i].flag == '1') {
+                sum=sum+1;
+            }
+        }
+        if(sum<1){
+            $.messager.alert('System Information',
+                    'Please select order closed!', 'warning');
+            return;
+        }
+        $.messager
+                .confirm(
+                'System Information',
+                'Please Sure Open the Dn ',
+                function(r) {
+                    if (r) {
+                        var codes = new Array();
+                        for ( var i = 0; i < rows.length; i++) {
+                            if (rows[i].flag == '1') {
+                                codes.push(rows[i].rowId);
+                            }
+                        }
+                        $
+                                .post(
+                                "/order/openStgDnDown",
+                                {
+                                    'ids' : codes.join()
+                                },
+                                function(data) {
+                                    if (data == 'S') {
+                                        $.messager
+                                                .alert(
+                                                        'System Information',
+                                                        'Open Success',
+                                                        'warning');
+                                    } else {
+                                        $.messager
+                                                .alert(
+                                                        'System Information',
+                                                        'Open Failure',
+                                                        'warning');
+                                    }
+                                    $('#stgDnDownGrid')
+                                            .datagrid('reload');
+                                })
+                                .error(
+                                function() {
+                                    $.messager
+                                            .alert(
+                                                    'System Information',
+                                                    'Network Abnormal!',
+                                                    'warning');
+                                });
+                    }
+                    searchStgDnDown();
+                });
+    }
+    </script>
+{{/component}}

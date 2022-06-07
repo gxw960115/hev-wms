@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haier.hevwms.customer.dao.OdsCustomerOrderDAO">
+
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<resultMap id="odsCustomerOrderMap" type="odsCustomerOrder">
+		<result column="ROW_ID" property="rowId" />
+		<result column="CTR_ORDER_NO" property="ctrOrderNo" />
+		<result column="CTR_ITEM_NO" property="ctrItemNo" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="PLANT" property="plant" />
+		<result column="WAREHOUSE_CODE" property="warehouseCode" />
+		<result column="WAREHOUSE_NAME" property="warehouseName" />
+		<result column="LOCATION" property="location" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="CUSTOMER_MODEL" property="customerModel" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="UNIT" property="unit" />
+		<result column="VENDOR_CODE" property="vendorCode" />
+		<result column="VENDOR_NAME" property="vendorName" />
+		<result column="DELIVERY_CODE" property="deliveryCode" />
+		<result column="DELIVERY_NAME" property="deliveryName" />
+		<result column="DELIVERY_DATE" property="deliveryDate" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" property="modifyDate" />
+		<result column="FLAG" property="flag" />
+		<result column="VERSION" property="version" />
+		<result column="REQUIRE_QTY" property="requireQty" />
+		<result column="ORDER_CLOSE" property="orderClose" />
+		<result column="PRESACN_FLAG" property="presacnFlag" />
+		<result column="CHECK_FLAG" property="checkFlag" />
+		<result column="FINISH_QTY" property="finishQty" />
+		<result column="CHECK_DATE" property="checkDate" />
+		<result column="CHECK_BY" property="checkBy" />
+		<result column="FINISH_FLAG" property="finishFlag" />
+		<result column="PRINT_FLAG" property="printFlag" />
+		<result column="BIN" property="bin" />
+		<result column="SAP_FLAG" property="sapFlag" />
+		<result column="SAP_MSG" property="sapMsg" />
+		<result column="MAT_DOC" property="matDoc" />
+		<result column="DOC_YEAR" property="docYear" />
+		<result column="POSTING_DATE" property="postingDate" />
+		<result column="IN_OUT_FLAG" property="inOutFlag" />
+		<result column="IN_OUT_MSG" property="inOutMsg" />
+		<result column="CUSTOMER_CODE" property="customerCode" />
+		<result column="CUSTOMER_NAME" property="customerName" />
+	</resultMap>
+	
+	<!-- 数据库中所有字段 -->
+	<sql id="Base_Column_List" >
+		ROW_ID,
+		CTR_ORDER_NO,
+		CTR_ITEM_NO,
+		ORDER_TYPE,
+		PLANT,
+		WAREHOUSE_CODE,
+		WAREHOUSE_NAME,
+		LOCATION,
+		MATERIAL_NO,
+		CUSTOMER_MODEL,
+		MATERIAL_DESP,
+		UNIT,
+		VENDOR_CODE,
+		VENDOR_NAME,
+		DELIVERY_CODE,
+		DELIVERY_NAME,
+		DELIVERY_DATE,
+		CREATE_BY,
+		CREATE_DATE,
+		MODIFY_BY,
+		MODIFY_DATE,
+		FLAG,
+		VERSION,
+		REQUIRE_QTY,
+		ORDER_CLOSE,
+		PRESACN_FLAG,
+		CHECK_FLAG,
+		FINISH_QTY,
+		CHECK_DATE,
+		CHECK_BY,
+		FINISH_FLAG,
+		PRINT_FLAG,
+		BIN,
+		SAP_FLAG,
+		SAP_MSG,
+		MAT_DOC,
+		DOC_YEAR,
+		POSTING_DATE,
+		IN_OUT_FLAG,
+		IN_OUT_MSG,
+		CUSTOMER_CODE,
+		CUSTOMER_NAME
+	</sql>
+	<sql id="selectAllOdsCustomerOrderColumns">
+		<![CDATA[
+			SELECT
+				ROW_ID,
+				CTR_ORDER_NO,
+				CTR_ITEM_NO,
+				ORDER_TYPE,
+				PLANT,
+				WAREHOUSE_CODE,
+				WAREHOUSE_NAME,
+				LOCATION,
+				MATERIAL_NO,
+				CUSTOMER_MODEL,
+				MATERIAL_DESP,
+				UNIT,
+				VENDOR_CODE,
+				VENDOR_NAME,
+				DELIVERY_CODE,
+				DELIVERY_NAME,
+				DELIVERY_DATE,
+				CREATE_BY,
+				CREATE_DATE,
+				MODIFY_BY,
+				MODIFY_DATE,
+				FLAG,
+				VERSION,
+				REQUIRE_QTY,
+				ORDER_CLOSE,
+				PRESACN_FLAG,
+				CHECK_FLAG,
+				FINISH_QTY,
+				CHECK_DATE,
+				CHECK_BY,
+				FINISH_FLAG,
+				PRINT_FLAG,
+				BIN,
+				SAP_FLAG,
+				SAP_MSG,
+				MAT_DOC,
+				DOC_YEAR,
+				POSTING_DATE,
+				IN_OUT_FLAG,
+				IN_OUT_MSG,
+				CUSTOMER_CODE,
+				CUSTOMER_NAME
+			FROM ODS_CUSTOMER_ORDER ocr 
+		]]>
+	</sql>
+	<sql id="searchOdsCustomerOrder_fragement">
+		<include refid="selectAllOdsCustomerOrderColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsCustomerOrder.ctrOrderNo != null">
+			and CTR_ORDER_NO like '%'||#{odsCustomerOrder.ctrOrderNo}||'%' 
+		</if>
+		<if test="odsCustomerOrder.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsCustomerOrder.materialNo}||'%' 
+		</if>
+		<if test="odsCustomerOrder.warehouseCode != null">
+			and WAREHOUSE_CODE like '%'||#{odsCustomerOrder.warehouseCode}||'%' 
+		</if>
+		<if test="odsCustomerOrder.warehouseName != null">
+			and WAREHOUSE_NAME like '%'||#{odsCustomerOrder.warehouseName}||'%' 
+		</if>
+		<if test="odsCustomerOrder.checkFlag != null and odsCustomerOrder.checkFlag != '-1'">
+			and CHECK_FLAG = #{odsCustomerOrder.checkFlag} 
+		</if>
+		<if test="odsCustomerOrder.finishFlag != null and odsCustomerOrder.finishFlag != '-1'">
+			and FINISH_FLAG = #{odsCustomerOrder.finishFlag} 
+		</if>
+		<if test="odsCustomerOrder.printFlag != null and odsCustomerOrder.printFlag != '-1'">
+			and PRINT_FLAG = #{odsCustomerOrder.printFlag} 
+		</if>
+		<if test="odsCustomerOrder.location != null and odsCustomerOrder.location != ''">
+			and LOCATION IN (${odsCustomerOrder.location})
+		</if>
+		<if test="odsCustomerOrder.begin != null and odsCustomerOrder.begin != ''">
+			<![CDATA[
+				and CREATE_DATE >= TO_DATE(concat(#{odsCustomerOrder.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsCustomerOrder.end != null and odsCustomerOrder.end != ''">
+			<![CDATA[
+				and CREATE_DATE <= TO_DATE(concat(#{odsCustomerOrder.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		ORDER BY CREATE_DATE DESC, CTR_ORDER_NO, CTR_ITEM_NO
+	</sql>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<insert id="save" parameterType="odsCustomerOrder">
+        <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_CUSTOMER_ORDER_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+        <![CDATA[
+			insert into ODS_CUSTOMER_ORDER(
+				ROW_ID,CTR_ORDER_NO, CTR_ITEM_NO,ORDER_TYPE, PLANT, WAREHOUSE_CODE,WAREHOUSE_NAME, 
+				LOCATION,MATERIAL_NO,CUSTOMER_MODEL, MATERIAL_DESP,UNIT,VENDOR_CODE, VENDOR_NAME, 
+				DELIVERY_CODE,DELIVERY_NAME,DELIVERY_DATE,CREATE_BY,CREATE_DATE, MODIFY_BY, 
+				MODIFY_DATE,FLAG,VERSION,REQUIRE_QTY,ORDER_CLOSE, PRESACN_FLAG, CHECK_FLAG,FINISH_QTY, 
+				CHECK_DATE, CHECK_BY,FINISH_FLAG,PRINT_FLAG, BIN, SAP_FLAG,SAP_MSG,MAT_DOC, DOC_YEAR,
+				POSTING_DATE,IN_OUT_FLAG, IN_OUT_MSG,CUSTOMER_CODE,CUSTOMER_NAME
+			)
+			values (
+				#{rowId}, #{ctrOrderNo},#{ctrItemNo},#{orderType}, #{plant}, #{warehouseCode},#{warehouseName}, 
+				#{location},#{materialNo},#{customerModel},#{materialDesp}, #{unit},#{vendorCode}, #{vendorName},
+				#{deliveryCode},#{deliveryName}, #{deliveryDate},#{createBy},#{createDate}, #{modifyBy}, 
+				#{modifyDate},#{flag}, #{version},#{requireQty},#{orderClose}, #{presacnFlag}, #{checkFlag},#{finishQty}, 
+				#{checkDate}, #{checkBy},#{finishFlag},#{printFlag},#{bin},#{sapFlag},#{sapMsg}, #{matDoc}, #{docYear},
+				#{postingDate},#{inOutFlag}, #{inOutMsg},#{customerCode},#{customerName}
+			)
+		]]>
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_ORDER WHERE ROW_ID = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteCustomerOrderByCusNo" parameterType="String">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_ORDER WHERE CTR_ORDER_NO = #{ctrOrderNo}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_ORDER WHERE ROW_ID IN
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateAll" parameterType="odsCustomerOrder">
+		<![CDATA[
+			UPDATE ODS_CUSTOMER_ORDER
+		   	SET 
+				CTR_ORDER_NO = #{ctrOrderNo},
+				CTR_ITEM_NO = #{ctrItemNo},
+				ORDER_TYPE = #{orderType},
+				PLANT = #{plant},
+				WAREHOUSE_CODE = #{warehouseCode},
+				WAREHOUSE_NAME = #{warehouseName},
+				LOCATION = #{location},
+				MATERIAL_NO = #{materialNo},
+				CUSTOMER_MODEL = #{customerModel},
+				MATERIAL_DESP = #{materialDesp},
+				UNIT = #{unit},
+				VENDOR_CODE = #{vendorCode},
+				VENDOR_NAME = #{vendorName},
+				DELIVERY_CODE = #{deliveryCode},
+				DELIVERY_NAME = #{deliveryName},
+				DELIVERY_DATE = #{deliveryDate},
+				CREATE_BY = #{createBy},
+				CREATE_DATE = #{createDate},
+				MODIFY_BY = #{modifyBy},
+				MODIFY_DATE = #{modifyDate},
+				FLAG = #{flag},
+				VERSION = #{version},
+				REQUIRE_QTY = #{requireQty},
+				ORDER_CLOSE = #{orderClose},
+				PRESACN_FLAG = #{presacnFlag},
+				CHECK_FLAG = #{checkFlag},
+				FINISH_QTY = #{finishQty},
+				CHECK_DATE = #{checkDate},
+				CHECK_BY = #{checkBy},
+				FINISH_FLAG = #{finishFlag},
+				PRINT_FLAG = #{printFlag},
+				BIN = #{bin},
+				SAP_FLAG = #{sapFlag},
+				SAP_MSG = #{sapMsg},
+				MAT_DOC = #{matDoc},
+				DOC_YEAR = #{docYear},
+				POSTING_DATE = #{postingDate},
+				IN_OUT_FLAG = #{inOutFlag},
+				IN_OUT_MSG = #{inOutMsg},
+				CUSTOMER_CODE = #{customerCode},
+				CUSTOMER_NAME = #{customerName}
+		 	WHERE ROW_ID = #{rowId}
+		]]>
+	</update>
+	<update id="customerApprove" parameterType="odsCustomerOrder">
+		<![CDATA[
+			UPDATE ODS_CUSTOMER_ORDER
+		   	SET CHECK_FLAG = '1',
+		   		MODIFY_BY = #{modifyBy},
+		   		MODIFY_DATE = SYSDATE,
+		   		CHECK_BY = #{modifyBy},
+		   		CHECK_DATE = SYSDATE
+		 	WHERE CTR_ORDER_NO = #{ctrOrderNo}
+		]]>
+	</update>
+	
+	<update id="updatePrintFlag" parameterType="string">
+		<![CDATA[
+			UPDATE ODS_CUSTOMER_ORDER
+		   	SET PRINT_FLAG = '1',
+		   		MODIFY_BY = #{userName},
+		   		MODIFY_DATE = SYSDATE
+		 	WHERE CTR_ORDER_NO = #{orderNo}
+		]]>
+	</update>
+	
+	<select id="get" resultMap="odsCustomerOrderMap" parameterType="long">
+		<include refid="selectAllOdsCustomerOrderColumns" />
+		<![CDATA[
+			where ocr.row_id = #{rowId}
+		]]>
+	</select>
+	<select id="getAll" resultMap="odsCustomerOrderMap">
+		<include refid="selectAllOdsCustomerOrderColumns" />
+	</select>
+	<select id="selectOdsCustomerOrderNo" resultType="string" >
+		<![CDATA[
+			SELECT SUBSTR(TO_CHAR(SEQ_CUSTOMER_ORDER_NO.NEXTVAL,'FM0000000000'),8) FROM DUAL
+		]]>
+	</select>
+	<select id="checkCustomerOrderExist" resultType="string">
+		<![CDATA[
+			SELECT CHECK_FLAG
+			FROM (SELECT T.CHECK_FLAG FROM ODS_CUSTOMER_ORDER T WHERE T.CTR_ORDER_NO = #{inpara.orno} ORDER BY T.CHECK_FLAG)
+			WHERE ROWNUM < 2
+		]]>
+	</select>
+	<select id="checkCustomerLoc" resultType="string">
+		<![CDATA[
+	        select case when count(0)>0 then 'Y' else 'N' end 
+			from ODS_CUSTOMER_ORDER t 
+			where t.CTR_ORDER_No = #{inpara.orno} 
+			and t.CHECK_FLAG = '1'
+			and t.plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id=#{userId})
+			and t.Location in (select loc_code from
+			cd_user_wh_loc where user_id=#{userId}) 
+ 		]]>
+	</select>
+	<select id="getCustomerLocation" resultType="string">
+		SELECT DISTINCT T.LOCATION
+		FROM ODS_CUSTOMER_ORDER T 
+		WHERE T.CTR_ORDER_NO = #{orderNo} 
+		AND T.CHECK_FLAG = '1'
+	</select>
+	<select id="searchOdsCustomerOrders" resultMap="odsCustomerOrderMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsCustomerOrder_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsCustomerOrdersCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsCustomerOrder_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+</mapper>

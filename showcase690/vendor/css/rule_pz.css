@@ -1,0 +1,222 @@
+.share_right .xitong{
+	height: 34px;
+	width: 237px;
+}
+.model_bd{
+	    width: 497px;
+
+}
+.model_bd span:nth-child(4){
+	width: 175px;
+	border-right: 1px solid #d4d4d4;
+}
+.tankuang {
+    width: 547px;
+    border: 2px solid #a9a9a9;
+		    border-radius: 10px;
+}
+   .tankuang {
+   	 margin-top: -181px;
+   } 
+.tankuang .model_bd .x2{
+	margin-left: 8px;
+    margin-top: 3px;
+    margin-bottom: 0;
+    height: 23px;
+    width: 85px;
+}
+.share_right .ry{
+	margin-right: 150px;
+}
+.mk{
+	margin-left: 344px;
+}
+.tankuang0 .gj{
+	overflow: hidden;
+}
+.tankuang0 .gj span,.tankuang0 .gj input{
+	float: left;
+}
+.tankuang0 .gj span{
+	margin-top:18px;
+	width: 100px;
+	text-align: right;
+}
+.tankuang .serv_sp .ooi{
+	margin-left: -23px;
+}
+.fa-caret-down .peiz_x{
+	    font-size: 12px;
+	        margin-left: 10px;
+}
+.share_left .peiz_x{
+	    font-size: 12px;
+	        margin-left: 10px;
+}
+.share_right>.bbh1{
+	    margin-left: 59px;
+
+}
+
+.fa-pencil  {
+	font-size: 20px;
+}
+a:hover{
+	color:#9bca63;
+}
+
+
+
+
+
+
+
+
+table {
+border-collapse:collapse;
+border:0;
+border:none;
+}
+ 
+table td  {
+border:1px solid #dcdcdc;
+overflow:hidden;
+padding:0 2px;
+}
+table td,table th{
+	height: 29px;
+    font-size: 12px;
+    text-align: center;
+} 
+    
+.my_div_5{
+	width:1px; height:194px;
+}
+.my_div_4{
+	width:630px; height:1px;
+}
+
+
+.my_div_3{
+	margin-left:108px; width:auto;overflow-x:scroll;overflow-y:hidden;
+}
+.my_div_2{
+	background-color:#dcdcdc;overflow:hidden;top:150px; width:100%; z-index:2;position:absolute;    width: 122%;    left: -111px;
+}
+
+.my_div_1{
+	position:relative;    height: 158px;overflow:hidden;width:100%;/*border-top: 1px solid #dcdcdc;*/
+}
+.share_right>.my_div{
+	    width: 842px;
+    padding-right: 54px;
+    margin: 0 auto;
+}
+
+.table_1 th:nth-last-child(1),.table_1 td:nth-last-child(1){
+	min-width:74px;    line-height: 29px;     max-width: 100px;
+    left: 735px;
+    top: 0;
+    width: 100px; top:0;  overflow:hidden; background-color:white;position:absolute;z-index:1;
+}
+.table_1 th,.table_1 td,.table_2 th,.table_2 td{
+	overflow: hidden;
+    
+    white-space: nowrap;
+	min-width: 100px; max-width: 100px;  width: 100px;
+}
+.table_1 td{
+	min-width: 100px; max-width: 100px;  width: 100px;background: white;
+}
+.table_5 td:nth-last-child(1){
+	min-width:74px;     font-size: 22px; color: #9bca63;cursor: pointer;  line-height: 29px; max-width:100px; left:420px; width:100px;  overflow:hidden; background: white; position:absolute;z-index:1;
+}
+
+.table_2 td:nth-last-child(1) i{
+	margin-left: 10px;
+}
+#tableDiv_title{width:auto;  overflow:scroll; background:#ea6153;}
+#tableDiv_y{overflow:hidden; position:absolute;height:142px; width:100%;}
+#tableDiv_body{width:auto;overflow-x:scroll;overflow-y: hidden;    height: 137px;}
+#scrollDiv_y{display:block; overflow-x:hidden; overflow-y:scroll; position:absolute; top:22px; right:0px; height:142px; padding-bottom:10px;}
+
+.my_div_1 .table_2 .cz_s{
+	background: #F6F6F6;color: #747474;    font-size: 13px;
+}
+
+.my_div{
+	       width: 631px;
+    padding-right: 54px;
+    margin: 0 auto;
+        margin-top: 24px;
+}
+tbody td a{
+	color: white;
+}
+
+.fa-pencil:before {
+    content: "\f040";
+}
+.fa-plus:before{
+	content:"\f067";
+}
+.tableDiv_body i{
+	display: inline-block;
+	margin-left: 110px;
+}
+.btn_xiao span{
+	
+	border-radius: 4px;
+}
+
+.btn_xiao .fa-plus:before {
+    content: "\f067";
+
+}
+.btn_xiao .fa-plus{
+	    background: white;
+    color: #9bca63;
+    border: 1px solid #dcdcdc;
+    font-size: 20px;
+            margin-left: 98px;
+}
+.fa-trash-o:before {
+    content: "\f014";
+    color: #9bca63;
+} 
+.fa-pencil:before {
+    content: "\f040";
+    color: #9bca63;
+}
+
+
+
+.fa-long-arrow-right:before {
+    content: "\f178";
+    color: #9bca63;
+}
+.fa-floppy-o:before {
+    content: "\f0c7";
+    color: #9bca63;
+}
+.xc .fa-plus{
+	margin-left: 533px;
+}
+.boders{
+	font-weight: bold;
+}
+
+.my_divvv{
+	    width: 526px;
+	    margin-top: 25px;
+}
+
+.btn_xiao{
+	margin-top: 0px;
+}
+.tankuang .x2{
+	margin-bottom: 0px;
+	height: 27px;
+    width: 95px;
+    margin-top: 1px;
+}

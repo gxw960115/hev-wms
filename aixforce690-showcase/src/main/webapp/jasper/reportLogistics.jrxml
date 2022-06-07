@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report4" pageWidth="1360" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="1320" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="035d0d1b-c26e-4e78-8943-daf896b27b20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="COST_DOC_NO" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select ods_logistic_cost_.ROW_ID,
+       ods_logistic_cost_.CX_PLAN_NO,
+       ods_logistic_cost_.COST_DOC_NO,
+       ods_logistic_cost_.PAYMENT_AMOUNT,
+       ods_logistic_cost_.PAYMENT_TERM,
+       ods_logistic_cost_.PAYMENT_DUE_DATE,
+       ods_logistic_cost_.CHECK_NO,
+       ods_logistic_cost_.PAYMENT_STATUS,
+       ods_logistic_cost_.CREATE_BY,
+       ods_logistic_cost_.CREATE_DATE,
+       ods_logistic_cost_.MODIFY_BY,
+       ods_logistic_cost_.MODIFY_DATE,
+       ods_logistic_cost_.FLAG,
+       ods_logistic_cost_.VERSION,
+       ods_logistic_cost_.INDOOR_ID,
+       ods_logistic_cost_.INVOICE_NUMBER,
+       ods_logistic_cost_.APPLY_BY,
+       ods_logistic_cost_.APPLY_DATE,
+       ods_logistic_cost_.COLLECTION_BY,
+       ods_logistic_cost_.COLLECTION_DATE,
+       ods_logistic_cost_.TALLY_BY,
+       ods_logistic_cost_.TALLY_DATE,
+       ods_logistic_cost_.company_name,
+       ods_logistic_cost_.mat_size,
+       ods_logistic_cost_.total_size,
+       ods_logistic_cost_.size_cost,
+       car.car_no,
+       car.in_date,
+       car.out_date,
+       ods_logistic_cost_.doc_tpye,
+       info.sap_order_no,
+       info.sap_order_item,
+       info.material_no,
+       info.customer_model,
+       info.material_desp,
+       info.scanned_qty,
+       info.unit,
+       info.location,
+       mat.division,
+      (select max(RECEIPT_CITY_CODE) from ods_plan_info where plan_no=ods_logistic_cost_.CX_PLAN_NO) as RECEIPT_CITY_CODE
+  from ODS_LOGISTIC_COST ods_logistic_cost_
+
+  left join ods_indoor_info car
+    on car.row_id = ods_logistic_cost_.indoor_id
+  left join ods_order_info info
+    on info.row_id = ods_logistic_cost_.order_id
+left join md_mat_info mat on info.material_no=mat.material_no where 1=1 and ods_logistic_cost_.flag=0 and ods_logistic_cost_.COST_DOC_NO in ($P!{COST_DOC_NO})]]>
+	</queryString>
+	<field name="customer_model" class="java.lang.String"/>
+	<field name="division" class="java.lang.String"/>
+	<field name="COST_DOC_NO" class="java.lang.String"/>
+	<field name="PAYMENT_DUE_DATE" class="java.util.Date"/>
+	<field name="company_name" class="java.lang.String"/>
+	<field name="INVOICE_NUMBER" class="java.lang.String"/>
+	<field name="material_no" class="java.lang.String"/>
+	<field name="CHECK_NO" class="java.lang.String"/>
+	<field name="PAYMENT_AMOUNT" class="java.lang.String"/>
+	<field name="PAYMENT_STATUS" class="java.lang.String"/>
+	<field name="sap_order_no" class="java.lang.String"/>
+	<field name="doc_tpye" class="java.lang.String"/>
+	<field name="scanned_qty" class="java.lang.String"/>
+	<field name="unit" class="java.lang.String"/>
+	<field name="car_no" class="java.lang.String"/>
+	<field name="location" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="1" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="47" splitType="Stretch">
+			<frame>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="1320" height="27" uuid="8940c3ae-10a3-4232-8ebb-eb475bfcce0c"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="0" y="0" width="1320" height="27" backcolor="#CCCCCC" uuid="972ae7db-92a1-4833-9bfe-7e4e88f97b74"/>
+					<box>
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Bottom">
+						<font fontName="Arial" size="14" isBold="true" pdfEncoding="Cp1252"/>
+					</textElement>
+					<text><![CDATA[Logistics Cost Information
+
+Division]]></text>
+				</staticText>
+			</frame>
+			<staticText>
+				<reportElement x="1102" y="27" width="100" height="20" uuid="9c60f0c5-df38-459e-b589-b41e3922d056"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Custemor Model]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="309" y="27" width="121" height="20" uuid="4c95deb3-c171-4af0-99db-c9aed594da4b"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Payment Due Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1018" y="27" width="84" height="20" uuid="66002a71-00b3-4083-97aa-91a14fcf1136"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Material No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="614" y="27" width="118" height="20" uuid="1546e186-7a98-46bc-b2d5-3091f0619941"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Payment Amount 	]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="258" y="27" width="51" height="20" uuid="cdd2632a-1dc1-40c9-b9dd-fe794b14f573"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Car No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="27" width="144" height="20" uuid="ee42deca-ed93-4cce-947c-55fea5994692"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Logistic CompanyName]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="27" width="116" height="20" uuid="c0af5144-e567-4903-8694-e93507dd9b83"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Vendor invoice No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="854" y="27" width="67" height="20" uuid="e66a6885-8307-4989-abc8-6047069532a3"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[SAP  No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="976" y="27" width="42" height="20" uuid="a9bb7d57-446a-4741-af61-a168e4d22988"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Loc]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="921" y="27" width="55" height="20" uuid="6f167f33-5ff4-4746-9c25-141396d8ab04"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[DocType]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1290" y="27" width="30" height="20" uuid="48a8ddd7-3bfd-477f-8fe2-7a50c92bc933"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Unit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="546" y="27" width="68" height="20" uuid="762635b5-ed40-4802-8ced-f38e3e6e516f"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Cheque No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="732" y="27" width="122" height="20" uuid="4c37d44b-5c24-4763-98a3-a6499f8508a5"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Payment Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1260" y="27" width="30" height="20" uuid="7672ee7e-fd69-4953-bec9-90535e4641c6"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1202" y="27" width="58" height="20" uuid="e3aa333f-69fe-45fe-8ada-7bcb4ef43a9d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Division]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="144" y="27" width="114" height="20" uuid="d839f0bb-aae6-48cf-8c18-6299e9bd3aaf"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Payment Doc NO]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="144" height="20" isPrintWhenDetailOverflows="true" uuid="da67c2ba-2c05-4553-bb36-889e11642397"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="144" y="0" width="114" height="20" uuid="420ddc7a-6f9a-44f4-8881-113b5eb14170"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COST_DOC_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="258" y="0" width="51" height="20" uuid="82ce8419-98c2-48d2-888e-9cc10c9592f0"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{car_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="309" y="0" width="121" height="20" uuid="45e6375a-4064-4ea5-8e4e-a737fe69b246"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYMENT_DUE_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="430" y="0" width="116" height="20" uuid="e52fa58d-3f51-4361-ac99-eb49fb1c899e"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INVOICE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="546" y="0" width="68" height="20" uuid="d70fdc85-ae72-4ec7-9ede-7256a076ec54"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CHECK_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="614" y="0" width="118" height="20" uuid="e0151712-67fc-4caa-ada2-5bb8111d3fb4"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYMENT_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="732" y="0" width="122" height="20" uuid="9a2315fd-5f36-44b3-b507-b2f6531c2540"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PAYMENT_STATUS}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="854" y="0" width="67" height="20" uuid="e76b9d4f-a946-443f-866b-1e408a3e3958"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sap_order_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="921" y="0" width="55" height="20" uuid="bfddfa93-65f5-4fd5-8522-11ee2f607307"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{doc_tpye}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="976" y="0" width="42" height="20" uuid="099c192a-abc4-4a82-a22a-53a7c19da79c"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{location}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1018" y="0" width="84" height="20" uuid="a05d09c2-2867-40d9-acfc-26e46f80cbda"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{material_no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1102" y="0" width="100" height="20" uuid="4ff3cbc7-ad52-4afb-bab9-805cc0160dec"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{customer_model}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1202" y="0" width="58" height="20" uuid="27a2008a-b2bd-469c-b441-3fee60426c7b"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{division}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1260" y="0" width="30" height="20" uuid="73deef20-20f6-4c86-a6a7-67b66a35b773"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{scanned_qty}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="1290" y="0" width="30" height="20" uuid="a22f2f1d-afa9-45e2-8943-a8d63174b3a2"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{unit}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

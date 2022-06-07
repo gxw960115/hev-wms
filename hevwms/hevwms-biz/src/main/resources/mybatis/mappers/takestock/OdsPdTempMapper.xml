@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- -->
+<mapper namespace="com.haier.hevwms.takestock.dao.OdsPdTempDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllColumns">
+		<![CDATA[
+		SELECT
+			t.ROW_ID,
+			t.ORDER_NO,
+			t.PLANT,
+			t.LOCATION,
+			t.STATUS,
+			t.CREATE_BY,
+			t.CREATE_DATE,
+			t.MODIFY_BY,
+			t.MODIFY_DATE 
+		FROM
+			ods_pd_temp t
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsPdTempMap" type="odsPdTempDTO">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="plant" column="PLANT" />
+		<result property="location" column="LOCATION" />
+		<result property="status" column="STATUS" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="get" resultMap="odsPdTempMap" parameterType="long">
+		<include refid="selectAllColumns" />
+		<![CDATA[
+		where t.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ods_pd_temp where row_id = #{rowId}
+		]]>
+	</delete>
+
+	<insert id="add" parameterType="odsPdTempDTO">
+		<![CDATA[
+		insert into ods_pd_temp
+		(		
+			ORDER_NO
+			,PLANT
+			,LOCATION
+			,CREATE_BY
+		)
+		values
+		(
+			#{odsPdTempDTO.orderNo}
+			,#{odsPdTempDTO.plant}
+			,#{odsPdTempDTO.location}
+			,#{odsPdTempDTO.createBy}
+		)
+	    ]]>
+	</insert>
+	<update id="updateStatus" parameterType="odsPdTempDTO">
+		UPDATE ods_pd_temp
+		SET STATUS = #{odsPdTempDTO.status}
+		WHERE ROW_ID = #{odsPdTempDTO.rowId}
+	</update>
+
+	<sql id="searchOdsPdTempDTOs_condition">
+		<include refid="selectAllColumns" />
+		<![CDATA[ WHERE T.STATUS <> '3' ]]>
+		<if test="odsPdTempDTO.orderNo != null and odsPdTempDTO.orderNo != ''">
+			AND T.ORDER_NO= #{odsPdTempDTO.orderNo}
+		</if>
+		<if test="odsPdTempDTO.location != null and odsPdTempDTO.location != ''">
+			AND t.LOCATION =#{odsPdTempDTO.location}
+		</if>
+		<if test="odsPdTempDTO.begin != null and odsPdTempDTO.begin != ''">
+			AND T.CREATE_DATE >= TO_DATE(concat(#{odsPdTempDTO.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		<if test="odsPdTempDTO.end != null and odsPdTempDTO.end != ''">
+			<![CDATA[
+			AND T.CREATE_DATE <= TO_DATE(concat(#{odsPdTempDTO.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+	</sql>
+	<select id="searchOdsPdTempDTOs" resultMap="odsPdTempMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsPdTempDTOs_condition" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsPdTempDTOsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsPdTempDTOs_condition" />
+		<include refid="count_Tail" />
+	</select>
+
+</mapper>

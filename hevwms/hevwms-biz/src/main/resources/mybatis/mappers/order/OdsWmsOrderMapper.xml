@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <typeAlias alias="odsWmsOrder" type="com.haier.hevwms.order.domain.OdsWmsOrder" 
+	/> -->
+<mapper namespace="com.haier.hevwms.order.dao.OdsWmsOrderDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllOdsWmsOrderColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			WMS_ORDER_NO,
+			WMS_ORDER_ITEM,
+			ORDER_TYPE,
+			DOC_TPYE,
+			PLANT,
+			WAREHOUSE_CODE,
+			WAREHOUSE_NAME,
+			LOCATION,
+			MATERIAL_NO,
+			CUSTOMER_MODEL,
+			MATERIAL_DESP,
+			UNIT,
+			VENDOR_CODE,
+			VENDOR_NAME,
+			DELIVERY_CODE,
+			DELIVERY_NAME,
+			DELIVERY_DATE,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			VERSION,
+			REQUIRE_QTY,
+			ORDER_CLOSE,
+			PRESACN_FLAG,
+			CHECK_FLAG,
+			FINISH_QTY,
+			CHECK_DATE,
+			CHECK_BY,
+			FINISH_FLAG
+		from 
+			ODS_WMS_ORDER ods_wms_order
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsWmsOrderMap" type="odsWmsOrder">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="wmsOrderNo" column="WMS_ORDER_NO" />
+		<result property="wmsOrderItem" column="WMS_ORDER_ITEM" />
+		<result property="orderType" column="ORDER_TYPE" />
+		<result property="docTpye" column="DOC_TPYE" />
+		<result property="plant" column="PLANT" />
+		<result property="warehouseCode" column="WAREHOUSE_CODE" />
+		<result property="warehouseName" column="WAREHOUSE_NAME" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="unit" column="UNIT" />
+		<result property="vendorCode" column="VENDOR_CODE" />
+		<result property="vendorName" column="VENDOR_NAME" />
+		<result property="deliveryCode" column="DELIVERY_CODE" />
+		<result property="deliveryName" column="DELIVERY_NAME" />
+		<result property="deliveryDate" column="DELIVERY_DATE" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="requireQty" column="REQUIRE_QTY" />
+		<result property="orderClose" column="ORDER_CLOSE" />
+		<result property="presacnFlag" column="PRESACN_FLAG" />
+		<result property="checkFlag" column="CHECK_FLAG" />
+		<result property="finishQty" column="FINISH_QTY" />
+		<result property="checkDate" column="CHECK_DATE" />
+		<result property="checkBy" column="CHECK_BY" />
+		<result property="finishFlag" column="FINISH_FLAG" />
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="odsWmsOrderMap">
+		<include refid="selectAllOdsWmsOrderColumns" />
+	</select>
+	<select id="get" resultMap="odsWmsOrderMap" parameterType="long">
+		<include refid="selectAllOdsWmsOrderColumns" />
+		<![CDATA[
+		where ods_wms_order.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_WMS_ORDER where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deltByOrderNo">
+		<![CDATA[
+		update  ODS_WMS_ORDER set flag='1',modify_by = #{odsWmsOrder.modifyBy}
+		,modify_date = #{odsWmsOrder.modifyDate}  where DOC_TPYE = #{docType} and WMS_ORDER_NO=#{odsWmsOrder.wmsOrderNo}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_WMS_ORDER where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="odsWmsOrder">	
+		<![CDATA[
+		insert into ODS_WMS_ORDER
+		  (WMS_ORDER_NO
+				,WMS_ORDER_ITEM
+				,ORDER_TYPE
+				,DOC_TPYE
+				,PLANT
+				,WAREHOUSE_CODE
+				,WAREHOUSE_NAME
+				,LOCATION
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,UNIT
+				,VENDOR_CODE
+				,VENDOR_NAME
+				,DELIVERY_CODE
+				,DELIVERY_NAME
+				,DELIVERY_DATE
+				,CREATE_BY
+				,CREATE_DATE
+				,REQUIRE_QTY
+				,CHECK_FLAG
+		   )
+		values
+		  (
+		  		#{wmsOrderNo}
+				,#{wmsOrderItem}
+				,#{orderType}
+				,#{docTpye}
+				,#{plant}
+				,#{warehouseCode}
+				,#{warehouseName}
+				,#{location}
+				,#{materialNo}
+				,#{customerModel}
+				,#{materialDesp}
+				,#{unit}
+				,#{vendorCode}
+				,#{vendorName}
+				,#{deliveryCode}
+				,#{deliveryName}
+				,#{deliveryDate}
+				,#{createBy}
+				,#{createDate}
+				,#{requireQty}
+				,#{checkFlag}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="odsWmsOrder">
+		<![CDATA[
+		update ODS_WMS_ORDER
+		   set  
+				PLANT = #{plant}
+				,WAREHOUSE_CODE = #{warehouseCode}
+				,WAREHOUSE_NAME = #{warehouseName}
+				,LOCATION = #{location}
+				,MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,UNIT = #{unit}
+				,VENDOR_CODE = #{vendorCode}
+				,VENDOR_NAME = #{vendorName}
+				,DELIVERY_CODE = #{deliveryCode}
+				,DELIVERY_NAME = #{deliveryName}
+				,DELIVERY_DATE = #{deliveryDate}				 
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate}
+				,FLAG = #{flag}				 
+				,REQUIRE_QTY = #{requireQty}				 
+				,CHECK_FLAG = #{checkFlag}
+				,FINISH_QTY = #{finishQty}
+				,CHECK_DATE = #{checkDate}
+				,CHECK_BY = #{checkBy}
+				,FINISH_FLAG = #{finishFlag}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<update id="updateScrapOrder">
+		<![CDATA[
+		update ODS_WMS_ORDER
+		   set 
+				CHECK_FLAG = #{odsWmsOrder.checkFlag}
+				,CHECK_DATE = #{odsWmsOrder.checkDate}
+				,CHECK_BY = #{odsWmsOrder.checkBy}
+		 where WMS_ORDER_NO = #{odsWmsOrder.wmsOrderNo} and flag='0'
+		]]>
+	</update>
+
+	<update id="updateScrapDtl">
+		update ods_order_info_dtl  
+		set
+		flag ='1' ,modify_by = #{odsWmsOrder.modifyBy}
+		,modify_date = #{odsWmsOrder.modifyDate}
+		where order_no = #{odsWmsOrder.wmsOrderNo} and
+		material_no=#{odsWmsOrder.materialNo}
+	</update>
+
+	<sql id="searchOdsWmsOrder_fragement">
+		<include refid="selectAllOdsWmsOrderColumns" />
+		where 1=1
+		<if test="odsWmsOrder.wmsOrderNo != null and odsWmsOrder.wmsOrderNo != ''">
+			and WMS_ORDER_NO like '%'||#{odsWmsOrder.wmsOrderNo}||'%' 
+		</if>
+		<if test="odsWmsOrder.orderType != null and odsWmsOrder.orderType != -1 ">
+			and ORDER_TYPE = #{odsWmsOrder.orderType}
+		</if>
+		<if test="odsWmsOrder.docTpye != null">
+			and DOC_TPYE like '%'||#{odsWmsOrder.docTpye}||'%' 
+		</if>
+
+		<if test="odsWmsOrder.userType != null and odsWmsOrder.userType != 1 ">
+		    and plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and u.user_id= #{odsWmsOrder.userId})
+			and LOCATION in (select loc_code from cd_user_wh_loc where
+			user_id=#{odsWmsOrder.userId})
+		</if>
+		<if test="odsWmsOrder.materialNo != null and odsWmsOrder.materialNo != '' ">
+			and MATERIAL_NO like '%'|| #{odsWmsOrder.materialNo}||'%'  
+		</if>
+
+		<if test="odsWmsOrder.flag != null and odsWmsOrder.flag != -1 ">
+			and flag = #{odsWmsOrder.flag}
+		</if>
+		<if test="odsWmsOrder.location != null and odsWmsOrder.location != '' ">
+			and location like '%'|| #{odsWmsOrder.location}||'%'  
+		</if>
+		<if test="odsWmsOrder.orderClose != null">
+			and ORDER_CLOSE like '%'||#{odsWmsOrder.orderClose}||'%' 
+		</if>
+
+		<if test="odsWmsOrder.checkFlag != null">
+			and CHECK_FLAG like '%'||#{odsWmsOrder.checkFlag}||'%' 
+		</if>
+		<if test="odsWmsOrder.plant != null and odsWmsOrder.plant != '' ">
+			and PLANT = #{odsWmsOrder.plant}
+		</if>
+		<if test="odsWmsOrder.finishFlag != null">
+			and FINISH_FLAG like '%'||#{odsWmsOrder.finishFlag}||'%' 
+		</if>
+		<if test="odsWmsOrder.begin != null and odsWmsOrder.begin != ''">
+		<![CDATA[
+			and create_date >= TO_DATE(concat(#{odsWmsOrder.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+
+		<if test="odsWmsOrder.end != null and odsWmsOrder.end != ''">
+		<![CDATA[
+			and create_date <= TO_DATE(concat(#{odsWmsOrder.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+	</sql>
+	<select id="searchOdsWmsOrders" resultMap="odsWmsOrderMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsWmsOrder_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsWmsOrdersCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsWmsOrder_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getOdsWmsOrder" resultMap="odsWmsOrderMap">
+		<include refid="searchOdsWmsOrder_fragement" />
+	</select>
+</mapper>

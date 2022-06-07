@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HOME</title>
+    <link rel="stylesheet" type="text/css" href="/assets/styles/css/details_qd.css"/>
+    <link href="/assets/styles/style.default.css" rel="stylesheet">
+    <link href="/assets/styles/jquery.datatables.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles/bootstrap/bootstrap-wysihtml5.css" />
+<!--     <script src="/assets/scripts/jquery-1.10.2.js"></script> -->
+    <script src="/assets/scripts/jquery-1.10.2.min.js"></script>
+    <script src="/assets/scripts/easyui/jquery.min.js"></script>
+    <script src="/assets/scripts/easyui/jquery.easyui.min.js"></script>
+<!--     <script src="/assets/scripts/highcharts.js"></script> -->
+<!--     <script src="/assets/scripts/highchartsTheme.js"></script> -->
+    <style type="text/css">
+    	#shareCenterTab tr td{
+    		text-align:left;
+    		height:31px;
+    		line-height:31px;
+    	}
+    	#shareCenterTab tr td a{
+    		color:#636E7B;//#636E7B
+    	}
+    	#shareCenterTab tr td a:hover{
+    		color:#428BCA;
+    	}
+    	.lineTr td{
+    		border-bottom:1px solid #dcdcdc;
+    	}
+    </style>
+</head>
+<body style="background-color:#f0f0f0">
+<div class="panels" class="easyui-layout">
+        <div class="row">
+            <div class="col-md-10">
+                <div class="panel panel-default widget-messaging">
+                    <div class="panel-heading">
+                        <h5>System Notification</h5>
+                    </div>
+                    <div class="panel-body" style="height: 224px">
+                        <ul>
+                            <div align="center" style="font-size: 20px; margin-top: 10px">
+                                <b id="noticeTitle"></b>
+                            </div>
+                            <div style="margin-top: 15px; padding-left: 15px;">
+                                <marquee id="scrollArea" height="170" width="850" loop="-1"
+                                         scrollamount="3" direction="up" onmouseover="this.stop()" onMouseOut="this.start()"><span id="noticeContent"></span></marquee>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!--To Do-->
+<!--             <div class="col-md-6" style="padding-right: 8px;"> -->
+<!--                 <div class="panel panel-default"> -->
+<!--                     <div class="panel-heading"> -->
+<!--                         <h5>To Do</h5> -->
+<!--                     </div> -->
+<!--                     <div class="panel-body" id="todoHighC" style="height: 224px; padding-left:15px"> -->
+<!--                     </div> -->
+<!--                 </div> -->
+<!--             </div> -->
+            <!--Share Center-->
+            <div  class="col-md-10" style="margin-top:-3px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>Share Center</h5>
+                    </div>
+                    <div class="panel-body"  style="height: 198px">
+						<table id="shareCenterTab">
+							
+						</table>
+					</div>
+                </div>
+            </div>
+            <!--Inventory-->
+<!--             <div  class="col-md-6" style="margin-top:-3px; padding-right: 8px;"> -->
+<!--                 <div class="panel panel-default"> -->
+<!--                     <div class="panel-heading"> -->
+<!--                         <h5>Inventory</h5> -->
+<!--                     </div> -->
+<!--                     <div class="panel-body" id="inventoryPie"  style="height:198px"> -->
+<!--                     </div> -->
+<!--                 </div> -->
+<!--             </div> -->
+        </div>
+</div>
+</body>
+<script type="text/javascript">
+    //notice
+    $.ajax({
+        url:'/portal/getNoticeData',
+        type:'post',
+        async:false,
+        dataType:'json',
+        success:function(data){
+            if(data&&data.length>0){
+                $('#noticeTitle').html(data[0]["title"]);
+                $('#noticeContent').html(data[0]["content"]);
+            }
+        },
+		error:function() {
+            $.messager.alert('System Information','Network Abnormal!','warning');
+            return;
+        }
+    });
+    
+    /*
+    //柱状图&饼状图
+    var undoData=[];
+    var postData=[];
+    $.ajax({
+        url:'/portal/getToDoChartsData',
+        type:'post',
+        async:false,
+        dataType:'json',
+        success:function(data){
+            if(data&&data.length==1){
+                data=data[0];
+                undoData=data["undo"];
+                postData=data["postS"];
+            }
+        },
+		error:function() {
+            $.messager.alert('System Information','Network Abnormal!','warning');
+            return;
+        }
+    });
+    $('#todoHighC').highcharts({
+        chart: {
+            width:450,
+            height:210,
+            type: 'column',
+            marginBottom: 25,
+            marginTop: 35
+        },
+        title: { text: '' },
+        xAxis: { categories: ['PO', 'IN', 'STO', 'DN'] },
+        yAxis: {
+            min: 0,
+            title: { text: '' },
+            stackLabels: { enabled: true, style: { fontWeight: 'bold' } }
+        },
+        credits :{
+            enabled: false
+        },
+        legend: {
+            align: 'right',
+            x: -210,
+            verticalAlign: 'top',
+            y: -10,
+            floating: true,
+            shadow: false },
+        tooltip: {
+            formatter: function() { return '<b>'+ this.x +'</b><br>'+ this.series.name +': '+ this.y; } },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+                dataLabels: {
+                    enabled: true,
+                    color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white' ,
+                    style: {
+                        textShadow: "0 0 0 contrast"
+                    }
+                } 
+            }
+        },
+        series: [{ name: 'Un Do',color:"#418bc9", data: undoData },
+            { name: 'Posting Success',color:"#1cb199", data: postData}
+        ]
+    });
+    */
+    
+    /*
+    //Posting Success Pie
+    var pieData={};
+    var pieDatas=[];
+    $.ajax({
+        url:'/portal/getInventoryPieData',
+        type:'post',
+        dataType:'json',
+        async:false,
+        success:function(data){
+            if(data.length>0){
+                for(var i=0;i<data.length;i++){
+                    pieData={};
+                    pieData["name"]=data[i]["plant"];
+                    pieData["y"]=data[i]["qty"];
+                    pieDatas.push(pieData);
+                }
+            }
+        },
+		error:function() {
+            $.messager.alert('System Information','Network Abnormal!','warning');
+            return;
+        }
+    });
+    $('#inventoryPie').highcharts({
+        chart: {
+            width:450,
+            height:198,
+            marginTop: 0,
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false },
+        credits :{
+            enabled: false
+        },
+        legend:{
+            layout:'vertical',
+            floating:true,
+            align:'right',
+            verticalAlign:'top',
+            //itemStyle: { fontWeight:'normal' }
+            //   x:-70
+        },
+        title: { text: '' },
+        tooltip: { pointFormat: '<b>{point.percentage:.1f}%</b>' },
+        plotOptions: {
+            pie: {
+                borderWidth: 0,
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    color: '#000',
+                    distance: -30,//通过设置这个属性，将每个小饼图的显示名称和每个饼图重叠
+                    style: {
+                        fontSize: '10px',
+                        fontWeight:'normal',
+                        lineHeight: '10px',
+                        textShadow: "0 0 0 contrast"
+                    },
+                    formatter: function(index) {
+                        return  '<span style="color:#ffffff;">' + this.point.name +'<br /></span><span style="color:#ffffff;">'+Highcharts.numberFormat(this.percentage,1,'.')+'%</span>';
+                    }
+                },
+                showInLegend: true
+            }
+        },
+        series: [{
+            type: 'pie',
+            data: pieDatas
+        }]
+    });
+    */
+    
+	//shareCenter 
+	$.ajax({
+		url:'/fileUpload/getfileNameShow',
+		type:'post',
+		dataType:'json',
+		data:{
+			status:'1'
+		},
+		success:function(data){
+			var hhtml="";
+			//判断文件个数
+			
+			if(data&&data.length>6){
+				for(var i=0;i<5;i++){	
+					hhtml+="<tr class='lineTr'><td style='padding-left:20px; width:800px;'><a href='javascript:void(0)' onclick='downloadFile("+data[i]["id"]+")'>"+data[i]["fileName"]+"</a>&nbsp;&nbsp;"+newIconDisplay(data[i]["createDate"].substring(0,10))+"</td><td style='border-right:0; width:100px'>"+data[i]["createDate"].substring(0,10)+"</td><td>&nbsp;&nbsp;</td></tr>";
+				}
+				hhtml+="<tr><td style='padding-left:20px; width:800px;'><a href='javascript:void(0)' onclick='downloadFile("+data[5]["id"]+")'>"+data[5]["fileName"]+"</a>&nbsp;&nbsp;"+newIconDisplay(data[5]["createDate"].substring(0,10))+"</td><td style='border-right:0; width:100px'>"+data[5]["createDate"].substring(0,10)+"</td><td>&nbsp;&nbsp;</td></tr>";
+			}else if(data&&data.length<=6){
+				for(var i=0;i<data.length-1;i++){	
+					hhtml+="<tr class='lineTr'><td style='padding-left:20px; width:800px;'><a href='javascript:void(0)' onclick='downloadFile("+data[i]["id"]+")'>"+data[i]["fileName"]+"</a>&nbsp;&nbsp;"+newIconDisplay(data[i]["createDate"].substring(0,10))+"</td><td style='border-right:0; width:100px'>"+data[i]["createDate"].substring(0,10)+"</td><td>&nbsp;&nbsp;</td></tr>";
+				}
+			    hhtml+="<tr><td style='padding-left:20px; width:800px;'><a href='javascript:void(0)' onclick='downloadFile("+data[data.length-1]["id"]+")'>"+data[data.length-1]["fileName"]+"</a>&nbsp;&nbsp;"+newIconDisplay(data[data.length-1]["createDate"].substring(0,10))+"</td><td style='border-right:0; width:100px'>"+data[data.length-1]["createDate"].substring(0,10)+"</td><td>&nbsp;&nbsp;</td></tr>";
+			}
+			$('#shareCenterTab').html(hhtml);
+		},
+		error:function() {
+            $.messager.alert('System Information','Network Abnormal!','warning');
+            return;
+        }
+	});
+    
+    function newIconDisplay(vDate){
+    	var sDate = vDate.split("-");  
+        var gDate = new Date(sDate[0], sDate[1]-1, sDate[2], 0, 0, 0);
+        var nDate = new Date();
+        if ((nDate.getTime()-gDate.getTime())/(1000*3600*24) < 3){
+        	return "<img src='/assets/images/new_11.png' />";
+        } else {
+        	return "";
+        }
+        
+    }
+    
+	function downloadFile(id){
+		window.location.href='/security/download?id='+id;
+	}
+</script>
+</html>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ Copyright (c) 2012 杭州端点网络科技有限公司 -->
+
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"  
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc
+            http://www.springframework.org/schema/mvc/spring-mvc.xsd
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+	<context:component-scan
+	base-package="io.terminus.pampas.webc,com.haier.openplatform.showcase.controller,com.haier.wms.controller.basicdata,com.haier.wms.controller.stocktaking,com.haier.wms.controller.inventory,com.haier.wms.controller.remoting,com.haier.wms.controller.order,com.haier.wms.controller.security,com.haier.wms.controller.report" />
+	
+	<context:component-scan base-package="com.haier.wms.controller.po" />
+	<context:component-scan base-package="com.haier.wms.controller.so" />
+	<context:component-scan base-package="com.haier.wms.controller.sto" />
+	<context:component-scan base-package="com.haier.wms.controller.scrap" />
+	<context:component-scan base-package="com.haier.wms.controller.consume" />
+	<context:component-scan base-package="com.haier.wms.controller.transfer" />
+	<context:component-scan base-package="com.haier.wms.controller.customer" />
+
+	<annotation-driven>
+		<message-converters>
+			<beans:bean
+				class="org.springframework.http.converter.StringHttpMessageConverter">
+				<beans:constructor-arg value="UTF-8" />
+				<beans:property name="supportedMediaTypes">
+					<beans:list>
+						<beans:value>text/plain;charset=UTF-8</beans:value>
+						<beans:value>text/html;charset=UTF-8</beans:value>
+					</beans:list>
+				</beans:property>
+			</beans:bean>
+			<beans:bean class="io.terminus.pampas.webc.converter.JsonMessageConverter" />
+		</message-converters>
+	</annotation-driven>
+
+	<beans:bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<beans:property name="messageConverters">
+			<beans:list>
+				<beans:bean
+					class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+				<beans:bean id="jsonHttpMessageConverter"
+					class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+					<beans:property name="supportedMediaTypes">
+						<beans:list>
+							<beans:value>text/plain;charset=UTF-8</beans:value>
+							<beans:value>text/html;charset=UTF-8</beans:value>
+						</beans:list>
+					</beans:property>
+				</beans:bean>
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!--<beans:bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource"> -->
+	<!--<beans:property name="basenames"> -->
+	<!--<beans:list> -->
+	<!--<beans:value>classpath:messages</beans:value> -->
+	<!--<beans:value>classpath:exceptions</beans:value> -->
+	<!--<beans:value>classpath:templates</beans:value> -->
+	<!--</beans:list> -->
+	<!--</beans:property> -->
+	<!--<beans:property name="cacheSeconds" value="3600"> -->
+	<!--</beans:property> -->
+	<!--<beans:property name="useCodeAsDefaultMessage" value="true"/> -->
+	<!--<beans:property name="defaultEncoding" value="UTF-8"/> -->
+	<!--</beans:bean> -->
+	<interceptors>
+		<beans:bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+			<beans:property name="paramName" value="lang" />
+		</beans:bean>
+		<beans:bean class="io.terminus.pampas.webc.interceptor.AppInterceptor" />
+		<beans:bean class="io.terminus.pampas.webc.interceptor.CookieInterceptor" />
+		<beans:bean class="com.haier.openplatform.showcase.interceptor.LoginContextInterceptor">
+		<beans:property name="noLoginAuthUrlList">
+		<beans:list>
+		<beans:value>/assets</beans:value>
+		<beans:value>/login</beans:value>
+		<beans:value>/aliveCheck</beans:value>
+		<beans:value>/aliveHeart</beans:value>
+		<beans:value>/user/login</beans:value>
+		<beans:value>/user/userlogin</beans:value>
+		<beans:value>/user/logout</beans:value>
+		<beans:value>/rf</beans:value>
+		<beans:value>/pdaPo</beans:value>
+		<beans:value>/pdaSo</beans:value>
+		<beans:value>/pdaGiftPo</beans:value>
+		<beans:value>/pdaGiftSo</beans:value>
+		<beans:value>/pdaSto</beans:value>
+		<beans:value>/pdaStodn</beans:value>
+		<beans:value>/pdaConsume</beans:value>
+		<beans:value>/pdaScrap</beans:value>
+		<beans:value>/scanWhenPD</beans:value>
+		<beans:value>/stocktakingOrder</beans:value>
+		<beans:value>/api</beans:value>
+		<beans:value>/odsStoCustPDA</beans:value>
+		<beans:value>/stocktakingOrderDtl</beans:value>
+		<beans:value>/odsCustomerOrder</beans:value>
+		<beans:value>/odsCustomerScanInfo</beans:value>
+		<beans:value>/odsTransferInfo</beans:value>
+		<beans:value>/odsTransferDtl</beans:value>
+		</beans:list>
+		</beans:property>
+		</beans:bean>
+		
+		<!-- added by gll for HOP Monitor, 20170419 begin 
+		<beans:bean id="actionProfileInterceptor"
+            class="com.haier.openplatform.console.audit.interceptor.ControllerProfileInterceptor">
+            <beans:property name="enabled" value="true" />
+            <beans:property name="actionSender" ref="HOP_ActionTraceSenderAdapter" />
+            <beans:property name="excludeActions">
+                <beans:set>
+                    <beans:value>/admin*</beans:value>
+                    <beans:value>/assets/*</beans:value>
+                    <beans:value>/upload/*</beans:value>
+                </beans:set>
+            </beans:property>
+        </beans:bean>
+		added by gll for HOP Monitor, 20170419 end -->
+		
+		<!-- 
+		<beans:bean  
+		class="com.haier.openplatform.showcase.interceptor.DefautSecurityInterceptor">
+		<beans:property name="resourceServiceClientAdapter"
+		ref="resourceServiceClientAdapter" />
+		<beans:property name="ignoralList">
+		<beans:list>
+		<beans:value>/login</beans:value>
+		<beans:value>/user/login</beans:value>
+		<beans:value>/user/logout</beans:value>
+		<beans:value>/index</beans:value>
+		<beans:value>/noAuth</beans:value>
+		<beans:value>/assets/</beans:value>
+		<beans:value>/file_upload</beans:value>
+		<beans:value>/ftp_file</beans:value>
+		<beans:value>/exportExcel</beans:value>
+		<beans:value>/importExcel</beans:value>
+		</beans:list>
+		</beans:property>
+		</beans:bean> 
+		-->
+	</interceptors>
+	
+	<!-- added by gll for HOP Monitor, 20170419 begin 
+	<beans:bean id="profileAdvice" class="com.haier.openplatform.console.audit.ProfileAdvice"></beans:bean>
+    <aop:config>
+        <aop:pointcut id="profileAudit" expression="execution(* com.haier..service.impl.*ServiceImpl.*(..)) or execution(* com.haier..dao.impl.*DAOImpl.*(..))"/>  
+        <aop:aspect ref="profileAdvice" order="5">
+            <aop:before pointcut-ref="profileAudit" method="beforeExecute"/>
+            <aop:after pointcut-ref="profileAudit" method="afterExecute" />
+        </aop:aspect>       
+    </aop:config>
+    <beans:import resource="classpath*:/console/audit/console-audit.xml"/>
+    <beans:import resource="classpath*:/console/message/console-message-provider.xml"/>
+	added by gll for HOP Monitor, 20170419 end -->
+
+	<beans:bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+		<beans:property name="defaultLocale" value="cn" />
+	</beans:bean>
+
+	<beans:bean id="viewResolver"
+		class="io.terminus.pampas.webc.resolver.HandlebarsViewResolver">
+		<beans:constructor-arg ref="handlebarsEngine" />
+		<beans:property name="cache" value="#{app.mode != 'dev'}" />
+	</beans:bean>
+
+	<beans:bean class="io.terminus.pampas.webc.resolver.ExceptionResolver">
+		<beans:property name="order" value="0" />
+		<!-- 定义默认的异常处理页面，当该异常类型的注册时使用 -->
+		<beans:property name="defaultErrorView" value="error" />
+	</beans:bean>
+
+	<beans:bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<beans:property name="defaultHandler" ref="entrance" />
+	</beans:bean>
+	<!-- 配置MultipartResolver 用于文件上传 使用spring的CommosMultipartResolver -->
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	</beans:bean>
+
+</beans:beans>

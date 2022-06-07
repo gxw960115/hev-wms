@@ -1,0 +1,353 @@
+
+{{#component "giftBarcode js-comp"}}
+    <style type="text/css">
+        #addInfoForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addInfoForm input{
+            height: 30px;
+            width: 155px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+        #addInfoForm table tr{
+            height: 40px;
+        }
+        #addInfoForm table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+	    #addForm table input{
+            height:30px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+    </style>
+    <div id="mdbarcodeDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab" style="margin-left:-10px">
+                <tr>
+                   
+		    		<td class="rightCls"> &nbsp;&nbsp; MaterialNo.:&nbsp;&nbsp; </td>
+		    		<td>
+		    			<input id="materialNoS" size="20" type="text" /> &nbsp;&nbsp;
+		    		</td> 
+		     		<td class="rightCls"> &nbsp;&nbsp; Barcode:&nbsp;&nbsp;</td>
+		     		<td>
+		     			<input id="barcodeS" size="20"type="text" /> &nbsp;&nbsp;
+		     		</td> 
+		     		<td class="rightCls" style="margin-left: 20px">&nbsp;&nbsp;Create Date: &nbsp;&nbsp; </td>
+                    <td colspan="3">
+                    	<input id="begin" class="radiusCls" readonly style="width:155px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" />
+                        - <input id="end" readonly style="width:155px" class="radiusCls" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" />
+                    </td>
+                </tr>
+  
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+	                <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+	                <a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn" onclick="addBarcode()" >Add</a>
+		    		<a href="javascript:void(0)" class="btnStyle printBtn" id="printBtn" onclick="print()">Print</a>
+	            	<a href="javascript:void(0)" class="btnStyle resetBtn" id="clearBtn" onclick="clearSearchForm()">Reset</a>
+            	</div>
+            </div>
+        </div>
+        <div region="center" style="border:0px;  overflow-y: hidden;  margin-top: -2px;">
+            <table id="dataGrid"></table>
+        </div>
+    </div>
+	<!--物料选择框-->
+    <div id="showMatWin" class="easyui-window" title="MatInfo"
+         data-options="modal:true,closed:true,iconCls:'icon-search',top:0, left:($(window).width() - 920) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false"
+         style="width: 920px; height: 500px; overflow-y: hidden">
+        <div class="easyui-layout" fit="true">
+            <div region="west" style=" width: 900px;overflow-y: hidden; border-right: 2px #ccc solid; border-left: 0;border-top: 0; border-bottom: 0">
+                <div id="matGridTool">
+                    <input type="text" id="matCodeP" style=" border: 1px solid #CCC;border-radius: 3px; height:30px"   class="easyui-validatebox" value="">
+                    <img onclick="searchMat()" src="/assets/images/serch-icon.png" id="serch-icon">
+                </div>
+                <table id="matGrid"></table>
+            </div>      
+        </div>
+    </div>
+
+
+    <div id="addBarcodeWin" class="easyui-window" title="Add BarCode"
+             data-options="modal:true,closed:true,iconCls:'icon-add', top:50, left:($(window).width() - 550) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+             style="width: 550px; height: 220px;">
+    <div class="easyui-layout" data-options="fit:true,border:false">
+        <div data-options="region:'north',border:false,fit:true">  
+            <form id="addForm">
+                <table style="font-size: 14px; color: #636E7B;">
+                    <tr style="height: 55px;">
+                        <td style="width:120px; text-align:right">Material Code:&nbsp;&nbsp;</td>
+                        <td><input type="text"  name="materialNo" id="materialNo" class="easyui-validatebox" 
+                        	readonly="readonly" style=" border: 1px solid #CCC;border-radius: 3px;" required="true" />
+                            <img src="/assets/images/serch-icon.png" id="serch-icon" onclick="showMatWin2()">
+                        </td>
+                    </tr>
+                    
+                    <tr style="height: 55px;">
+                        <td style="text-align:right">Material Desc:&nbsp;&nbsp;</td>
+                        <td><input style="width: 300px;" type="text"  class="easyui-validatebox"  style=" border: 1px solid #CCC;border-radius: 3px;" 
+                            name="materialDesp" id="materialDesp" readonly="readonly" /></td>
+                    </tr>
+                    <tr style="height: 55px;" >
+                        <td style="width: 100px;" align="center">
+                        <a href="javascript:void(0)" class="btnStyle saveBtn" onclick="addMdBarcode()">Create</a></td>            
+                        <td>
+                        <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="clearAddForm()">Reset</a></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    </div>
+    <script type="text/javascript">
+    var matColumns="";//物料列
+    $(function(){
+    	$('#mdbarcodeDiv').height(suitHeight);
+        var columns=[[{
+            field : 'ck',
+            checkbox : true,
+            width : 80,
+            align : 'center'
+        }, {
+            field : 'barcode',
+            title : 'Barcode',
+            align : 'center',
+            width : 240,
+            sortable : true
+       
+        }, {
+            field : 'materialDesp',
+            title : 'MaterialDesp',
+            align : 'center',
+            width : 240,
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width : 120,
+            sortable : true
+       
+        },{
+            field : 'stNo',
+            title : 'stNo',
+            align : 'center',
+            width : 110,
+            sortable : true
+        }, {
+            field : 'createBy',
+            title : 'CreatedBy',
+            align : 'center',
+            width : 120,
+            sortable : true
+        }, {
+            field : 'createDate',
+            title : 'CreateDate',
+            align : 'center',
+            width : 234         
+        }  ]];
+         matColumns = [ [ {
+            field : 'materialNo',
+            title : 'Material Code',
+            width : 150,
+            align : 'center'
+        }, {
+//             field : 'customerModel',
+//             title : 'Customer Model',
+//             width:160,
+//             align : 'center'
+//         }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width: 350,
+            align : 'center'
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            width: 150,
+            align : 'center'
+        }, {
+            field : 'basicUnit',
+            title : 'BasicUnit',
+            width: 120,
+            align : 'center'
+//         }, {
+//             field : 'division',
+//             title : 'Division',
+//             width: 100,
+//             align : 'center'
+//         }, {
+//             field : 'produceAttribute',
+//             title : 'IDU/ODU',
+//             width: 60,
+//             align : 'center'
+        } ] ];
+        var grid = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            method:'post',
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+ 		initPagination(grid);
+        gridScroll(grid);
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })    
+    });
+    function addBarcode(){
+
+        $('#addBarcodeWin').window("open");
+    }
+    function searchMat(){
+       var grid= $('#matGrid').datagrid({
+            url:'/api/search',
+            queryParams: {
+                materialNo:$('#matCodeP').val(),
+                matScanType:'SKU'
+            },
+            onLoadSuccess : function(data) {
+                $("#matGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                }
+            }
+        });
+        initPagination(grid);
+    }
+    function matCheck(index, row) {
+    
+        $('#materialNo').val(row['materialNo']);    
+	    $('#materialNoRule').val(row['materialNo']);
+	    $('#materialDesp').val(row['materialDesp']);
+	
+	    $('#showMatWin').window('close');
+    }
+    function showMatWin2(){
+        var matGrid = $('#matGrid').datagrid(
+                {
+                    rownumbers : true,
+                    pagination : true,
+                    striped : true,
+                    singleSelect : false,
+                    height : 405,
+                    url : '/api/search',
+                    queryParams: {
+                        matScanType:'SKU'
+                    },
+                    idField : 'rowId',
+                    fitColumns : false,
+                    columns : matColumns,
+                    onLoadSuccess : function(data) {
+                        if (data.mess != null) {
+                            $.messager.alert('System Information',
+                                    data.mess, 'warning');
+                            return;
+                        }
+                        if (data.total == 0 && data.rows.length == 0) {
+                            $.messager.alert('System Information',
+                                    'No records found.',
+                                    'warning');
+                        }
+                    },
+                    onDblClickRow : matCheck
+                });
+                initPagination(matGrid);
+                 $('#showMatWin').window('open');
+                }
+	function queryData(){
+        var grid=  $('#dataGrid').datagrid({
+            url:'/api/searchGiftBarcodes',
+            queryParams: {
+                materialNo:$('#materialNoS').val(),
+				barcode:$('#barcodeS').val(),
+				createDateB:$('#begin').val(),
+				createDateE:$('#end').val()
+            },
+            onLoadSuccess : function(data) {
+                $("#dataGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                }
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+    }
+
+     /*查询条件清除*/
+     function clearSearchForm() {
+		//$("input[type=reset]").trigger("click");//触发reset按钮
+		$("#searchTab").form('clear');
+		$('#dataGrid').datagrid('clearSelections');
+     }
+     
+     //打印
+     function print() {
+        var selectedRows = $("#dataGrid").datagrid('getChecked');
+        if (selectedRows.length < 1) {
+            $.messager.alert('System Information',
+                    'Please select at least one data!', 'warning');
+            return false;
+        }
+        var codes = new Array();
+	   	for ( var i = 0; i < selectedRows.length; i++) {
+            codes.push(selectedRows[i].barcode);
+        }  
+        var url='/barcode/print?matType=SKU&barcodes='+codes.join();
+        window.open(url);
+
+    }
+	
+    //创建
+    function addMdBarcode() {
+    if(!$("#addForm").form("validate")){return}
+        $.post("/api/addGiftBarcode", {
+            'materialNo' : $("#materialNo").val(),
+            'materialDesp' : $("#materialDesp").val()
+        }, function(data) {
+            if (data == "S") {
+                $.messager.alert('System Information', 'success', 'info');
+                $("#addBarcodeWin").window("close");
+                return;
+            }else if (data == "R"){
+                $.messager.alert('System Information', 'The barcode has exist!', 'info');
+                return;
+            } else {
+            	$.messager.alert('System Information', 'failed!', 'info');
+                return;
+            }
+        });
+    }
+
+     //清空
+    function clearAddForm() {
+        $("#addForm").form('clear');
+    }
+
+    //转大写
+    function toUpCase(){
+        document.getElementById("productLine").value=document.getElementById("productLine").value.toUpperCase();
+    }
+    </script>
+{{/component}}

@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.inventory.dao.OdsInventoryInfoDtlDAO">
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllOdsInventoryBinInfoColumns">
+		<![CDATA[
+			SELECT
+			    PLANT,
+			    LOCATION,
+			    BIN,
+			    MATERIAL_NO,
+			    UNIT,
+			    QTY,
+			    USE_QTY,
+			    MATERIAL_DESP
+			FROM V_INVENTORY_BIN_INFO ods_inventory_info_dtl_
+		]]>
+	</sql>
+
+	<sql id="selectAllOdsInventoryMaterialInfoColumns">
+		<![CDATA[
+			SELECT
+				PLANT,
+			    MATERIAL_NO,
+			    UNIT,
+			    QTY,
+			    USE_QTY,
+			    MATERIAL_DESP
+			FROM V_INVENTORY_MATERIAL_INFO ods_inventory_info_dtl_
+		]]>
+	</sql>
+
+	<sql id="selectAllOdsInventoryInfoColumns">
+		<![CDATA[
+			SELECT
+			    MATERIAL_NO,
+			    LOCATION,
+			    PLANT,
+			    UNIT,
+			    QTY,
+			    USEQTY USE_QTY,
+			    MATERIAL_DESP
+			FROM V_INVENTORY_INFO ods_inventory_info_dtl_
+		]]>
+	</sql>
+
+	<sql id="selectAllOdsInventoryInfoDtlColumns">
+		<![CDATA[
+		select
+			ods_inventory_info_dtl_.ROW_ID,
+			ods_inventory_info_dtl_.PLANT,
+			mat.CUSTOMER_MODEL,
+			ods_inventory_info_dtl_.LOCATION,
+			ods_inventory_info_dtl_.MATERIAL_NO,
+			mat.MATERIAL_DESP,
+			ods_inventory_info_dtl_.UNIT,
+			ods_inventory_info_dtl_.BARCODE,
+			ods_inventory_info_dtl_.ORDER_NO,
+			ods_inventory_info_dtl_.ORDER_ITEM,
+			ods_inventory_info_dtl_.DOC_TPYE,
+			ods_inventory_info_dtl_.SAP_ORDER_NO,
+			ods_inventory_info_dtl_.SAP_ORDER_ITEM,
+			(TRUNC(SYSDATE) - TRUNC(ods_inventory_info_dtl_.FIRST_IN_DATE)) as TOTAL_STOCK_DAYS,
+			(TRUNC(SYSDATE) - TRUNC(ods_inventory_info_dtl_.CREATE_DATE)) as CURRENT_STOCK_DAYS,
+			ods_inventory_info_dtl_.BATCH_NO,
+			ods_inventory_info_dtl_.CREATE_BY,
+			ods_inventory_info_dtl_.CREATE_DATE,
+			ods_inventory_info_dtl_.MODIFY_BY,
+			ods_inventory_info_dtl_.MODIFY_DATE,
+			ods_inventory_info_dtl_.FLAG,
+			ods_inventory_info_dtl_.VERSION,
+			ods_inventory_info_dtl_.QTY,
+			ods_inventory_info_dtl_.USE_QTY,
+			ods_inventory_info_dtl_.PALLET,
+			ods_inventory_info_dtl_.SUB_LOCATION,
+			ods_inventory_info_dtl_.first_in_date,
+			ods_inventory_info_dtl_.remark,
+			mat.division,
+			ods_inventory_info_dtl_.lock_flag,
+			ods_inventory_info_dtl_.BIN ,
+			ods_inventory_info_dtl_.CUSTOMER_FLAG
+		from 
+			ODS_INVENTORY_INFO_DTL ods_inventory_info_dtl_
+			left join md_mat_info mat on ods_inventory_info_dtl_.material_no = mat.material_no
+		]]>
+	</sql>
+
+	<resultMap id="odsInventoryInfoDtlMap" type="odsInventoryInfoDtl">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="plant" column="PLANT" />
+		<result property="bin" column="BIN" />
+		<result property="warehouseCode" column="WAREHOUSE_CODE" />
+		<result property="warehouseName" column="WAREHOUSE_NAME" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="unit" column="UNIT" />
+		<result property="barcode" column="BARCODE" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="orderItem" column="ORDER_ITEM" />
+		<result property="docTpye" column="DOC_TPYE" />
+		<result property="sapOrderNo" column="SAP_ORDER_NO" />
+		<result property="sapOrderItem" column="SAP_ORDER_ITEM" />
+		<result property="totalStockDays" column="TOTAL_STOCK_DAYS" />
+		<result property="currentStockDays" column="CURRENT_STOCK_DAYS" />
+		<result property="batchNo" column="BATCH_NO" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="qty" column="QTY" />
+		<result property="useQty" column="USE_QTY" />
+		<result property="pallet" column="PALLET" />
+		<result property="subLocation" column="SUB_LOCATION" />
+		<result property="wmsQty" column="wms_qty" />
+		<result property="sapQty" column="sap_qty" />
+		<result property="firstInDate" column="first_in_date" />
+		<result property="remark" column="remark" />
+		<result property="lockFlag" column="LOCK_FLAG" />
+		<result property="customerFlag" column="CUSTOMER_FLAG" />
+	</resultMap>
+
+	<resultMap id="odsInventoryInfoDtlDTOMap" type="com.haier.openplatform.wms.inventory.dto.OdsInventoryInfoDtlDTO">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="plant" column="PLANT" />
+		<result property="bin" column="BIN" />
+		<result property="warehouseCode" column="WAREHOUSE_CODE" />
+		<result property="warehouseName" column="WAREHOUSE_NAME" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="unit" column="UNIT" />
+		<result property="barcode" column="BARCODE" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="orderItem" column="ORDER_ITEM" />
+		<result property="docTpye" column="DOC_TPYE" />
+		<result property="sapOrderNo" column="SAP_ORDER_NO" />
+		<result property="sapOrderItem" column="SAP_ORDER_ITEM" />
+		<result property="totalStockDays" column="TOTAL_STOCK_DAYS" />
+		<result property="currentStockDays" column="CURRENT_STOCK_DAYS" />
+		<result property="batchNo" column="BATCH_NO" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="qty" column="QTY" />
+		<result property="useQty" column="USE_QTY" />
+		<result property="pallet" column="PALLET" />
+		<result property="subLocation" column="SUB_LOCATION" />
+		<result property="wmsQty" column="wms_qty" />
+		<result property="sapQty" column="sap_qty" />
+		<result property="firstInDate" column="first_in_date" />
+		<result property="remark" column="remark" />
+		<result property="lockFlag" column="LOCK_FLAG" />
+		<result property="customerFlag" column="CUSTOMER_FLAG" />
+	</resultMap>
+
+	<select id="getAll" resultMap="odsInventoryInfoDtlMap">
+		<include refid="selectAllOdsInventoryInfoDtlColumns" />
+	</select>
+
+	<select id="get" resultMap="odsInventoryInfoDtlMap"
+		parameterType="long">
+		<include refid="selectAllOdsInventoryInfoDtlColumns" />
+		<![CDATA[
+		where ods_inventory_info_dtl_.row_id = #{rowId}
+		]]>
+	</select>
+	<sql id="searchOdsInventoryInfoDtl_fragement">
+		<include refid="selectAllOdsInventoryInfoDtlColumns" />
+		where 1=1
+		<if test="odsInventoryInfoDtl.plant != null and odsInventoryInfoDtl.plant !=''">
+			and ods_inventory_info_dtl_.PLANT like '%'||#{odsInventoryInfoDtl.plant}||'%' 
+		</if>
+		<if test="odsInventoryInfoDtl.location != null and odsInventoryInfoDtl.location !=''">
+			and ods_inventory_info_dtl_.LOCATION IN (${odsInventoryInfoDtl.location})
+		</if>
+		<if test="odsInventoryInfoDtl.barcode != null and odsInventoryInfoDtl.barcode !='' ">
+			and ods_inventory_info_dtl_.BARCODE like '%'||#{odsInventoryInfoDtl.barcode}||'%' 
+		</if>
+		<if test="odsInventoryInfoDtl.orderNo != null and odsInventoryInfoDtl.orderNo != ''">
+			and ods_inventory_info_dtl_.ORDER_NO like '%'||#{odsInventoryInfoDtl.orderNo}||'%' 
+		</if>
+		<if test="odsInventoryInfoDtl.materialNo != null and odsInventoryInfoDtl.materialNo !=''">
+			and ods_inventory_info_dtl_.MATERIAL_NO like '%'||#{odsInventoryInfoDtl.materialNo}||'%' 
+		</if>
+		<if test="odsInventoryInfoDtl.sapOrderNo != null and odsInventoryInfoDtl.sapOrderNo != '' ">
+			and ods_inventory_info_dtl_.SAP_ORDER_NO like '%'||#{odsInventoryInfoDtl.sapOrderNo}||'%' 
+		</if>
+		<if test="odsInventoryInfoDtl.bin != null and odsInventoryInfoDtl.bin != ''">
+			and ods_inventory_info_dtl_.bin like '%'||#{odsInventoryInfoDtl.bin}||'%'
+		</if>
+		<if test="odsInventoryInfoDtl.customerFlag == 1">
+			and ods_inventory_info_dtl_.customer_flag = '1'
+		</if>
+		<if test="odsInventoryInfoDtl.customerFlag == 0">
+			and ods_inventory_info_dtl_.customer_flag is null
+		</if>
+		<if test="odsInventoryInfoDtl.userType != null and odsInventoryInfoDtl.userType != 1">
+		    and ods_inventory_info_dtl_.plant in 
+		    (
+			    select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+				where w.row_id = u.wh_id and u.user_id = #{odsInventoryInfoDtl.userId}
+			)
+			and ods_inventory_info_dtl_.location in 
+			(
+				select loc_code from cd_user_wh_loc 
+				where user_id = #{odsInventoryInfoDtl.userId}
+			)
+		</if>
+		<if test="odsInventoryInfoDtl.lockFlag != null and odsInventoryInfoDtl.lockFlag != -1 and odsInventoryInfoDtl.lockFlag != '' ">
+			and ods_inventory_info_dtl_.lock_flag = #{odsInventoryInfoDtl.lockFlag} 
+		</if>
+	</sql>
+	<sql id="searchOdsInventoryInfo_fragement">
+		<include refid="selectAllOdsInventoryInfoColumns" />
+		where 1=1
+		<if test="odsInventoryInfoDtl.plant != null and odsInventoryInfoDtl.plant !='' ">
+			and ods_inventory_info_dtl_.PLANT like '%'||#{odsInventoryInfoDtl.plant}||'%'
+		</if>
+		<if test="odsInventoryInfoDtl.location != null and odsInventoryInfoDtl.location !='' ">
+			and ods_inventory_info_dtl_.LOCATION IN (${odsInventoryInfoDtl.location})
+		</if>
+		<if test="odsInventoryInfoDtl.materialNo != null and odsInventoryInfoDtl.materialNo !=''">
+			and ods_inventory_info_dtl_.MATERIAL_NO like '%'||#{odsInventoryInfoDtl.materialNo}||'%'
+		</if>
+	</sql>
+	<sql id="searchOdsInventoryBinInfo_fragement">
+		<include refid="selectAllOdsInventoryBinInfoColumns" />
+		where 1=1
+		<if test="odsInventoryInfoDtl.plant != null and odsInventoryInfoDtl.plant !='' ">
+			and ods_inventory_info_dtl_.PLANT like '%'||#{odsInventoryInfoDtl.plant}||'%'
+		</if>
+		<if test="odsInventoryInfoDtl.location != null and odsInventoryInfoDtl.location !='' ">
+			and ods_inventory_info_dtl_.LOCATION IN (${odsInventoryInfoDtl.location})
+		</if>
+		<if test="odsInventoryInfoDtl.materialNo != null and odsInventoryInfoDtl.materialNo !=''">
+			and ods_inventory_info_dtl_.MATERIAL_NO like '%'||#{odsInventoryInfoDtl.materialNo}||'%'
+		</if>
+		<if test="odsInventoryInfoDtl.bin != null and odsInventoryInfoDtl.bin !=''">
+			and ods_inventory_info_dtl_.bin like '%'||#{odsInventoryInfoDtl.bin}||'%'
+		</if>
+	</sql>
+	<sql id="searchOdsInventoryMaterialInfo_fragement">
+		<include refid="selectAllOdsInventoryMaterialInfoColumns" />
+		where 1=1
+		<if test="odsInventoryInfoDtl.materialNo != null and odsInventoryInfoDtl.materialNo !=''">
+			and ods_inventory_info_dtl_.MATERIAL_NO like '%'||#{odsInventoryInfoDtl.materialNo}||'%'
+		</if>
+	</sql>
+	<update id="updateUseQtyByOrderNo" parameterType="odsWmsOrder">
+		update ODS_INVENTORY_INFO_DTL
+		set use_QTY =0
+		where 1=1
+			and barcode in 
+			(
+				select barcode from ods_order_info_dtl 
+				where order_no = #{odsWmsOrder.wmsOrderNo} and
+				material_no = #{odsWmsOrder.materialNo} and flag = '0'
+			)
+	</update>
+
+	<select id="searchOdsInventoryInfos" resultMap="odsInventoryInfoDtlDTOMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsInventoryInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsInventoryInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsInventoryInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="searchOdsInventoryBinInfos" resultMap="odsInventoryInfoDtlDTOMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsInventoryBinInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsInventoryBinInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsInventoryBinInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="searchOdsInventoryMaterialInfos" resultMap="odsInventoryInfoDtlDTOMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsInventoryMaterialInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsInventoryMaterialInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsInventoryMaterialInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="searchOdsInventoryInfoDtls" resultMap="odsInventoryInfoDtlMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsInventoryInfoDtl_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsInventoryInfoDtlsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsInventoryInfoDtl_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getOdsInventoryInfoDtlByParam" resultMap="odsInventoryInfoDtlMap">
+		<include refid="searchOdsInventoryInfoDtl_fragement" />
+	</select>
+
+	<select id="getByBarcode" resultMap="odsInventoryInfoDtlMap">
+		<include refid="selectAllOdsInventoryInfoDtlColumns" />
+		<![CDATA[
+		where ods_inventory_info_dtl_.barcode = #{barcode}
+		]]>
+	</select>
+	<insert id="save" parameterType="odsInventoryInfoDtl">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_INVENTORY_INFO_DTL_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into ODS_INVENTORY_INFO_DTL
+		(
+			ROW_ID,
+			PLANT,
+			LOCATION,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			UNIT,
+			BARCODE,
+			ORDER_NO,
+			ORDER_ITEM,
+			DOC_TPYE,
+			SAP_ORDER_NO,
+			SAP_ORDER_ITEM,
+			TOTAL_STOCK_DAYS,
+			CURRENT_STOCK_DAYS,
+			BATCH_NO,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			QTY,
+			USE_QTY,
+			FIRST_IN_DATE,
+			BIN,
+			CUSTOMER_FLAG
+		)
+		values
+		(
+			#{rowId},
+			#{plant},
+			#{location},
+			#{materialNo},
+			#{materialDesp},
+			#{unit},
+			#{barcode},
+			#{orderNo},
+			#{orderItem},
+			#{docTpye},
+			#{sapOrderNo},
+			#{sapOrderItem},
+			#{totalStockDays},
+			#{currentStockDays},
+			#{batchNo},
+			#{createBy},
+			#{createDate},
+			#{modifyBy},
+			#{modifyDate},
+			#{flag},
+			#{qty},
+			#{useQty},
+			#{firstInDate},
+			(SELECT BIN FROM ODS_PD_INFO_DTL WHERE ORDER_NO = #{orderNo} AND BARCODE = #{barcode}),
+			#{customerFlag}
+		)
+	    ]]>
+	</insert>
+	<update id="updateUseQty">
+		update ODS_INVENTORY_INFO_DTL
+			set use_QTY = qty
+		where 1=1 and row_id
+		in
+		<foreach collection="ids" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	<select id="getListByids" resultMap="odsInventoryInfoDtlMap">
+		<include refid="selectAllOdsInventoryInfoDtlColumns" />
+		where 1=1 and ods_inventory_info_dtl_.ROW_ID  in
+		<foreach collection="ids" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	<select id="getInventoryPieData" resultMap="odsInventoryInfoDtlMap">
+		select t.plant,SUM(t.qty) qty from ods_inventory_info_dtl t group by t.plant
+	</select>
+	<delete id="deleteByBarcode" parameterType="string">
+		<![CDATA[
+		delete from ODS_INVENTORY_INFO_DTL where barcode = #{barcode}
+		]]>
+	</delete>
+	<select id="sapQtyDetail" resultMap="odsInventoryInfoDtlMap">
+		select t.LOCATION ,t.qty  from stg_sap_stock t 
+		where plant = #{odsInventoryInfoDtl.plant} and material_no = #{odsInventoryInfoDtl.materialNo}
+		GROUP BY t.LOCATION 
+	</select>
+	<select id="sapQtyDetailCount" resultType="long">
+		select count(*) from 
+		(
+			select  t.LOCATION ,t.qty  from stg_sap_stock t 
+			where plant = #{odsInventoryInfoDtl.plant} and material_no = #{odsInventoryInfoDtl.materialNo}
+			GROUP BY t.LOCATION 
+		) row_
+	</select>
+	
+	<insert id="receiptWhenPD" >
+		INSERT INTO ODS_INVENTORY_INFO_DTL
+		(
+			PLANT,
+			CUSTOMER_MODEL,
+			LOCATION,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			UNIT,
+			BARCODE,
+			ORDER_NO,
+			ORDER_ITEM,
+			DOC_TPYE,
+			SAP_ORDER_NO,
+			SAP_ORDER_ITEM,
+			BATCH_NO,
+			CREATE_BY,
+			qty,
+			SUB_LOCATION,
+			first_in_date
+		) 
+		values
+		(
+			#{dtl.plant},
+			(select CUSTOMER_MODEL from md_mat_info where material_no = #{dtl.materialNo} and ROWNUM = 1),
+			#{dtl.location},
+			#{dtl.materialNo},
+			(select MATERIAL_DESP from md_mat_info where material_no=#{dtl.materialNo} and ROWNUM = 1),
+			#{dtl.unit},
+			#{dtl.barcode},
+			'',
+			'',
+			#{dtl.docTpye},
+			#{dtl.sapOrderNo},
+			#{dtl.sapOrderItem},
+			'',
+			#{dtl.createBy},
+			#{dtl.qty},
+			'',
+			(
+				select NVL(MIN(t.inout_date), SYSDATE) 
+				from ods_barcode_history t
+				where t.barcode = #{dtl.barcode} and t.inout_type = '1'
+			)
+		)
+	</insert>
+	<update id="updateQty">
+		UPDATE ODS_INVENTORY_INFO_DTL t
+			SET t.qty = t.qty - #{scanQty},
+				t.use_qty = t.use_qty - #{scanQty}
+		WHERE t.barcode = #{barcode} and t.row_id=#{id}
+	</update>
+	<delete id="delete" parameterType="long">
+		DELETE FROM ODS_INVENTORY_INFO_DTL where ROW_ID = #{id}
+	</delete>
+	
+	<update id="updateBarcodeRemark" parameterType="odsInventoryInfoDtl">
+		<![CDATA[
+			update ods_inventory_info_dtl
+				set remark = #{odsInventoryInfoDtl.remark} ,
+				    modify_by = #{odsInventoryInfoDtl.modifyBy} ,
+				    modify_date = #{odsInventoryInfoDtl.modifyDate} 
+		    where barcode = #{odsInventoryInfoDtl.barcode}
+		]]>
+	</update>
+	
+	<update id="updateBarcodeStatus">
+		<![CDATA[
+			UPDATE ODS_INVENTORY_INFO_DTL t
+				SET t.lock_flag = #{status}
+	        WHERE t.barcode = #{barcode}
+         ]]>
+	</update>
+	<update id="updateInventoryLocation" parameterType="odsInventoryInfoDtl">
+		<![CDATA[
+			update ods_inventory_info_dtl
+	            set  modify_by    = #{odsInventoryInfoDtl.modifyBy},
+	                 modify_date  = #{odsInventoryInfoDtl.modifyDate},
+	                 location     = #{odsInventoryInfoDtl.location}, 
+	                 sub_location = #{odsInventoryInfoDtl.location}, 
+	                 sap_order_no = #{odsInventoryInfoDtl.sapOrderNo},
+	                 use_qty      = '0' 
+	        where barcode in (
+	        	select barcode from ods_order_info_dtl
+				where sap_order_no = #{odsInventoryInfoDtl.sapOrderNo} 
+	        )
+         ]]>
+	</update>
+	<update id="updateUseQtyBySapOrderNo">
+		update ODS_INVENTORY_INFO_DTL inven
+			set inven.use_qty  = inven.use_qty - #{qty},
+			      modify_by    = #{odsInventoryInfoDtl.modifyBy},
+			      modify_date  = sysdate
+		where 1=1
+			and barcode  = #{odsInventoryInfoDtl.barcode}
+			and plant    = #{odsInventoryInfoDtl.plant}
+			and location = #{odsInventoryInfoDtl.location}
+	</update>
+	<update id="updateQtyInfo" parameterType="odsInventoryInfoDtl">
+		<![CDATA[
+			update ods_inventory_info_dtl
+	            set qty = #{qty},
+	                use_qty = #{useQty}
+	        where row_id = #{id}
+         ]]>
+	</update>
+	<update id="updateInventoryDtlBin" parameterType="odsInventoryInfoDtl">
+		<![CDATA[
+			UPDATE ODS_INVENTORY_INFO_DTL S
+			SET S.BIN = (SELECT BIN FROM ODS_PD_INFO_DTL WHERE BARCODE = #{barcode} and ORDER_NO = #{orderNo})
+			WHERE BARCODE = #{barcode}
+         ]]>
+	</update>
+	
+	<select id="searchScrapBarcodeDtlList" resultMap="odsInventoryInfoDtlMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsInventoryInfoDtl_fragement" />
+		and ods_inventory_info_dtl_.barcode not in 
+		(
+			select o.barcode from ods_order_info_dtl o 
+			where o.doc_type = 'SCRAP' and not exists 
+			(
+				select w.* from ods_wms_order w 
+				where w.flag = '1' and w.wms_order_no = o.sap_order_no 
+					and w.wms_order_item = o.sap_order_item 
+			)
+		)
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchScrapBarcodeDtlCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsInventoryInfoDtl_fragement" />
+		and ods_inventory_info_dtl_.barcode not in 
+		(
+			select o.barcode from ods_order_info_dtl o 
+			where o.doc_type = 'SCRAP' and not exists 
+			(
+				select w.* from ods_wms_order w 
+				where w.flag = '1' and w.wms_order_no = o.sap_order_no 
+					and w.wms_order_item = o.sap_order_item 
+			)
+		)
+		<include refid="count_Tail" />
+	</select>
+	<select id="addInventory" statementType="CALLABLE">
+		<![CDATA[
+          {call PRC_INVENTORY_ADD(
+          #{inParam.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inParam.location,mode=IN,jdbcType=VARCHAR},
+          #{inParam.bin,mode=IN,jdbcType=VARCHAR},
+          #{outParam.status,mode=OUT,jdbcType=VARCHAR},
+          #{outParam.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+	</select>
+	<delete id="deleteInventory">
+		DELETE FROM ODS_INVENTORY_INFO_DTL WHERE BARCODE = #{barcode}
+	</delete>
+</mapper>

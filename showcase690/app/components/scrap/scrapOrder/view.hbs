@@ -1,0 +1,931 @@
+{{#component "scrapOrder js-comp"}}
+    <style type="text/css">
+        .formatStyle{
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #orderNo{
+            height: 25px;
+            width: 155px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+        #addScrapForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addScrapForm input{
+            height: 28px;
+            width: 140px;
+        }
+        #addScrapForm table tr{
+            height: 32px;;
+        }
+        #addScrapForm table select{
+            width: 155px;
+            height: 25px;
+        }
+    </style>
+    <div id="scrapOrderDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDiv" region="north" style="border-right:0">
+            <table id="searchTab1">
+                <tr>
+                    <td style="text-align: right">Scrap NO:</td> 
+                    <td class="leftCls"><input id="orderNoP" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Material NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="materialNoP" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Plant:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="plantP" type="text" class="easyui-combobox" style="border:0" 
+                    	data-options="border:false,width:155,height:30,editable:true,required:false,panelWidth:180"/></td>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td>
+                    <td><input id="locationP" type="text" class="easyui-combobox"
+                            data-options="editable:false,multiple:true,multiline:true,valueField:'id',textField:'id'" style="width:155px;height:30px"/></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right">Delete Flag: &nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="flagP" class="easyui-combobox flag" data-options="width:155,height:30,editable:false,panelHeight:'auto'" /></td>
+<!--                     <td class="rightCls">Bin:&nbsp;&nbsp;</td> -->
+<!--                     <td class="leftCls"><input id="binP" class="radiusCls" type="text" /></td> -->
+                    <td class="rightCls">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="begin" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                        - <input id="end" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchOdsScrapOrder()" >Query</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" onclick="add()">Add</a>
+                    <a href="javascript:void(0)" class="btnStyle deleteBtn" onclick="delt()">Delete</a>
+                    <a href="javascript:void(0)" class="btnStyle editBtn" onclick="updateCostCenter()">Modify</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" onclick="exportOdsScrapOrder()">Export</a>
+					<a href="javascript:void(0)" class="btnStyle paymentReconciliationBtn" onclick="postingScrap()">Posting</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border-top:0px; margin-top: -2px; overflow-y: hidden">
+            <table id="odsOrderInfoGrid">
+
+            </table>
+        </div>
+    </div>
+    <!-- 添加窗口 -->
+    <div id="addOrderWin" title="Add Scrap Order"
+         data-options="modal:true,closed:true,iconCls:'icon-add', top:0, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+         style="width: 735px; height: 500px; display:none">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style=" height: 230px; border:0">
+                <form id="addScrapForm" method="post">
+                    <table cellpadding="0" cellspacing="0" >
+                        <tr>
+                            <td align="right" valign="middle">Scrap No:&nbsp;&nbsp;</td>
+                            <td colspan="3"><input id="scrapOrderNo" type="text" class="radiusCls" readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td align="right" valign="middle">Plant:&nbsp;&nbsp;</td>
+                            <td width="190"><input type="text" id="plant" class="easyui-combobox" data-options="width:140,height:30,editable:true,panelWidth:180">
+                            <td align="left" valign="middle">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<!--<input type="text" id="factory" class="easyui-combobox" data-options="width:140,height:30,editable:true,valueField:'code',textField:'code',url:'/plant/list/select'">
+                                <font color="red">*</font>--></td>
+                        </tr>
+                        <tr class="locTr">
+                            <td align="right" valign="middle">Location:&nbsp;&nbsp;</td>
+                            <td  colspan="3" >
+                                <div style="height: 155px; border: 1px #ccc solid; width: 100%; overflow-y: scroll; overflow-x: auto;">
+                                    <ul id="locTree" class="easyui-tree"></ul>
+                                </div> <input id="locs" type="hidden" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div region="center">
+                <table id="scrapItemGrid" ></table>
+            </div>
+            <div data-options="region:'south',border:false" style="text-align: right; padding: 1px; height: 37px">
+                <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetWinData(this)">Reset</a>
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveOrder()">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" 
+                onclick="javascript:$('#addOrderWin').window('close');">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <!--物料选择框-->
+    <div id="showMatWin" class="easyui-window" title="MatInfo"
+         data-options="modal:true,closed:true,iconCls:'icon-search',top:0, left:($(window).width() - 750) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false"
+         style="width: 750px; height: 450px; overflow-y: hidden">
+        <div class="easyui-layout" fit="true">
+            <div region="west" style=" width: 480px;overflow-y: hidden; border-right: 2px #ccc solid; border-left: 0;border-top: 0; border-bottom: 0">
+                <div id="matGridTool">
+                    Mat Code:<input type="text" id="matCodeP" value="" class="radiusCls" style="width:120px">|
+                	Mat Desc:<input type="text" id="matDespP" value="" class="radiusCls" style="width:120px">|
+                    <img onclick="searchMat()" src="/assets/images/serch-icon.png" id="serch-icon">
+                </div>
+                <table id="matGrid"></table>
+            </div>
+            <div region="center" style="overflow-y: hidden; ">
+                <table id="selMatGrid"></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 37px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveMat();">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="javascript:closeMat();">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var matColumns="";
+    var scrapItemColumns = "";
+    var columns="";
+    var selMatColumns="";
+    $(function(){
+    	$('#scrapOrderDiv').height(suitHeight);
+        $('#flagP').combobox({
+                data:[{"text":"ALL","value":"-1"},{"text":"Not Delete","value":"0"},{"text":"Delete","value":"1"}],
+                value:'-1'
+            });
+        var selectedFlag = false;
+        var curRowIndex = -1;
+        
+      	//初始化日期
+        var date=new Date();
+        var y=date.getFullYear();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(date,-7));
+        $('#end').val(date);
+        columns=[[{
+            field : 'ck',
+            checkbox : true,
+            // hidden : true,
+            width : 80,
+            align : 'center'
+        }, {
+            field : 'scrapNo',
+            title : 'Scrap No',
+            align : 'center',
+            width : 100,
+            sortable : true
+        }, {
+            field : 'checkFlag',
+            title : 'Check Flag',
+            align : 'center',
+            sortable : true,
+             width : 100,
+            formatter : function(val) {
+                if (val == '0') {
+                    return "<font color='red'>Not Confirmed</font>";
+                } else if (val == '1') {
+                    return "<font color='green'>Confirmed</font>";
+                }
+                return val;
+            }
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            align : 'center',
+            width : 60,
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location ',
+            align : 'center',
+            width : 70,
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width : 90,
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            width : 250,
+            sortable : true
+        },{
+            field : 'requireQty',
+            title : 'Require Qty',
+            align : 'center',
+            width : 90,
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Scanned Qty',
+            align : 'center',
+            width : 90,
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            align : 'center',
+            width : 60,
+            sortable : true
+        },{
+        	field : 'postingDate',
+            title : 'Post Date',
+            align : 'center',
+            width : 100,
+            sortable : true ,
+            formatter: formatY_M_D
+        },{
+        	field : 'costCenter',
+            title : 'Cost Center',
+            align : 'center',
+            width : 100,
+            sortable : true,
+            editor:{
+                type:'text'
+            },
+	        styler: function (value, row, index) {
+	            return 'color:blue';
+	        }
+        },{
+            field : 'flag',
+            title : 'Delete Flag',
+            align : 'center',
+            width : 100,
+            formatter : function(val) {
+                if (val == '0') {
+                    return 'Not Delete';
+                } else if (val == '1') {
+                    return 'Delete';
+                }
+                return val;
+            }
+        },{
+            field : 'sapFlag',
+            title : 'Sap Flag',
+            align : 'center',
+            sortable : true,
+            width : 100,
+            formatter : function(val) {
+                if (val == '0') {
+                    return "<font color='red'>UnDelivery</font>";
+                } else if (val == '1') {
+                    return "<font color='green'>Posting Success</font>";
+                } else if(val == '2'){
+                    return "<font color='red'>Posting Failure</font>";
+                }
+                return val;
+            }
+        }, {
+            field : 'sapMsg',
+            title : 'Sap Msg',
+            align : 'center',
+            sortable : true,
+            width : 300
+        }]];
+        scrapItemColumns = [ [ {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width : 100
+        }, {
+            field : 'materialNo',
+            title : 'MaterialNo',
+            align : 'center',
+            width : 120
+        }, {
+        	field : 'qty',
+            title : 'Plan Qty',
+            align : 'center',
+            width : 80
+        }, {
+            field : 'basicUnit',
+            title : 'Unit',
+            align : 'center',
+            width : 50
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            width : 160
+        } ] ];
+        matColumns = [ [ {
+            field : 'materialNo',
+            title : 'Material Code',
+            width : 120,
+            align : 'center'
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width: 200,
+            align : 'center'
+        }, {
+            field : 'produceAttribute',
+            title : 'IDU/ODU',
+            width: 60,
+            align : 'center',
+            hidden: true
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            align : 'center',
+            width : 60,
+            editor:{
+                type:'numberbox'
+            },
+            styler: function (value, row, index) {
+                return 'background-color:#ffee00;color:red;';
+            }
+        },  {
+            field : 'basicUnit',
+            title : 'Unit',
+            align : 'center',
+            width : 50
+        } ] ];
+        selMatColumns = [ [ {
+            field : 'materialNo',
+            title : 'Material Code',
+            align : 'center',
+            width : 100
+        }, {
+            field : 'qty',
+            title : 'Plan Qty',
+            width : 100,
+            align : 'center'
+        } ] ];
+        var grid=$('#odsOrderInfoGrid').datagrid(
+                {
+                    url : '',
+                    rownumbers:true,
+                    columns:columns,
+                    pagination:true,
+                    striped:true,
+                    singleSelect:false,
+                    pageNumber : 1,
+                    fit:true,
+                    onLoadSuccess : function(data) {
+                        $(this).datagrid("fixRownumber");
+                    },
+                    onLoadError:function(){
+                        $.messager.alert('System Information','Network Abnormal!','warning');
+                    },
+                    onClickRow:function(rowIndex, rowData){
+                    	if (!selectedFlag){
+                        	grid.datagrid('selectRow', rowIndex);
+                        	selectedFlag = true;
+                        	curRowIndex = rowIndex;
+                    	}else{
+                    		if (curRowIndex == rowIndex){
+//                     			grid.datagrid('unselectRow', rowIndex);
+                    			grid.datagrid('clearSelections');
+                    			selectedFlag = false;
+                    		}else{
+                    			grid.datagrid('clearSelections');
+                            	grid.datagrid('selectRow', rowIndex);
+                            	selectedFlag = true;
+                            	curRowIndex = rowIndex;
+                    		}
+                    	}
+                    }
+                });
+        initPagination(grid);
+        $.ajax({
+            url:'/plant/list/select',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                var dataRes = [];
+               // dataRes.push({ "text": " ", "value": " " });
+                if(data!=''||data!=null||data!=undefined){
+                   for(var i=0;i<data.length;i++){
+                	   dataRes.push({ "text": data[i]['name'], "value": data[i]['code'], "rowId": data[i]['rowId']});
+                    }           
+                }
+                $('#plantP').combobox({
+                    data:dataRes
+                })
+                $('#plant').combobox({
+                    data:dataRes
+                })
+            }
+        });
+        $('#plant').combobox({
+            onSelect:function(record){
+                $.ajax({
+					url:'/loc/select/tree',
+                    type:'post',
+                    dataType:'json',
+                    data:{
+                        rowId:record.rowId
+                    },
+                    success:function(data){
+                        $('#locTree').tree({
+                            checkbox:true,
+                            data:data,
+                            onCheck:function(node, checked){
+                                if(checked){
+//                                     $.messager.confirm('System Information', "select Material Info?", function(r) {
+//                                         if (r) {
+                                            showMatWin();
+//                                         }else{
+//                                             var row = {
+//                                                // id : node.id,
+//                                                 location : node.id,
+//                                                 materialNo:'ALL'
+//                                             };
+//                                             var selIndex = $('#scrapItemGrid').datagrid(
+//                                                     'getRowIndex', row);
+//                                             if (selIndex == -1) {
+//                                                 $('#scrapItemGrid').datagrid('appendRow', row);
+//                                             } else {
+//                                                 $.messager.alert(
+//                                                         'System Information',
+//                                                         'The Data already exists!');
+//                                             }
+//                                         }
+//                                   })
+                                  //便于辨别正选中的location
+                                   $('#locs').val(node.id);
+                                }else{
+                                    //去除grid中节点material信息
+                                   var allRows= $('#scrapItemGrid').datagrid('getRows');
+                                   var dataRowsIndex=[];
+                                   for(var i=0;i<allRows.length;i++){
+                                   	  if(node.id==allRows[i]["location"]){
+                                   	    dataRowsIndex.push($('#scrapItemGrid').datagrid('getRowIndex',allRows[i]));
+                                   	  }
+                                   }
+                                   if(dataRowsIndex.length>0){
+                                   		for(var i=dataRowsIndex.length-1;i>=0;i--){
+                                   			$('#scrapItemGrid').datagrid('deleteRow',dataRowsIndex[i]);
+                                   		}
+                                   }
+                                }
+                            }
+                        });
+                    }
+                });
+
+            }
+        });
+
+        // 加载Location数据
+        $(document).ready(function () {
+            $("#plantP").combobox({
+                onChange: function (record) {
+                    $.ajax({
+                        url: '/loc/getLocationList',
+                        type: 'post',
+                        dataType: 'json',
+                        data: {
+                           rowId: record.rowId,
+                           // locationType: 0,
+                           parentId: record.rowId
+                        },
+                        success: function (data) {
+                            $("#locationP").combobox({
+                                data:data
+                            });
+                        }
+                    })
+                }
+            });
+        });
+
+    })
+    
+    var editIndex = undefined;
+    function endEditing(elementId) {
+        if (editIndex == undefined) {
+            return true
+        }
+        if ($('#'+elementId).datagrid('validateRow', editIndex)) {
+            $('#'+elementId).datagrid('endEdit', editIndex);
+            editIndex = undefined;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function onClickCell(index, field) {
+        if (endEditing('matGrid')) {
+            if (field == 'qty') {
+                $('#matGrid').datagrid('selectRow', index).datagrid('beginEdit', index);
+                editIndex = index;
+                var ed = $(this).datagrid('getEditor', {index:index,field:field});
+                $(ed.target).focus();
+            }
+            editIndex = index;
+        }
+    }
+
+    function searchMat(){
+        var matGrid = $('#matGrid').datagrid({
+            url:'/api/search',
+            queryParams: {
+                materialNo:$('#matCodeP').val(),
+                materialDesp:$('#matDespP').val()
+            },
+            onLoadSuccess : function(data) {
+                $("#matGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                }
+            },
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+        initPaginationForDialog(matGrid);
+    }
+    function matCheck(index, row) {
+    	if (row.qty == undefined || row.qty == ''){
+    		$.messager.alert('System Information',
+            		'Please input qty first!');
+    		return ;
+    	}
+        var selIndex = $('#selMatGrid').datagrid('getRowIndex', row);
+        if (selIndex == -1) {
+            $('#selMatGrid').datagrid('appendRow', row);
+        } else {
+            $.messager.alert('System Information',
+                    'The Data already exists!');
+        }
+    }
+    function closeMat() {
+        //获得tree选中的location，点击取消触发该事件，则给location赋值all
+//         var node= $('#locTree').tree('find',$('#locs').val());
+//         alert(node);
+//         var row = {
+//             //id : node.rowId,
+//             location : node.id,
+//             materialNo:'ALL'
+//         };
+//         var selIndex = $('#scrapItemGrid').datagrid('getRowIndex', row);
+//         if (selIndex == -1) {
+//             $('#scrapItemGrid').datagrid('appendRow', row);
+//         } else {
+//             $.messager.alert('System Information',
+//                     'The Data already exists!');
+//         }
+        $('#showMatWin').window('close');
+    }
+    
+    function saveMat() {
+        //获得tree选中的location，点击取消触发该事件，则给location赋值all
+        var node= $('#locTree').tree('find',$('#locs').val());
+        if (node != null) {
+            var rows = $('#selMatGrid').datagrid('getRows');
+            
+            //必须填写数量，不然不能保存
+            for (var i = 0; i < rows.length; i++) { 
+	        	var plQty = rows[i]['qty'];
+	        	if (plQty == null || plQty == '' || plQty == 'undefined') {
+	        		$.messager.alert('System Information','You must input the Qty!','warning'); 
+	        		return false;
+	        	}
+			}
+            
+            $.each(rows, function(index, value) {
+                value.location = node.id;
+                var selIndex = $('#scrapItemGrid').datagrid('getRowIndex', value);
+                if (selIndex == -1) {
+                    $('#scrapItemGrid').datagrid('appendRow', value);
+                }
+            });
+        }
+        $('#showMatWin').window('close');
+    }
+    
+    function inputCostCenter(index, field) {
+        if (endEditing('odsOrderInfoGrid')) {
+            if (field == 'costCenter') {
+                $('#odsOrderInfoGrid').datagrid('selectRow', index).datagrid('beginEdit', index);
+                editIndex = index;
+                var ed = $(this).datagrid('getEditor', {index:index,field:field});
+                $(ed.target).focus();
+            }
+            editIndex = index;
+        }
+    }
+    
+    function updateCostCenter(){
+    	endEditing('odsOrderInfoGrid');
+    	
+    	var selectRows = $('#odsOrderInfoGrid').datagrid('getSelections');
+        if (selectRows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return;
+        }
+        var orderNo = selectRows[0].scrapNo;
+        var sapFlag = selectRows[0].sapFlag;
+        var costCenter = selectRows[0].costCenter;
+        if (sapFlag != '2') {
+            $.messager.alert('System Information',
+                    'Please select a post failed data!', 'warning');
+            return;
+        }
+
+        if (costCenter.length != 10){
+        	$.messager.alert('System Information',
+                    'The cost center should be 10 degitals!', 'warning');
+            return;
+        }
+        $.post(
+                "/scrap/updateCostCenter",
+                {
+                	"scrapNo":orderNo,
+                	"costCenter":costCenter
+				},
+                function(data) {
+                    if (data == 'success') {
+                        $.messager.alert('System Information','Modify Success!','warning');
+                        searchOdsScrapOrder();
+                    } else {
+                        $.messager.alert('System Information','Modify Failure!,' + data, 'warning');
+                    }
+                }
+        ).error(
+            function() {
+                $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                searchOdsScrapOrder();
+            }
+        );
+    }
+    
+    /*查询*/
+    function searchOdsScrapOrder() {
+        var locationArr = $('#locationP').combobox('getValues');
+        var locations = getLocationStr(locationArr);
+        var grid=$('#odsOrderInfoGrid').datagrid({
+            url : '/scrap/searchOdsScrapOrder',
+            queryParams : {
+                'scrapNo' : $('#orderNoP').val(),
+                'materialNo' : $('#materialNoP').val(),
+                'begin' : $('#begin').val(),
+                'end' : $('#end').val(),
+                'location' : locations,
+                'flag' : $('#flagP').combobox("getValue"),
+                'plant' : $('#plantP').combobox("getValue")
+            },
+            onClickCell:inputCostCenter,
+            onLoadSuccess : function(data) {
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information', 'No records found.', 'warning');
+                    gridScroll(grid);
+                }
+                $(this).datagrid("fixRownumber");
+            },
+            onLoadError:function(){
+                 $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+            
+        });
+        initPagination(grid);
+    }
+
+    // 导出
+    function exportOdsScrapOrder() {
+        var locationArr = $('#locationP').combobox('getValues');
+        var locations = getLocationStr(locationArr);
+        $.ajax({
+            url : '/scrap/searchOdsScrapOrderAmount',
+            type : 'post',
+            dataType : 'json',
+            data : {
+                a:1,
+                flag:0,
+                scrapNo:$('#orderNoP').val(),
+                materialNo:$('#materialNo').val(),
+                begin:$('#begin').val(),
+                end:$('#end').val(),
+                plant:$('#plantP').combobox("getValue"),
+                location:locations
+            },
+            success : function(data){
+                if (data == "success") {
+                    var url = '/scrap/exportOdsScrapOrder?a=1'
+                        + '&scrapNo=' + $('#orderNoP').val()
+                        + '&materialNo=' + $('#materialNoP').val()
+                        + '&begin=' + $('#begin').val()
+                        + '&end=' + $('#end').val()
+                        + '&flag=' + '0'
+                        + '&plant=' + $('#plantP').combobox("getValue")
+                        + '&location=' + locations;
+                    window.location.href = url;
+                } else {
+                    $.messager.alert('System Information',data, 'warning');
+                }
+            }
+        });
+    }
+
+    // 增加
+    function add() {
+    	
+        $.post("/scrap/getScrapSequence", function(data) {
+            $("#scrapOrderNo").val(data);
+            $('#plant').combobox('setValue','');
+            $('#scrapItemGrid').datagrid({
+                rownumbers : true,
+                striped : true,
+                singleSelect : false,
+                height : 190,
+                idField : 'id',
+                fitColumns : true,
+                fit : true,
+                columns : scrapItemColumns,
+                data:[]
+            });
+            $('#addOrderWin').show();
+            $('#addOrderWin').window(); 
+            $('#addOrderWin').window('open');
+        }).error(
+            function() {
+            	$.messager.alert('System Information','Network Abnormal!','warning');
+             });
+        $('#locTree').tree('loadData',[]);   
+    }
+    
+    //展示物料窗口
+    function showMatWin(){
+        var matGrid = $('#matGrid').datagrid(
+                {
+                    rownumbers : true,
+                    pagination : true,
+                    striped : true,
+                    singleSelect : false,
+                    height : 345,
+                    url : '/api/search',
+                    idField : 'rowId',
+                    fitColumns : false,
+                    pageNumber : 1,
+                    columns : matColumns,
+                    onClickCell:onClickCell,
+                    onLoadSuccess : function(data) {
+                        if (data.mess != null) {
+                            $.messager.alert('System Information',data.mess, 'warning');
+                            return;
+                        }
+                        if (data.total == 0 && data.rows.length == 0) {
+                            $.messager.alert('System Information','No records found.','warning');
+                        }
+                    },
+                    onDblClickRow : matCheck,
+                    onLoadError:function(){
+                       $.messager.alert('System Information','Network Abnormal!','warning');
+                    }
+                });
+        initPaginationForDialog(matGrid);
+        $('#selMatGrid').datagrid({
+            rownumbers : true,
+            striped : true,
+            singleSelect : false,
+            border:false,
+            height : 370,
+            idField : 'materialNo',
+            fitColumns : true,
+            columns : selMatColumns,
+            data:[]
+
+        });
+        $('#showMatWin').window('open');
+    }
+
+    function saveOrder() {
+    	if (!$("#plant").combobox('getValue')) {
+            $.messager.alert('System Information','Plant Code can not be null');
+            return false;
+        }
+    	if (!$('#locs').val()){
+    		$.messager.alert('System Information','Location Code can not be null');
+            return false;
+    	}
+    	$.maskLoading();
+        $.ajax({
+        		url:"/scrap/saveScrapOrder",
+        		type:'post',
+        		data:{
+                	'scrapNo' : $('#scrapOrderNo').val(),
+    	            'plant' :$("#plant").combobox('getValue'),
+    	            'msg' : JSON.stringify($('#scrapItemGrid').datagrid('getRows')),
+    	            'location' : $('#locs').val()
+                },
+                
+                success:function(data) {
+                	$.maskEnd();
+                	$.messager.alert('System Information', data, 'warning');
+                	$('#addOrderWin').window('close');
+                	searchOdsScrapOrder();
+                },
+                error:function() {
+                	$.maskEnd();
+                    $.messager.alert('System Information','Network Abnormal!','warning');
+                }
+        });
+    }
+
+    // 删除
+    function delt() {
+    	
+        var row = $('#odsOrderInfoGrid').datagrid('getChecked');
+        if (row.length != 1) {
+            $.messager.alert('System Information', 'Please select one data!', 'warning');
+            return;
+        }
+        // 审核标记 == 1 ，已审核
+        if (row[0].checkFlag == '1') {
+            $.messager.alert('System Information', 'The data has been confirmed! ', 'warning');
+            return;
+        }
+        // 标志 == 1 ，标志 0-有效 1-失效
+        if (row[0].flag == '1') {
+            $.messager.alert('System Information', 'The data has been deleted! ', 'warning');
+            return;
+        }
+        $.messager.confirm('System Information','Are You Sure Delete Data?',
+            function(r) {
+                if (r) {
+                    var codes = new Array();
+                    for ( var i = 0; i < row.length; i++) {
+                        codes.push(row[i].rowId);
+                	}
+                    $.post(
+                            "/scrap/deleteScrapOrder",
+                            {'rowIds' : codes.join()},
+                            function(data) {
+                                if (data == 'deleteSuccess') {
+                                    $.messager.alert('System Information','Delete Success!','warning');
+                                    searchOdsScrapOrder();
+                                } else {
+                                    $.messager.alert('System Information','Delete Failure!,' + data, 'warning');
+                                }
+                            }
+                    ).error(
+                        function() {
+                            $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                            searchOdsScrapOrder();
+                        }
+                    );
+                }
+            }
+        );
+    }
+    
+    function postingScrap() {
+        var row = $('#odsOrderInfoGrid').datagrid('getChecked');
+        if (row.length != 1) {
+            $.messager.alert('System Information', 'Please select one data!', 'warning');
+            return;
+        }
+
+        // 审核标记
+        if (row[0].checkFlag == '0') {
+            $.messager.alert('System Information', 'The data has not been confirmed! ', 'warning');
+            return;
+        }
+        if (row[0].finishFlag == '0') {
+            $.messager.alert('System Information', 'The data has not been finished! ', 'warning');
+            return;
+        }
+        if (row[0].sapFlag == '0') {
+            $.messager.alert('System Information', 'The data is unDelivery! ', 'warning');
+            return;
+        } else if(row[0].sapFlag == '1'){
+            $.messager.alert('System Information', 'The data has been Posting! ', 'warning');
+            return;
+        }
+        $.messager.confirm('System Information','Are You Sure Post Data?',
+            function(r) {
+                if (r) {
+                    $.post("/pdaScrap/orderPosting",
+                            {
+	                            orderNo : row[0].scrapNo,
+	                            createBy:row[0].createBy,
+								location : row[0].location,
+								docType : 'SCRAP',
+								sapFlag : row[0].sapFlag,
+								orderType : '2'
+	                        },
+                            function(data) {
+                                if (data == 'success') {
+                                    $.messager.alert('System Information','Posting Success!','warning');
+                                    searchOdsCustomerOrder();
+                                } else {
+                                    $.messager.alert('System Information','Posting Failure!,' + data, 'warning');
+                                }
+                            }
+                    ).error(
+                        function() {
+                            $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                            searchOdsCustomerOrder();
+                        }
+                    );
+                }
+            }
+        );
+    }
+    
+    </script>
+{{/component}}

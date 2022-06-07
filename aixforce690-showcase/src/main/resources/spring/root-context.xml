@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ Copyright (c) 2012 杭州端点网络科技有限公司 -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:util="http://www.springframework.org/schema/util" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	   xmlns:dubb="http://code.alibabatech.com/schema/dubbo"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd
+       http://code.alibabatech.com/schema/dubbo
+       http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+       ">
+
+	<context:component-scan base-package="io.terminus.pampas" />
+
+	<util:properties id="app" location="classpath:app.properties" />
+
+	<bean id="implantApp" class="io.terminus.pampas.engine.model.App">
+		<property name="key" value="${server.key}" />
+		<property name="domain" value="${domain.name}" />
+		<property name="assetsHome" value="${publicPathPrefix}/public/" />
+		<property name="configPath" value="${publicPathPrefix}/public/back_config.yaml" />
+	</bean>
+	
+	<!-- 以下信息在海外部署需要注释掉, by guolulu, start
+	<bean id="resourceServiceClientAdapter"
+		class="com.haier.openplatform.showcase.service.impl.ResourceServiceClientAdapterImpl">
+		<property name="resourceServiceClient" ref="resourceServiceClient" />
+		<property name="appHacVersion" value="${app.hac.version}" />
+	</bean>
+
+	<bean id="fileServiceClientAdapter"
+		class="com.haier.openplatform.showcase.service.impl.FileServiceClientAdapterImpl">
+		<property name="fileServiceClient" ref="fileServiceClient" />
+		<property name="storeSystemAddress" value="${store.system.address}" />
+	</bean>
+	<bean id="importExcelService"
+		class="com.haier.openplatform.showcase.service.impl.ImportExcelServiceImpl" />
+	<bean id="hacUserServiceCliAdapter"
+		class="com.haier.openplatform.showcase.service.impl.HacUserServiceCliAdapterImpl"
+		init-method="init">
+		<property name="hacUserServiceCli" ref="hacUserServiceCli" />
+		<property name="authSourcce" value="${auth.source}" />
+		<property name="coSessionId" value="${co.session.id}" />
+		<property name="IdsAppName" value="${ids.app.name}" />
+		<property name="passwdKey" value="${passwd.key}" />
+	</bean>  
+	以下信息在海外部署需要注释掉, by guolulu, end -->
+
+	<!-- 以下信息在海外部署需要注释掉, by guolulu, start
+	
+	权限用dubbo接口配置
+	<dubbo:reference id="resourceServiceClient" registry="qingdaoRegistry"
+		interface="com.haier.openplatform.hac.resource.service.HacResourceServiceClient"
+		version="2.1" protocol="dubbo" timeout="100000" init="false" />
+	文件上传下载接口
+	<dubbo:reference id="fileServiceClient" registry="qingdaoRegistry"
+		interface="com.haier.openplatform.hfs.client.service.FileServiceClient"
+		version="1.0.0" protocol="dubbo" timeout="100000" init="true" />
+	用户认证
+	<dubbo:reference id="hacUserServiceCli" registry="qingdaoRegistry"
+		interface="com.haier.openplatform.hac.service.HacUserServiceCli"
+		version="2.1" protocol="dubbo" timeout="100000" init="true" />
+		
+	以下信息在海外部署需要注释掉, by guolulu, end -->
+	
+	<!-- added by gll for HOP Monitor, 20170419 
+	<dubbo:reference id="sendMessageClient" registry="qingdaoRegistryHQ" 
+     interface="com.haier.openplatform.hmc.client.send.SendMessageClient" version="1.0" protocol="dubbo" timeout="100000" init="true"/>
+    -->
+	<bean id="setting" class="io.terminus.pampas.engine.Setting">
+		<property name="mode" value="IMPLANT" />
+		<property name="implantApp" ref="implantApp" />
+		<property name="devMode" value="true" />
+	</bean>
+		
+	<dubbo:application name="${dubbo.application.name}" />
+	<dubbo:registry id="qingdaoRegistry" protocol="zookeeper"
+		address="${dubbo.registry.address}"  timeout="120000" />
+	<dubbo:protocol name="dubbo"  port="${dubbo.port}"  />
+<!--	<dubbo:provider delay="-1" protocol="dubbo" timeout="10000" retries="0"></dubbo:provider>-->
+	<import resource="redis-persistence-context.xml" />
+	<alias name="jedisPool" alias="pampasJedisPool" />
+
+	<!-- 改dubbo版本号为5.0 -->
+	<dubbo:reference id="fileUploadServiceClient" registry="qingdaoRegistry"
+		interface="com.haier.openplatform.wms.security.service.FileUploadServiceClient"
+		version="5.0" protocol="dubbo" timeout="100000" init="true" />	
+	
+	<dubbo:reference id="seleceMaterialInfoService"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.basicdata.service.MdmathInfoServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- Plant Manage 工厂信息管理 -->
+	<dubbo:reference id="plantServiceClient" registry="qingdaoRegistry"
+		owner="linzongxiao" version="5.0"
+		interface="com.haier.openplatform.wms.security.service.PlantServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+
+	<!-- Bin Manage bin管理 -->
+	<dubbo:reference id="binServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.bin.service.CdBinServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!--库存dubbo接口 -->
+	<dubbo:reference id="seleceInventoryInfoService"
+		registry="qingdaoRegistry" owner="Hevwms" 
+		interface="com.haier.openplatform.wms.inventory.service.InventoryInfoServiceClient"
+		version="5.0" protocol="dubbo" timeout="100000" init="true" />
+
+	<!--历史条码dubbo接口 -->
+	<dubbo:reference id="searchOldsBarcodeInfoClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.inventory.service.SearchOldsBarcodeInfoClient"
+		protocol="dubbo" timeout="300000" init="true" />
+	<!--MD52查询资源树  -->
+	<dubbo:reference id="cdWhInfoServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.basicdata.service.CdWhInfoServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+		
+	<!--location 相关 -->
+	<dubbo:reference id="cdLocInfoServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.basicdata.service.CdLocInfoServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!--查询数据字典  -->
+	<dubbo:reference id="mdDictionaryServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.dictionary.service.MdDictionaryServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!--sap库存查询dubbo接口 -->
+	<dubbo:reference id="stgSapStockServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.inventory.service.StgSapStockServiceClient"
+		protocol="dubbo" timeout="1000000" init="true" />
+
+	<!--库存报表详情dubbo接口 -->
+	<dubbo:reference id="searchStockAgeReportClient"
+		registry="qingdaoRegistry" owner="Hevwms"
+		interface="com.haier.openplatform.wms.inventory.service.SearchStockAgeReportClient"
+		protocol="dubbo" timeout="300000" init="true" version="5.0" />
+
+	<!-- MdBarcode 条码相关 -->
+	<dubbo:reference id="mdBarcodeServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.basicdata.service.MdBarcodeServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+
+	<!-- Added By liujian -->
+	<dubbo:reference id="stgStoDownService" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.sto.service.StgStoDownServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+
+	<dubbo:reference id="stgPoDownService" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.po.service.StgPoDownServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+
+	<dubbo:reference id="stgDnDownService" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.so.service.StgDnDownServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+
+	<!-- 孙艳飞 sto dn down -->
+	<dubbo:reference id="stgStodnDownService" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.sto.service.StgStodnDownServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+	<!-- stg inbound detail -->
+	<dubbo:reference id="stgInboundDownServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.order.service.StgInboundDownServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+
+	<!-- StocktakingOrder Manage 库存盘点单管理 -->
+	<dubbo:reference id="stocktakingServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.stocktaking.service.StocktakingServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	<!--库存盘点 明细 -->
+	 <dubbo:reference id="stocktakingDtlServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.stocktaking.service.StocktakingDtlServiceClient"
+		protocol="dubbo" timeout="100000" init="true" /> 
+	<!--库存盘点 差异 -->
+    <dubbo:reference id="stocktakingDiffServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.stocktaking.service.StocktakingDiffServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		<!-- 临时盘点相关 -->
+	<dubbo:reference id="odsPdTempDtlServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.stocktaking.service.OdsPdTempDtlServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- 311移库   -->
+	<dubbo:reference id="transferInventoryServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.order.service.TransferInventoryServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	<dubbo:reference id="odsTransferInfoServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.transfer.service.OdsTransferInfoServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	<dubbo:reference id="odsTransferDtlServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.transfer.service.OdsTransferDtlServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<!-- Customer Order -->
+	<dubbo:reference id="odsCustomerOrderServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.customer.service.OdsCustomerOrderServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	<dubbo:reference id="odsCustomerScanInfoServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.customer.service.OdsCustomerScanInfoServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	<dubbo:reference id="odsCustomerStockServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.customer.service.OdsCustomerStockServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<!--portal -->
+    <dubbo:reference id="portalServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.portal.service.PortalServiceClient"
+		protocol="dubbo" timeout="1000000" init="true" />
+    
+	<!--手持 -->
+    <dubbo:reference id="rfWsClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.remoting.service.RfWsClient"
+		protocol="dubbo" timeout="1000000" init="true" />
+		
+	<!-- PSI Report，add by yanfengdan@20151201 -->
+	<dubbo:reference id="psiReportServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms"
+		interface="com.haier.openplatform.wms.report.service.PsiReportServiceClient"
+		protocol="dubbo" version="5.0" timeout="100000" init="true" />
+		
+	<!-- Sales Return Report，add by yanfengdan@20151201 -->
+	<dubbo:reference id="salesReturnReportServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms"
+		interface="com.haier.openplatform.wms.report.service.SalesReturnReportServiceClient"
+		protocol="dubbo" version="5.0" timeout="100000" init="true" />
+	
+	<!-- STO Intransit Report，add by yanfengdan@20151201 -->
+	<dubbo:reference id="stoIntransitReportServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms"
+		interface="com.haier.openplatform.wms.report.service.StoIntransitReportServiceClient"
+		protocol="dubbo" version="5.0" timeout="100000" init="true" />
+	
+	<!-- Consignment Report，add by yanfengdan@20151201 -->
+	<dubbo:reference id="consignmentReportServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms"
+		interface="com.haier.openplatform.wms.report.service.ConsignmentReportServiceClient"
+		protocol="dubbo" version="5.0" timeout="100000" init="true" />
+		
+	<!-- 安全，组-->	
+	<dubbo:reference id="groupServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.security.service.GroupServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<!-- 安全，用户 -->	
+	<dubbo:reference id="securityUserServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.security.service.SecurityUserServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- 安全，角色 -->	
+	<dubbo:reference id="roleServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.security.service.RoleServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- 安全，资源 -->	
+	<dubbo:reference id="resourceServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.security.service.ResourceServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<!-- DB Operation -->
+	<dubbo:reference id="databaseServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.security.service.DatabaseServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<dubbo:reference id="odsInventoryInfoDtlServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.inventory.service.OdsInventoryInfoDtlServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+	
+	<dubbo:reference id="odsOrderInfoDtlServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.po.service.OdsOrderInfoDtlServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+	
+	<dubbo:reference id="odsWmsOrderServiceClient"
+		registry="qingdaoRegistry" owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.order.service.OdsWmsOrderServiceClient"
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<dubbo:reference id="odsOrderInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.order.service.OdsOrderInfoServiceClient"
+		protocol="dubbo" timeout="300000" init="true" />
+		
+	<!-- 盘点时 手持出入库 2016-3-25 -->
+	<dubbo:reference id="rfScanWhenPDClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0"
+		interface="com.haier.openplatform.wms.remoting.service.RfScanWhenPDClient"
+		protocol="dubbo" timeout="100000" init="true" />
+    
+	<!-- PO Gr Info -->
+	<dubbo:reference id="odsPoGrInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.po.service.OdsPoGrInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+    
+	<!-- POScanInfo -->
+	<dubbo:reference id="odsPoScanInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.po.service.OdsPoScanInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+
+	<!--STO CUST-->
+	<dubbo:reference id="odsStoCustServiceClient" registry="qingdaoRegistry"
+		 owner="Hevwms" version="5.0"
+		 interface="com.haier.openplatform.wms.sto.service.OdsStoCustServiceClient"
+		 protocol="dubbo" timeout="100000" init="true" />
+	<dubbo:reference id="odsStoCustScanInfoServiceClient" registry="qingdaoRegistry"
+		 owner="Hevwms" version="5.0"
+		 interface="com.haier.openplatform.wms.sto.service.OdsStoCustScanInfoServiceClient"
+		 protocol="dubbo" timeout="100000" init="true" />
+
+	<!-- SOScanInfo -->
+	<dubbo:reference id="odsSoScanInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.so.service.OdsSoScanInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- SOGrInfo -->
+	<dubbo:reference id="odsSoGrInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.so.service.OdsSoGrInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<!-- STOScanInfo -->
+	<dubbo:reference id="odsStoScanInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.sto.service.OdsStoScanInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- STOGigrInfo -->
+	<dubbo:reference id="odsStoGigrInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.sto.service.OdsStoGigrInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- SCRAPScanInfo -->
+	<dubbo:reference id="odsScrapScanInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.scrap.service.OdsScrapScanInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- SCRAP order -->
+	<dubbo:reference id="odsScrapOrderServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.scrap.service.OdsScrapOrderServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- Consume Scan Info -->
+	<dubbo:reference id="odsConsumeScanInfoServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.consume.service.OdsConsumeScanInfoServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- Consume order -->
+	<dubbo:reference id="odsConsumeOrderServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.consume.service.OdsConsumeOrderServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<!-- PDA手持操作 -->
+	<!-- Po PDA -->
+	<dubbo:reference id="poPDAServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.po.service.PoPDAServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- So PDA -->
+	<dubbo:reference id="soPDAServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.so.service.SoPDAServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- Sto PDA -->
+	<dubbo:reference id="stoPDAServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.sto.service.StoPDAServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- Consume PDA -->
+	<dubbo:reference id="consumePDAServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.consume.service.ConsumePDAServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+		
+	<!-- Scrap PDA -->
+	<dubbo:reference id="scrapPDAServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.scrap.service.ScrapPDAServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+	
+	<!-- System Config -->
+	<dubbo:reference id="systemConfigServiceClient" registry="qingdaoRegistry"
+		owner="Hevwms" version="5.0" 
+		interface="com.haier.openplatform.wms.security.service.SystemConfigServiceClient" 
+		protocol="dubbo" timeout="100000" init="true" />
+
+	<!-- Gift 功能 -->
+<!-- 	<dubbo:reference id="giftPoDownServiceClient" registry="qingdaoRegistry" -->
+<!-- 					 owner="Hevwms" version="5.0" protocol="dubbo" timeout="100000" init="true" -->
+<!-- 					 interface="com.haier.openplatform.wms.gift.po.service.GiftPoDownServiceClient"/> -->
+<!-- 	<dubbo:reference id="giftPoScanInfoServiceClient" registry="qingdaoRegistry" -->
+<!-- 					 owner="Hevwms" version="5.0" protocol="dubbo" timeout="100000" init="true" -->
+<!-- 					 interface="com.haier.openplatform.wms.gift.po.service.GiftPoScanInfoServiceClient"/> -->
+<!-- 	<dubbo:reference id="giftPoGrInfoServiceClient" registry="qingdaoRegistry" -->
+<!-- 					 owner="Hevwms" version="5.0" protocol="dubbo" timeout="100000" init="true" -->
+<!-- 					 interface="com.haier.openplatform.wms.gift.po.service.GiftPoGrInfoServiceClient"/> -->
+<!-- 	<dubbo:reference id="giftPoPDAServiceClient" registry="qingdaoRegistry" -->
+<!-- 					 owner="Hevwms" version="5.0" protocol="dubbo" timeout="100000" init="true" -->
+<!-- 					 interface="com.haier.openplatform.wms.gift.po.service.GiftPoPDAServiceClient"/> -->
+<!-- 	<dubbo:reference id="giftSoDownServiceClient" registry="qingdaoRegistry" -->
+<!-- 					 owner="Hevwms" version="5.0" protocol="dubbo" timeout="100000" init="true" -->
+<!-- 					 interface="com.haier.openplatform.wms.gift.so.service.GiftSoDownServiceClient"/> -->
+<!-- 	<dubbo:reference id="giftSoScanInfoServiceClient" registry="qingdaoRegistry" -->
+<!-- 					 owner="Hevwms" version="5.0" protocol="dubbo" timeout="100000" init="true" -->
+<!-- 					 interface="com.haier.openplatform.wms.gift.so.service.GiftSoScanInfoServiceClient"/> -->
+<!-- 	<dubbo:reference id="giftSoGiInfoServiceClient" registry="qingdaoRegistry" -->
+<!-- 					 owner="Hevwms" version="5.0" protocol="dubbo" timeout="100000" init="true" -->
+<!-- 					 interface="com.haier.openplatform.wms.gift.so.service.GiftSoGiInfoServiceClient"/> -->
+
+	<import resource="classpath*:/spring/cache/spring-cache.xml" />
+	<import resource="classpath*:/pampas/engine-context.xml" />
+	<import resource="classpath*:/pampas/register-context.xml" />
+	<import resource="classpath*:/pampas/design-context.xml" />
+</beans>

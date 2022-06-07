@@ -1,0 +1,389 @@
+{{#component "stoDetailClose js-comp"}}
+    <div id="stoDCDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDiv" region="north" style="border:0">
+            <table id="searchTab" style="margin-left: -10px;">
+                <tr>
+                    <td style="text-align: right">STO NO.:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input type="text" id="stoNo"></td>
+                    <td class="rightCls">Material No:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="materialNo" type="text" /></td>
+                </tr>
+                <tr>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input type="text" id="locationP"></td>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="begin" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                        - <input id="end" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+                </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchStgStoDown()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle closBtn" onclick="closeStgStoDown()">Manual Close</a>
+                    <!-- <a href="javascript:void(0)" class="btnStyle openBtn" onclick="openStgStoDown()">Manual Open</a>-->
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" onclick="exportStgStoDown();">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+            </div>
+        <div region="center" style="border:0px; overflow-y: hidden;">
+            <table id="stgStoDownGrid"></table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        //��ʼ������
+        var date=new Date();
+        var m=date.getMonth()+1;
+        $('#begin').val(date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-01");
+        var d=date.getDate();
+        date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#end').val(date);
+        /**
+         * ���ͷ��
+         */
+        var templateColumns = [ [ {
+            field : 'ck',
+            checkbox : true,
+            width : 80,
+            align : 'center'
+        }, {
+            field : 'flag',
+            title : 'Close Flag',
+            align : 'center',
+            sortable : true,
+            formatter : function(val) {
+                if (val == 0) {
+                    return '<font color="green">Not Close</font>';
+                } else if (val == 1) {
+                    return '<font color="red">Closed</font>';
+                }
+                return val;
+            }
+        }, {
+            field : 'stoNo',
+            title : 'STO NO',
+            align : 'center',
+            width:90,
+            sortable : true
+        }, {
+            field : 'stoItemNo',
+            title : 'STO Item No',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            align : 'center',
+            width:200,
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'MaterialDesp',
+            align : 'center',
+            sortable : true,
+            hidden:true
+        }, {
+            field : 'qty',
+            title : 'Qty',
+            width:60,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'giFinishQty',
+            title : 'Gi Finish Qty',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'grFinishQty',
+            title : 'Gr Finish Qty',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'giPlant',
+            title : 'GiPlant',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'giLocation',
+            title : 'GiLocation',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'giDate',
+            title : 'GiDate',
+            align : 'center',
+            width:120,
+            sortable : true
+        }, {
+            field : 'grPlant',
+            title : 'GrPlant',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'grLocation',
+            title : 'GrLocation',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'grDate',
+            title : 'GrDate',
+            align : 'center',
+            width:120,
+            sortable : true
+        }, {
+            field : 'purOrg',
+            title : 'PurOrg',
+            align : 'center',
+            width:70,
+            sortable : true
+        }, {
+            field : 'stoDocDate',
+            title : 'StoDocDate',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'stoLastModifyDate',
+            title : 'StoLastModifyDate',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'stoCreateBy',
+            title : 'StoCreateBy',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'itemDeltet',
+            title : 'ItemDeltet',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'stoClose',
+            title : 'StoClose',
+            align : 'center',
+            sortable : true
+        } ] ];
+        $(function() {
+           $('#stoDCDiv').height(suitHeight);
+           var grid= $('#stgStoDownGrid').datagrid(
+                    {
+                        rownumbers : true,
+                        pagination : true,
+                        striped : true,
+                        singleSelect : false,
+                        fit:true,
+                        pageNumber : 1,
+                        url : '/order/searchSto',
+                        queryParams : {
+                            'stoNo' : $('#stoNo').val(),
+                            'materialNo' : $('#materialNo').val(),
+                            'begin' : $('#begin').val(),
+                            'end' : $('#end').val(),
+                            'giFinishFlag' : '0',
+                            'flag' : '1',
+                            'grLocation' : $('#locationP').val()
+                        },
+                        //idField : 'rowId',
+                        remoteSort : false,
+                        fitColumns : false,
+                        fit : true,
+                        columns : templateColumns,
+                        toolbar : '#stgStoDownToolbar',
+                        onLoadSuccess : function(data) {
+                            if (data.mess != null) {
+                                $.messager.alert('System Information',
+                                        data.mess, 'warning');
+                                gridScroll(grid);
+                                return;
+                            }
+                           	$(this).datagrid("fixRownumber"); 
+                        },
+                        onLoadError:function(){
+                             $.messager.alert('System Information','Network Abnormal!','warning');
+                            gridScroll(grid);
+                        }
+                    });
+          initPagination(grid);
+		 
+        });
+        /*��ѯ*/
+        function searchStgStoDown() {
+           var grid= $('#stgStoDownGrid').datagrid({
+                url : '/order/searchSto',
+                queryParams : {
+                    'stoNo' : $('#stoNo').val(),
+                    'materialNo' : $('#materialNo').val(),
+                    'begin' : $('#begin').val(),
+                    'end' : $('#end').val(),
+                    'giFinishFlag' : '0',
+                    'flag' : '1',
+                    'grLocation' : $('#locationP').val()
+                },
+               // loadMsg : 'query......',
+                onLoadSuccess : function(data) {
+                    $("#stgStoDownGrid").datagrid('clearChecked');
+                    $(this).datagrid("fixRownumber");
+                }
+            });
+             initPagination(grid);
+             gridScroll(grid);
+        }
+        function exportStgStoDown() {
+            var url = '/order/exportStgStoDown?a=1'
+                    + '&stoNo=' + $('#stoNo').val()
+                    + '&materialNo=' + $('#materialNo').val()
+                    + '&begin=' + $('#begin').val()
+                    + '&end=' + $('#end').val()
+                    + '&giFinishFlag=0&flag=1'
+                    +'&grLocation='+$('#locationP').val()
+                    +'&giLocation='+$('#locationP').val();
+            window.location.href = url;
+        }
+
+        function closeStgStoDown() {
+            var rows = $('#stgStoDownGrid').datagrid('getSelections');
+            if (rows.length <= 0) {
+                $.messager.alert('System Information',
+                        'Please select at least one data!', 'warning');
+                return;
+            }
+            var sum=0;
+            for ( var i = 0; i < rows.length; i++) {
+                if (rows[i].flag == '0') {
+                   sum=sum+1;
+                }
+            }
+            if(sum<1){
+                $.messager.alert('System Information',
+                        'Please select order not close!', 'warning');
+                return;
+            }
+            $.messager
+                    .confirm(
+                    'System Information',
+                    'Please Sure Close the STO ',
+                    function(r) {
+                        if (r) {
+                           // loadMask($('#loading'), 'Closeing...');
+                            var codes = new Array();
+                            for ( var i = 0; i < rows.length; i++) {
+                                if (rows[i].flag == '0') {
+                                    codes.push(rows[i].rowId);
+                                }
+                            }
+                            $
+                                    .post(
+                                    "/order/closeStgStoDown",
+                                    {
+                                        'ids' : codes.join()
+                                    },
+                                    function(data) {
+                                        if (data == 'S') {
+                                            $.messager
+                                                    .alert(
+                                                    'System Information',
+                                                    'Close Success',
+                                                    'warning');
+                                        } else {
+                                            $.messager
+                                                    .alert(
+                                                    'System Information',
+                                                    'Close Failure',
+                                                    'warning');
+                                        }
+                                   //     unLoadMask($('#loading'));
+                                        $('#stgStoDownGrid')
+                                                .datagrid('reload');
+                                    })
+                                    .error(
+                                    function() {
+                                      //  unLoadMask($('#loading'));
+                                        $.messager
+                                                .alert(
+                                                'System Information',
+                                                'Network Abnormal!',
+                                                'warning');
+                                    });
+                        }
+                    });
+        }
+
+        //20140721 STO reopen chenp
+        function openStgStoDown() {
+            var rows = $('#stgStoDownGrid').datagrid('getSelections');
+            if (rows.length <= 0) {
+                $.messager.alert('System Information',
+                        'Please select at least one data!', 'warning');
+                return;
+            }
+            var sum=0;
+            for ( var i = 0; i < rows.length; i++) {
+                if (rows[i].flag == '1') {
+                    sum=sum+1;
+                }
+            }
+            if(sum<1){
+                $.messager.alert('System Information',
+                        'Please select order closed!', 'warning');
+                return;
+            }
+            $.messager
+                    .confirm(
+                    'System Information',
+                    'Please Sure Open the STO ',
+                    function(r) {
+                        if (r) {
+                  //          loadMask($('#loading'), 'Opening...');
+                            var codes = new Array();
+                            for ( var i = 0; i < rows.length; i++) {
+                                if (rows[i].flag == '1') {
+                                    codes.push(rows[i].rowId);
+                                }
+                            }
+                            $
+                                    .post(
+                                    "/order/openStgStoDown",
+                                    {
+                                        'ids' : codes.join()
+                                    },
+                                    function(data) {
+                                        if (data== 'S') {
+                                            $.messager
+                                                    .alert(
+                                                    'System Information',
+                                                    'Open Success',
+                                                    'warning');
+                                        } else {
+                                            $.messager
+                                                    .alert(
+                                                    'System Information',
+                                                    'Open Failure',
+                                                    'warning');
+                                        }
+                                   //     unLoadMask($('#loading'));
+                                        $('#stgStoDownGrid')
+                                                .datagrid('reload');
+                                    })
+                                    .error(
+                                    function() {
+                                   //     unLoadMask($('#loading'));
+                                        $.messager
+                                                .alert(
+                                                'System Information',
+                                                'Network Abnormal!',
+                                                'warning');
+                                    });
+                        }
+                    });
+        }
+    </script>
+{{/component}}

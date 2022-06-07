@@ -1,0 +1,86 @@
+
+{{!-- {{#component "compony_column js-comp"}} --}}
+
+<div class="compony_column js-comp" data-comp-path="compony_column">
+  <div id="tb">
+          <table>             
+              <button  class="btn btn-primary"
+                          type="button" style="height:40px;width:60px;background-color: #59B4E9;color: white;border: 0;"  onclick="search();">
+              <span>查询</span>
+               </button>
+                  &nbsp;
+                  <button  class="btn btn-primary"
+                           type="button" style="height:40px;width:60px;background-color: #59B4E9;color: white;border: 0;"  onclick="add();">
+                      <span>新增</span>
+                  </button>
+               </tr>
+          </table>
+      </div>
+  <div class="container">
+    
+    <table class="table table-bordered">
+      <tr>
+        <td class="">序号</td>
+        <td class="">公司代码</td>
+        <td class="">公司名称</td>
+        <td class="">账套</td>
+        <td class="">过账地址</td>
+        <td class="">操作</td>
+      </tr>
+      <tr>
+        <td class="">1</td>
+        <td class="">EIS</td>
+        <td class="">2015-07-21</td>
+        <td class=""><a href="/account/detail?missionId=1">87372984209847</a></td>
+        <td class="">XXXXX的发票需要校验</td>
+        <td class="">删除</td>
+      </tr>
+      <tbody id = "tableList">
+      </tbody>
+   </table>
+ </div>
+
+ <script id = "table_barcode" type = "text/x-handlebars-template">
+  {{#each this}}
+        <tr>
+            <td>12312312{{rowId}}</td>
+            <td>{{materialNo}}</td>
+            <td>{{barcode}}</td>
+            <td>{{materialDesp}}</td>
+            <td>{{stoNo}}</td>
+            <td>{{createBy}}</td>
+        </tr>
+      {{/each}}
+</script>
+
+
+ <script>
+     function add(){
+        window.open("/compony/add",'newwindow','height=600,width=600'); 
+      }
+     function updateCom(rowId){
+        window.open("/compony/update?rowId="+rowId,'newwindow','height=600,width=600'); 
+      } 
+     function search(){
+      alert(123);
+      $.get("api/searchBarcodes",
+      {
+          size:10,
+          num:20,
+          code:"as"
+      },
+      function(data,status){
+          var myTemplate = Handlebars.compile($("#table_barcode").html());
+          $("#tableList").html(myTemplate(data));
+      });
+     }
+    function deleteCom(rowId){      
+        if(confirm("确定要删除数据吗？")){
+          $.get("api/deleteCompony?rowId="+rowId,function(result){
+            if (result=='1') {alert("删除成功")}
+          })
+        }
+    }
+ </script>
+</div>
+{{!-- {{/component}} --}}

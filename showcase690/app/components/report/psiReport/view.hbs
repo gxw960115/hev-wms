@@ -1,0 +1,223 @@
+{{#component "psiReport js-comp"}}
+    <div id="psiReportDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDiv" region="north">
+            <table id="searchTab1">
+                <tr>
+                    <td class="rightCls">Warehouse:</td>
+                    <td class="leftCls">
+                    <input id="warehouseCode" class="easyui-combobox" type="text" name="warehouseName" 
+                        data-options="width:155,height:30,editable:false,required:true,valueField:'code',textField:'name',panelWidth:200" />
+                    </td>
+                    
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td><td class="leftCls"><input id="location" class="easyui-combobox" type="text"  missingMessage="The Data not null" data-options="width:140,height:30,editable:true,valueField:'code',textField:'name'" /></td>
+                    <td class="rightCls">Material No:&nbsp;&nbsp;</td><td class="leftCls"><input id="materialNo" class="radiusCls" type="text" /></td>
+                </tr>
+                <tr>
+                    <td class="rightCls" style="text-align: right"> Division:&nbsp;&nbsp;</td><td class="leftCls"><input id="division" type="text" class="easyui-combobox" style="border:0"
+                                               data-options="border:false,width:155,height:30,editable:true,required:false,valueField:'code',textField:'name',url:'/basicdata/mddictionary/listbox'"/></td>
+                    <td class="rightCls">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="begin" class="radiusCls" style="width:213px;" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                        - <input id="end" class="radiusCls" style="width:213px;" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/><font color="red">*</font></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="searchBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" id="exportBtn">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle printBtn" id="printBtn">Print</a>
+                	<a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="dataGrid">
+
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function(){
+        $('#psiReportDiv').height(suitHeight);
+            //初始化日期
+           var date=new Date();
+	    var m=date.getMonth()+1;
+	    var d=date.getDate();
+	    var begin=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+	    $('#begin').val(getLastRq(begin,-1));
+	    date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+	    $('#end').val(date);
+            var columns=[[{
+                field:'warehouseName',title:'Warehouse', width:80, align:'center',sortable:true
+            },{
+                field:'location',title:'Location',width:80, align:'center',sortable:true
+            },{
+                field:'division', title:'Division', width:60,align:'center',sortable:true
+            },{
+                field:'materialNo',title:'Material No',width:90,align:'center',sortable:true
+            },{
+                field:'customerModel',title:'Customer Model',width:120,align:'center',sortable:true
+            },{
+                field:'materialDesp',title:'Material Description',width:150, align:'center',sortable:true, hidden:true
+            },{
+                field:'color',title:'Color',width:50,align:'center',sortable:true
+            },{
+                field:'openingQty',title:'Opening Qty',width:90, align:'center',sortable:true
+            },{
+                field:'inWarehouseQty',title:'InWarehouse Qty',width:130,align:'center',sortable:true
+            },{
+                field:'outWarehouseQty',title:'OutWarehouse Qty',width:130,align:'center',sortable:true
+            },{
+                field:'wmsQty',title:'WMS Qty', width:100, align:'center',sortable:true
+            }]];
+            var grid = $('#dataGrid').datagrid({
+                rownumbers:true,
+                columns:columns,
+                pagination:true,
+                striped:true,
+                fit:true,
+                pageNumber : 1,
+                method:'post',
+                onLoadError:function(){
+                   $.messager.alert('Message','System Exception.','warning');
+                }
+            });
+            initPagination(grid);
+        	gridScroll(grid);
+            
+            $.ajax({
+                url:'/plan/searchAllCdWh',
+                type:'post',
+                dataType:'json',
+                async:false,
+                success:function(data){
+                    var arr=[];
+                    if(data!=""||data!=undefined||data!=null){
+                        for(var i=0;i<data.length;i++){
+                        	var json={};
+                            json["rowId"]=data[i]['rowId'];
+                            json["code"]=data[i]['code'];
+                            json["name"]=data[i]['name'];
+                            arr.push(json);
+
+                        }
+                    }
+                    $('#warehouseCode').combobox({
+                        data:arr,
+                        onSelect:function(record){
+                           $('#location')
+                                        .combobox(
+                                                {
+
+                                                    url : '/plan/cdLocTreeByParentId?parentId='+record.rowId
+                                                });
+                        }
+                    });
+                }
+          });
+          $('#searchBtn').on('click',function(){
+              searchData();
+          })
+            
+          $('#exportBtn').on('click',function(){
+              exportData();
+          })
+           $('#printBtn').on('click',function(){
+              print();
+          })
+ });
+ 		/* 查询 */
+        function searchData(){
+            var begin=$('#begin').val();
+            var end = $('#end').val();
+            if(begin==null||begin==''){
+                $.messager.alert('Message', "Please input Begin Date.", 'warning');
+                return;
+            }
+            if(end==null||end==''){
+                $.messager.alert('Message',
+                            "Please input End Date.",
+                            'warning');
+                            return;
+            }
+            var division=$('#division').combobox('getValue');
+            var grid=$('#dataGrid').datagrid({
+                url:'/report/searchPsiReport',
+                queryParams: {
+                	warehouseCode:$('#warehouseCode').combobox("getValue"),
+                    location: $('#location').combobox("getValue"),
+                    materialNo: $('#materialNo').val(),
+                    begin: begin,
+                    end: end,
+                    division: division
+                }
+            });
+            initPagination(grid);
+        	gridScroll(grid);
+        }
+        /* 导出 */
+        function exportData() {
+            var division=$('#division').combobox('getValue');
+        	/*var url = "/report/exportPsiReport?"
+        		+ '&warehouseCode=' + $('#warehouseCode').combobox("getValue")
+        		+ '&location=' + $('#location').combobox("getValue")
+        		+ '&materialNo=' + $('#materialNo').val()
+        		+ '&division=' + division
+        		+ '&begin=' + $('#begin').val()
+        		+ '&end=' + $('#end').val();
+        window.location.href = url;*/
+        
+	        $.ajax({
+	        	url:'/report/searchPsiReportAmount',
+	        	type:'post',
+	        	dataType:'json',
+	        	data:{
+	        		warehouseCode:$('#warehouseCode').combobox("getValue"),
+	        		location:$('#location').combobox("getValue"),
+	        		materialNo:$('#materialNo').val(),
+	        		division:division,
+	        		begin:$('#begin').val(),
+	        		end:$('#end').val()
+	        	},
+	        	success:function(data) {
+	        		if (data == "success") {
+	        			var url = "/report/exportPsiReport?"
+	                		+ '&warehouseCode=' + $('#warehouseCode').combobox("getValue")
+	                		+ '&location=' + $('#location').combobox("getValue")
+	                		+ '&materialNo=' + $('#materialNo').val()
+	                		+ '&division=' + division
+	                		+ '&begin=' + $('#begin').val()
+	                		+ '&end=' + $('#end').val();
+	                	window.location.href = url;
+	        		}else {
+	        			$.messager.alert('System Information',data,	'warning');
+	        		}
+	        	}
+	        });
+        }
+        function print(){
+                var begin=$('#begin').val();
+                var end = $('#end').val();
+                if(begin==null||begin==''){
+                    $.messager.alert('System Information',
+                                "Begin Date Can't Be Null !",
+                                'warning');
+                                return;
+                }
+                if(end==null||end==''){
+                    $.messager.alert('System Information',
+                                "End Date Can't Be Null !",
+                                'warning');
+                                return;
+                }
+                var division=$('#division').combobox('getValue');
+                var url='/psi/print?'
+                +'&warehouseCode=' + $('#warehouseCode').combobox("getValue")
+                + '&location=' + $('#location').combobox("getValue")
+                + '&materialNo=' + $('#materialNo').val()
+                + '&division=' + division
+                + '&begin=' + begin
+                + '&end=' + end;
+                window.open(url);
+        }
+    </script>
+{{/component}}

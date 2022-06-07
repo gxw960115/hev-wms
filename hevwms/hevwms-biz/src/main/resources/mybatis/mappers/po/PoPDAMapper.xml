@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.po.dao.PoPDADAO">
+     <select id="orderDelete" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_PO_DELETE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.barcode,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.doctype,mode=IN,jdbcType=VARCHAR},
+          #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.matno,mode=OUT,jdbcType=VARCHAR},
+          #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{out.location,mode=OUT,jdbcType=VARCHAR},
+          #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    
+     <select id="giftPoOrderDelete" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_GIFT_PO_DELETE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.barcode,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.doctype,mode=IN,jdbcType=VARCHAR},
+          #{in.qty,mode=IN,jdbcType=VARCHAR},
+          #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.matno,mode=OUT,jdbcType=VARCHAR},
+          #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{out.location,mode=OUT,jdbcType=VARCHAR},
+          #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    
+    <select id="scanPoCheck" statementType="CALLABLE">
+        <![CDATA[
+          {call prc_barcode_po_check(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.bin,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.version,mode=IN,jdbcType=VARCHAR},
+          #{inpara.returnType,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    
+    <select id="scanGiftPoCheck" statementType="CALLABLE">
+        <![CDATA[
+          {call prc_barcode_gift_po_check(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.version,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="poOrderIgp" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_PO_COLLECT(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+          #{in.carNo,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+          #{in.invoiceNo,mode=IN,jdbcType=VARCHAR},
+          #{in.returnType,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.orId,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    
+    <select id="giftPoOrderIgp" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_GIFT_PO_COLLECT(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+          #{in.carNo,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+          #{in.invoiceNo,mode=IN,jdbcType=VARCHAR},
+          #{in.returnType,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.orId,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="poGoodsReceive" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_PO_RECEIVE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="poGoodsDelivery" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_PO_DELIVERY(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    
+    <select id="giftPoGoodsReceive" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_GIFT_RECEIVE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+</mapper>

@@ -1,0 +1,439 @@
+﻿{{#component "stoDnDetailList js-comp"}}
+    <style type="text/css">
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            padding:2.5px;
+
+            height:25px;
+        }
+
+        .fileUpload input.upload {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
+    </style>
+    <div id="stoDnDDiv" class="easyui-layout"  style="width:100%;margin-top: -20px;">
+        <div class="searchDiv" region="north" style="top:auto;" >
+            <table id="searchTab1">
+                <tr>
+                    <td style="text-align:right;width:110px;">STO NO:</td>
+                    <td class="leftCls"><input  id="stono" class="radiusCls" style="width:155px;" type="text" /></td>
+                    <td style="text-align:right;width:110px;">STO DN NO:</td>
+                    <td class="leftCls" ><input style="width:155px;" id="stodnno" class="radiusCls" type="text" />
+                    <td style="text-align:right;width:110px;">Material No:</td>
+                    <td class="leftCls"><input style="width:155px;" id="materialNo" class="radiusCls" type="text" /></td>
+                    <td style="text-align:right;width:110px;">Gi Warehouse:</td> 
+                    <td class="leftCls"><input id="giPlant" class="easyui-combobox" type="text"
+                    	data-options="border:false,width:155,height:30,editable:true,required:false,panelHeight:'auto'" /></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;width:110px;">Gr Warehouse:</td> 
+                    <td class="leftCls"><input id="grPlant" type="text" class="easyui-combobox" style="border:0" data-options="border:false,
+                         width:155,height:30,editable:true,required:false"/></td> 
+                    <td style="text-align:right;">Create Date:</td>
+                    <td class="leftCls" colspan="3"><input  id="begin" class="radiusCls" style="width:155px;text-align: left;" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/> &nbsp;&nbsp;
+                        -  &nbsp;&nbsp;<input id="end" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                    <td colspan="4">
+                	</td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" id="dispatchBtn">Dispatch</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="dataGrid" style="width: 140%"></table>
+        </div>
+    </div>
+    <div id="showDnWin" class="easyui-window" title="Select a DN"
+         data-options="modal:true,closed:true,iconCls:'icon-search',top:0, left:($(window).width() - 920) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false"
+         style="width: 920px; height: 450px; overflow-y: hidden">
+        <div class="easyui-layout" fit="true">
+            <div region="center" style=" width:900px ;overflow-y: hidden; border-right: 2px #ccc solid; border-left: 0;border-top: 0; border-bottom: 0">
+                <div id="dnNoTool">
+                    &nbsp;&nbsp;&nbsp;&nbsp;DN:&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="dnNo" value="">|
+                    <img onclick="searchDn()" src="/assets/images/serch-icon.png" id="serch-icon">
+                </div>
+                <table id="dnGrid"></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 37px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="directDispatch();">Dispatch</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="javascript:closeDnDialog();">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var totalWidth = $('#dataGrid').width();
+        var dnPlant = "";
+        var dnLoc = "";
+        var stoDnNo = "";
+        $(function(){
+        	$('#stoDnDDiv').height(suitHeight);
+        	$('#giPlant').combobox({
+                data:[{"text":"6640","value":"6640"},{"text":"6641","value":"6641"},{"text":"6642","value":"6642"},{"text":"6643","value":"6643"},
+                      {"text":"6644","value":"6644"},{"text":"6645","value":"6645"},{"text":"6646","value":"6646"}],
+                value:''
+            });
+            //初始化日期
+            var date=new Date();
+            var m=date.getMonth()+1;
+            var d=date.getDate();
+            $('#postingDate').val(date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d));
+            $('#begin').val(date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-01");
+            date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+            $('#end').val(date);
+            var columns=[[{
+                field:'ck',checkbox:true
+            },{
+                field:'stoNo',title:'STO NO',width:fixWidth(0.07), align:'center',sortable:true
+            },{
+                field:'stoItemNo',title:'STO Item',width:fixWidth(0.05), align:'center',sortable:true
+            },{
+                field:'stoDnNo',title:'STO Dn No',width:fixWidth(0.07),align:'center',sortable:true
+            },{
+                field:'stoDnItemNo',title:'STO Dn Item No',width:fixWidth(0.075), align:'center',sortable:true
+            },{
+                field:'materialNo', title:'Material No', width:fixWidth(0.07),align:'center',sortable:true
+            },{
+                field:'qty',title:'Qty',width:fixWidth(0.025), align:'center',sortable:true
+            },{
+                field:'unit',title:'Unit',width:fixWidth(0.03), align:'center',sortable:true
+            },{
+                field:'location',title:'GI Location', width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'plant',title:'GI Warehouse', width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'giFinishQty',
+                title:'GI Scan Qty',
+                width:fixWidth(0.06),
+                align:'center',
+                sortable:true,
+                formatter:function(val) {
+                    if (val==''||val==null||val=='undefined') {
+                        return '0';
+                    }
+                    return val;
+                }
+            },{
+                field:'giFinishFlag',title:'GI Scan Flag',width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'giFlag',title:'GI Flag',width:fixWidth(0.04), align:'center',sortable:true,hidden:true
+            },{
+                field:'giSapFlag',title:'GI Sap Flag',width:fixWidth(0.05), align:'center',sortable:true,hidden:true
+            },{
+                field:'giSapMsg',title:'Gi Sap Msg',width:fixWidth(0.045), align:'center',sortable:true,hidden:true
+            },{
+                field:'giDoc',title:'GI Doc',width:fixWidth(0.08), align:'center',sortable:true,hidden:true
+            },{
+                field:'grLocation',title:'GR Location', width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'grPlant',title:'GR Warehouse', width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'grFinishQty',
+                title:'GR Scan Qty',
+                width:fixWidth(0.06), 
+                align:'center',
+                sortable:true,
+                formatter : function(val) {
+                    if (val==''||val==null||val=='undefined') {
+                        return '0';
+                    }
+                    return val;
+                }
+            },{
+                field:'grFinishFlag',title:'GR Scan Flag',width:fixWidth(0.06), align:'center',sortable:true
+            },{
+                field:'grFlag',title:'GR Flag',width:fixWidth(0.04), align:'center',sortable:true,hidden:true
+            },{
+                field:'grSapFlag',title:'GR Sap Flag',width:fixWidth(0.05), align:'center',sortable:true,hidden:true
+            },{
+                field:'grSapMsg',title:'GR Sap Msg',width:fixWidth(0.045), align:'center',sortable:true,hidden:true
+            },{
+                field:'grDoc',title:'GR Doc',width:fixWidth(0.03), align:'center',sortable:true,hidden:true
+            },{
+                field:'remark',title:'Remark',width:fixWidth(0.04), align:'center',sortable:true
+            },{
+                field:'message',title:'Message',width:fixWidth(0.04), align:'center',sortable:true
+            }]];
+            var grid = $('#dataGrid').datagrid({
+                rownumbers:true,
+                columns:columns,
+                pagination:true,
+                striped:true,
+                remoteSort : false,
+                pageNumber : 1,
+                fit:true,
+                method:'post',
+                url:'',
+                onLoadError:function(){
+                         $.messager.alert('System Information','Network Abnormal!','warning');
+                    },
+                onLoadSuccess:function(){
+                	$(this).datagrid("fixRownumber");
+                }
+            });
+            $.ajax({
+                url:'/warehouse/searchAvailableWh',
+                type:'post',
+                dataType:'json',
+                success:function(data){
+                    var dataRes = [];
+                   // dataRes.push({ "text": " ", "value": " " });
+                    if(data!=''||data!=null||data!=undefined){
+                       for(var i=0;i<data.length;i++){
+                           dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                        }           
+                    }
+                    $('#grPlant').combobox({
+                        data:dataRes, 
+                        panelWidth:180
+                    })
+                }
+            });
+            initPagination(grid);
+            $('#queryBtn').on('click',function(){
+                queryStoReceiveData();
+            })
+            
+			$('#dispatchBtn').on('click',function(){
+                showDispatchDialog();
+            })
+        })
+        
+        dnColumns = [ [ {
+//             field : 'ck',
+//             checkbox : true,
+//             /* width : 80,*/
+//             width: fixWidth(0.01),
+//             align : 'center'
+//         }, {
+            field : 'dnNo',
+            title : 'Billing No',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'dnItemNo',
+            title : 'Billing Item',
+            align : 'center',
+            width: fixWidth(0.04),
+            sortable : true
+        },{
+            field : 'sellOrderType',
+            title : 'Sale Type',
+            align : 'center',
+            width: fixWidth(0.04),
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+   		}, {
+            field : 'qty',
+            title : 'Qty',
+            align : 'center',
+            width: fixWidth(0.03),
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit ',
+            align : 'center',
+            width: fixWidth(0.03),
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            hidden: true,
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Warehouse',
+            align : 'center',
+            width: fixWidth(0.04),
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width: fixWidth(0.04),
+            sortable : true
+        }, {
+            field : 'customerNo',
+            title : 'Customer No',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'customerName',
+            title : 'Customer Name',
+            width: fixWidth(0.18),
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'deliveryCode',
+            title : 'ShipTo Code',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'deliveryName',
+            title : 'ShipTo Name',
+            align : 'center',
+            width: fixWidth(0.18),
+            sortable : true
+        }
+        ] ];
+        // set width of column
+        function fixWidth(percent) {
+            return totalWidth * percent;
+        }
+        function queryStoReceiveData(){
+            var grid=$('#dataGrid').datagrid({
+                url:'/order/searchStoDnFromFactory',
+                queryParams: {
+                    stoNo:$('#stono').val(),
+                    stoDnNo:$('#stodnno').val(),
+                    materialNo: $('#materialNo').val(),
+                    begin:$('#begin').val(),
+                    end:$('#end').val(),
+                    plant:$('#giPlant').combobox('getValue'),
+                    grPlant:$('#grPlant').combobox('getValue')
+                },
+                onLoadSuccess : function(data) {
+                    if (data.total == 0 && data.rows.length == 0) {
+                        $.messager.alert('System Information',
+                                'No records found.',
+                                'warning');
+                        gridScroll(grid);
+                    }
+                    $(this).datagrid("fixRownumber");
+                }
+            });
+            initPagination(grid);
+        }
+        function showDispatchDialog(){
+        	var rows = $('#dataGrid').datagrid('getSelections');
+            if (rows.length != 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return;
+            }
+            dnPlant = rows[0].grPlant;
+            dnLoc = rows[0].grLocation;
+            stoDnNo = rows[0].stoDnNo;
+            var dnGrid = $('#dnGrid').datagrid(
+                    {
+                        rownumbers : true,
+                        pagination : true,
+                        striped : true,
+                        singleSelect : true,
+                        height : 345,
+                        url : '/order/searchDirectDispatchDn',
+                        queryParams : {
+                        	dnNo: $('#dnNo').val(),
+                            plant:dnPlant, 
+                            location:dnLoc,
+                            finishQty:0
+                        },
+                        pageNumber : 1,
+                        columns : dnColumns,
+                        onLoadSuccess : function(data) {
+                            if (data.mess != null) {
+                                $.messager.alert('System Information',
+                                        data.mess, 'warning');
+                                return;
+                            }
+                            if (data.total == 0 && data.rows.length == 0) {
+                                $.messager.alert('System Information',
+                                        'No records found.',
+                                        'warning');
+                            }
+                        },
+                        onLoadError:function(){
+                           $.messager.alert('System Information','Network Abnormal!','warning');
+                        }
+                    });
+            initPagination(dnGrid);
+            $('#showDnWin').window('open');
+        }
+        
+        function searchDn(){
+            $('#dnGrid').datagrid({
+                url:'/order/searchDirectDispatchDn',
+                queryParams: {
+                	dnNo: $('#dnNo').val(),
+                    plant:dnPlant, 
+                    location:dnLoc,
+                    finishQty:0
+                },
+                onLoadSuccess : function(data) {
+                    $("#matGrid").datagrid('clearChecked');
+                    if (data.total == 0 && data.rows.length == 0) {
+                        $.messager.alert('System Information',
+                                'No records found.',
+                                'warning');
+                    }
+                },
+                onLoadError:function(){
+                   $.messager.alert('System Information','Network Abnormal!','warning');
+                }
+            });
+        }
+        
+        function closeDnDialog() {
+            $('#showDnWin').window('close');
+        }
+        
+        function directDispatch(){
+        	var dnRows = $('#dnGrid').datagrid('getSelections');
+            if (dnRows.length != 1) {
+                $.messager.alert('System Information',
+                        'Please select one data!', 'warning');
+                return;
+            }
+            $.maskLoading();
+            $.ajax({
+                url:'/order/directDispatch',
+                type:'post',
+                dataType:'json',
+               	data : {
+               		stodnNo:stoDnNo,
+               		dnNo:dnRows[0].dnNo
+               	},
+                success:function(data){
+                	if (data.status == 'S'){
+                		$.messager.alert(
+	                        'System Information',
+	                        'Dispatch Success!',
+	                        'warning');
+                		
+                	} else {
+                        $.messager.alert(
+                            'System Information',
+                            'Failed!'+data.msg,
+                            'warning');
+                	}
+                	$('#dataGrid').datagrid('reload');
+                	$.maskEnd();
+                }
+            });
+        }
+    </script>
+{{/component}}

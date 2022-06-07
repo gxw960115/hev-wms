@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 使用dubbo协议暴露服务 -->
+
+	<!-- <dubbo:service interface="com.haier.openplatform.showcase.security.service.UserServiceClient" 
+		owner="hop" ref="userServiceClient" version="1.0" protocol="dubbo,rest" delay="-1" 
+		registry="qingdaoRegistry690"/> -->
+
+	<bean id="seleceInventoryInfoService"
+		class=" com.haier.openplatform.wms.inventory.impl.SearchOdsInventoryInfoClientImpl">
+		<property name="odsInventoryInfoService"  ref="odsInventoryInfoService"></property>
+	</bean>
+	<dubbo:service 
+		interface="com.haier.openplatform.wms.inventory.service.InventoryInfoServiceClient"
+		owner="Hevwms" ref="seleceInventoryInfoService"  protocol="dubbo" delay="-1" version="5.0"
+		registry="qingdaoRegistry690" />
+	<!--库存报表详情方法暴露 -->
+	<bean id="searchStockAgeReportClient"
+		class=" com.haier.openplatform.wms.inventory.impl.SearchStockAgeReportClientImpl">
+		<property name="odsInventoryInfoDtlService" ref="odsInventoryInfoDtlService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.inventory.service.SearchStockAgeReportClient"
+		owner="Hevwms" ref="searchStockAgeReportClient" protocol="dubbo" delay="-1" version="5.0"
+		registry="qingdaoRegistry690" />
+	<!--条码历史查询方法暴露 -->
+	<bean id="searchOldsBarcodeInfoClient"
+		class=" com.haier.openplatform.wms.inventory.impl.SearchOldsBarcodeInfoClientImpl">
+		<property name="odsBarcodeHistoryService" ref="odsBarcodeHistoryService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.inventory.service.SearchOldsBarcodeInfoClient"
+		owner="Hevwms" ref="searchOldsBarcodeInfoClient" protocol="dubbo" version="5.0"
+		delay="-1" registry="qingdaoRegistry690" />
+<!--sap库存查询方法暴露 -->
+	<bean id="stgSapStockServiceClient"
+		class=" com.haier.openplatform.wms.inventory.impl.StgSapStockServiceClientImpl">
+		<property name="stgSapStockService" ref="stgSapStockService"></property>
+  		<property name="cdLocInfoService" ref="cdLocInfoService"></property>
+  		<property name="cdWhInfoService" ref="cdWhInfoService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.inventory.service.StgSapStockServiceClient"
+		owner="Hevwms" ref="stgSapStockServiceClient" protocol="dubbo" version="5.0"
+		delay="-1" registry="qingdaoRegistry690" />
+
+</beans>

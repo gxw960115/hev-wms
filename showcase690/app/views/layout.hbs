@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>-{{#block "title"}}{{/block}}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/assets/styles/vendor.css">
+    <link rel="stylesheet" href="/assets/styles/app.css">
+    <!--[if IE 8]>
+    <script src="/assets/scripts/iecss/IE8.js"></script>
+    <script src="/assets/scripts/iecss/PIE.js"></script>
+    <![endif]-->
+
+    <!--[if lt IE 9]>
+    <script src="http://cdn.bootcss.com/html5shiv/3.7.0/html5shiv.min.js"></script>
+    <!--<script src="http://cdn.bootcss.com/respond.js/1.3.0/respond.min.js"></script>-->
+    <![endif]-->
+</head>
+<body>
+<!--[if lt IE 8]>
+<script type="text/javascript">alert("您的浏览器版本太低，请升级到IE8以上或谷歌火狐浏览器！");</script>
+<![endif]-->
+<!--[if lt IE 8]><script src="http://cdn.staticfile.org/json2/20121008/json2.js"></script><![endif]-->
+<div class="page-container">
+
+        {{{block "body"}}}
+
+</div>
+<script src="/assets/scripts/vendor.js"></script>
+{{{block "script"}}}
+<script src="/assets/scripts/app.js"></script>
+<script>require("app")();</script>
+<script type="text/javascript">
+    //添加网站流量计数器
+    (function() {
+        var lzhd = document.createElement('script'); lzhd.type = 'text/javascript'; lzhd.async = true;
+        if('https:' != document.location.protocol)
+            lzhd.src = 'http://liangzi1.haier.net:8099/collect-common.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(lzhd, s);
+    })();
+</script>
+</body>
+</html>

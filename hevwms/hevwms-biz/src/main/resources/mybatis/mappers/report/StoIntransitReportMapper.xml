@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- -->
+<mapper namespace="com.haier.hevwms.report.dao.StoIntransitReportDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="stoIntransitReportMap" type="stoIntransitReport">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="stoNo" column="SAP_ORDER_NO" />
+		<result property="intrasitQty" column="QTY" />
+		<result property="giQty" column="QTY" />
+		<result property="unit" column="UNIT" />
+		<result property="barcode" column="BARCODE" />
+		<result property="division" column="DIVISION" />
+		<result property="giDate" column="SCANNED_DATE" />
+		<result property="giPlt" column="GI_PLANT" />
+		<result property="giLoc" column="GI_LOCATION" />
+		<result property="grPlt" column="GR_PLANT" />
+		<result property="grLoc" column="GR_LOCATION" />
+	</resultMap>
+	
+	<sql id="searchStoIntransitReportInfo_fragement">
+		SELECT
+			t1.Material_No AS materialNo,
+			t1.Customer_Model AS customerModel,
+			t1.Material_Desp AS materialDesp,
+			t1.Sap_Order_No AS stoNo,
+			t1.Qty AS intrasitQty,
+			t1.Qty AS giQty,
+			t1.Unit AS unit,
+			t1.barcode,
+			t1.Scanned_Date AS giDate,
+			m.division,
+			stodown.gi_plant AS giPlt,
+			stodown.gi_location AS giLoc,
+			stodown.gr_plant AS grPlt,
+			stodown.gr_location AS grLoc
+		FROM
+			ods_order_info_dtl t1
+		INNER JOIN ods_order_info o ON o.row_id = t1.Order_Id
+		LEFT JOIN md_mat_info m ON m.material_no = t1.Material_No
+		LEFT JOIN stg_stodn_down stodndown ON stodndown.stodn_no = t1.Sap_Order_No
+		AND stodndown.stodn_item_no = t1.Sap_Order_Item
+		LEFT JOIN stg_sto_down stodown ON stodown.sto_no = stodndown.sto_no
+		AND stodown.sto_item_no = SUBSTR (stodndown.stodn_item_no,-5, 5)
+		WHERE
+			t1.doc_type = 'STO'
+		AND t1.order_type = '2'
+		AND NOT EXISTS (
+			SELECT
+				t2.BARCODE
+			FROM
+				ods_order_info_dtl t2
+			WHERE
+				t2.doc_type = 'STO'
+			AND t2.order_type = '1'
+			AND t2.doc_type = t1.doc_type
+			AND t2.Sap_Order_No = t1.Sap_Order_No
+			AND t2.Sap_Order_Item = t1.Sap_Order_Item
+		)
+		AND o.sap_flag = '1'
+		<if test="stoIntransitReportDTO.stoNo != null and stoIntransitReportDTO.stoNo != ''">
+        	<![CDATA[ and t1.Sap_Order_No = #{stoIntransitReportDTO.stoNo} ]]>
+	    </if>
+	    <if test="stoIntransitReportDTO.materialNo != null and stoIntransitReportDTO.materialNo != ''">
+	        <![CDATA[ and t1.material_no = #{stoIntransitReportDTO.materialNo} ]]>
+	    </if>
+	    <if test="stoIntransitReportDTO.division != null and stoIntransitReportDTO.division != ''">
+	        <![CDATA[ and m.division = #{stoIntransitReportDTO.division} ]]>
+	    </if>
+	    <if test="stoIntransitReportDTO.giPlt != null and stoIntransitReportDTO.giPlt != ''">
+	        <![CDATA[ and stodown.gi_plant = #{stoIntransitReportDTO.giPlt} ]]>
+	    </if>
+	    <if test="stoIntransitReportDTO.giDateBegin != null and stoIntransitReportDTO.giDateBegin != ''">
+	        <![CDATA[ and t1.Scanned_Date >= concat(#{stoIntransitReportDTO.giDateBegin}, ' 00:00:00') ]]>
+	    </if>
+	    <if test="stoIntransitReportDTO.giDateEnd != null and stoIntransitReportDTO.giDateEnd != ''">
+	        <![CDATA[ and t1.Scanned_Date <= concat(#{stoIntransitReportDTO.giDateEnd} ,' 23:59:59') ]]>
+	    </if>
+	</sql>
+	<select id="searchStoIntransitReportInfos" resultMap="stoIntransitReportMap">
+		<include refid="pagination_Head" />
+		<include refid="searchStoIntransitReportInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchStoIntransitReportInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchStoIntransitReportInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getStoIntransitReportInfos" resultMap="stoIntransitReportMap">
+		<include refid="searchStoIntransitReportInfo_fragement" />
+	</select>
+</mapper>

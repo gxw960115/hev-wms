@@ -1,0 +1,741 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.sto.dao.OdsStoScanInfoDAO" >
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+  
+	<resultMap id="BaseResultMap" type="odsStoScanInfo" >
+	    <result column="ROW_ID" property="rowId" />
+	    <result column="ORDER_TYPE" property="orderType" />
+	    <result column="BIN" property="bin" />
+	    <result column="STO_NO" property="stoNo" />
+	    <result column="STO_ITEM_NO" property="stoItemNo" />
+	    <result column="STODN_NO" property="stodnNo" />
+	    <result column="STODN_ITEM_NO" property="stodnItemNo" />
+	    <result column="BATCH_NO" property="batchNo" />
+	    <result column="PLANT" property="plant" />
+	    <result column="CUSTOMER_MODEL" property="customerModel" />
+	    <result column="LOCATION" property="location" />
+	    <result column="MATERIAL_NO" property="materialNo" />
+	    <result column="MATERIAL_DESP" property="materialDesp" />
+	    <result column="UNIT" property="unit" />
+	    <result column="BARCODE" property="barcode" />
+	    <result column="VENDOR_CODE" property="vendorCode" />
+	    <result column="VENDOR_NAME" property="vendorName" />
+	    <result column="DELIVERY_CODE" property="deliveryCode" />
+	    <result column="DELIVERY_NAME" property="deliveryName" />
+	    <result column="SCANNED_BY" property="scannedBy" />
+	    <result column="SCANNED_DATE" property="scannedDate" jdbcType="DATE" />
+	    <result column="DELIVERY_DATE" property="deliveryDate" jdbcType="DATE" />
+	    <result column="ORDER_ID" property="orderId" />
+	    <result column="ORDER_NO" property="orderNo" />
+	    <result column="CAR_NO" property="carNo" />
+	    <result column="CREATE_BY" property="createBy" />
+	    <result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+	    <result column="MODIFY_BY" property="modifyBy" />
+	    <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+	    <result column="FLAG" property="flag" />
+	    <result column="VERSION" property="version" />
+	    <result column="QTY" property="qty" />
+	    <result column="ORDER_ITEM" property="orderItem" />
+	    <result column="SERIAL_NO" property="serialNo" />
+	    <result column="FINISH_FLAG" property="finishFlag" />
+	    <result column="IN_OUT_FLAG" property="inOutFlag" />
+	    <result column="IN_OUT_MSG" property="inOutMsg" />
+	    <result column="USED_FLAG" property="usedFlag" />
+	    <result column="SUB_LOCATION" property="subLocation" />
+	    <result column="REMARK" property="remark" />
+	</resultMap>
+
+	<resultMap id="StoDnBaseResultMap" type="odsStodnScanInfo">
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="BIN" property="bin" />
+		<result column="STO_NO" property="stoNo" />
+		<result column="PLANT" property="plant" />
+		<result column="LOCATION" property="location" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="QTY" property="qty" />
+		<result column="UNIT" property="unit" />
+		<result column="BARCODE" property="barcode" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+		<result column="POST_DATE" property="postDate" />
+		<result column="CAR_NO" property="carNo" />
+		<result column="TRANSPORTER" property="transporter" />
+		<result column="STODN_NO" property="stodnNo" />
+		<result column="STODN_ITEM" property="stodnItem" />
+	</resultMap>
+
+
+	<sql id="Base_Column_List" >
+	  ROW_ID, ORDER_TYPE, BIN, STO_NO, STO_ITEM_NO, STODN_NO, STODN_ITEM_NO, BATCH_NO, 
+	  PLANT, CUSTOMER_MODEL, LOCATION, MATERIAL_NO, MATERIAL_DESP, UNIT, BARCODE, VENDOR_CODE, 
+	  VENDOR_NAME, DELIVERY_CODE, DELIVERY_NAME, SCANNED_BY, SCANNED_DATE, DELIVERY_DATE, 
+	  ORDER_ID, ORDER_NO, CAR_NO, CREATE_BY, CREATE_DATE, MODIFY_BY, MODIFY_DATE, FLAG, 
+	  VERSION, QTY, ORDER_ITEM, SERIAL_NO, FINISH_FLAG, IN_OUT_FLAG, IN_OUT_MSG, USED_FLAG, 
+	  SUB_LOCATION, REMARK
+	</sql>
+	
+	<!-- 无条件查询数据库所有字段 -->
+	<sql id="selectAllOdsStoScanInfoColumns">
+		select 
+		<include refid="Base_Column_List" /> 
+		from ODS_STO_SCAN_INFO
+	</sql>
+	
+	<sql id="searchOdsStoScanInfo_fragement">
+		where 1=1 
+		<if test="odsStoScanInfo.rowId != null" >
+	      and ROW_ID = #{odsStoScanInfo.rowId},
+	    </if>
+	    <if test="odsStoScanInfo.orderType != null and odsStoScanInfo.orderType != ''" >
+	      and ORDER_TYPE = #{odsStoScanInfo.orderType}
+	    </if>
+	    <if test="odsStoScanInfo.bin != null and odsStoScanInfo.bin != ''" >
+	      and BIN like '%'||#{odsStoScanInfo.bin}||'%' 
+	    </if>
+	    <if test="odsStoScanInfo.stoNo != null and odsStoScanInfo.stoNo != ''" >
+	      and STO_NO like '%'||#{odsStoScanInfo.stoNo}||'%' 
+	    </if>
+	    <if test="odsStoScanInfo.stodnNo != null and odsStoScanInfo.stodnNo != ''" >
+	      and STODN_NO like '%'||#{odsStoScanInfo.stodnNo}||'%'
+	    </if>
+	    <if test="odsStoScanInfo.stoItemNo != null and odsStoScanInfo.stoItemNo != ''" >
+	      and STO_ITEM_NO like '%'||#{odsStoScanInfo.stoItemNo}||'%' 
+	    </if>
+	    <if test="odsStoScanInfo.plant != null and odsStoScanInfo.plant != ''" >
+	      and PLANT like '%'||#{odsStoScanInfo.plant}||'%' 
+	    </if>
+	    <if test="odsStoScanInfo.customerModel != null and odsStoScanInfo.customerModel != ''" >
+	      and CUSTOMER_MODEL like '%'||#{odsStoScanInfo.customerModel}||'%'  
+	    </if>
+	    <if test="odsStoScanInfo.location != null and odsStoScanInfo.location != ''" >
+	      and LOCATION IN (${odsStoScanInfo.location})
+	    </if>
+	    <if test="odsStoScanInfo.materialNo != null and odsStoScanInfo.materialNo != ''" >
+	      and MATERIAL_NO like '%'||#{odsStoScanInfo.materialNo}||'%' 
+	    </if>
+	    <if test="odsStoScanInfo.barcode != null and odsStoScanInfo.barcode != ''" >
+	      and BARCODE like '%'||#{odsStoScanInfo.barcode}||'%' 
+	    </if>
+	    <if test="odsStoScanInfo.orderNo != null and odsStoScanInfo.orderNo != ''" >
+	      and ORDER_NO like '%'||#{odsStoScanInfo.orderNo}||'%' 
+	    </if>
+	    <if test="odsStoScanInfo.flag != null" >
+	      and FLAG = #{odsStoScanInfo.flag}
+	    </if>
+	    <if test="odsStoScanInfo.finishFlag != null and odsStoScanInfo.finishFlag != ''" >
+	      and FINISH_FLAG = #{odsStoScanInfo.finishFlag}
+	    </if>
+		<if test="odsStoScanInfo.scannedBy != null and odsStoScanInfo.scannedBy != ''">
+			and SCANNED_BY = #{odsStoScanInfo.scannedBy}
+		</if>
+
+	    <if test="odsStoScanInfo.begin != null and odsStoScanInfo.begin != ''" >
+	      	<![CDATA[
+				and CREATE_DATE >= TO_DATE(#{odsStoScanInfo.begin}||' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+	    <if test="odsStoScanInfo.end != null and odsStoScanInfo.end != ''" >
+	      	<![CDATA[
+				and CREATE_DATE <= TO_DATE(#{odsStoScanInfo.end}||' 23:59:59', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+	</sql>
+
+	<sql id="selectStoDnAllResult">
+		select
+			ROW_ID,
+			ORDER_TYPE,
+			BIN,
+            STO_NO,
+            STODN_NO,
+            STODN_ITEM,
+            PLANT,
+            LOCATION,
+            MATERIAL_NO,
+            MATERIAL_DESP,
+            UNIT,
+            BARCODE,
+            CAR_NO,
+            CREATE_BY,
+            CREATE_DATE,
+            MODIFY_BY,
+            MODIFY_DATE,
+            QTY,
+            IN_OUT_FLAG,
+            IN_OUT_MSG,
+            REMARK,
+            POST_DATE,
+            TRANSPORTER,
+            FIRST_IN_DATE,
+            ORDER_NO
+		from ODS_STODN_SCAN_INFO
+	</sql>
+
+	<sql id="selectStoDnByParameter">
+		where 1=1
+		<if test="odsStodnScanInfoDTO.stoNo != null and odsStodnScanInfoDTO.stoNo != ''">
+			and STO_NO like '%'||#{odsStodnScanInfoDTO.stoNo}||'%'
+		</if>
+		<if test="odsStodnScanInfoDTO.stodnNo != null and odsStodnScanInfoDTO.stodnNo != ''">
+			and STODN_NO like '%'||#{odsStodnScanInfoDTO.stodnNo}||'%'
+		</if>
+		<if test="odsStodnScanInfoDTO.orderNo != null and odsStodnScanInfoDTO.orderNo != ''">
+			and ORDER_NO like '%'||#{odsStodnScanInfoDTO.orderNo}||'%'
+		</if>
+		<if test="odsStodnScanInfoDTO.materialNo != null and odsStodnScanInfoDTO.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsStodnScanInfoDTO.materialNo}||'%'
+		</if>
+		<if test="odsStodnScanInfoDTO.plant != null and odsStodnScanInfoDTO.plant != ''">
+			and PLANT like '%'||#{odsStodnScanInfoDTO.plant}||'%'
+		</if>
+		<if test="odsStodnScanInfoDTO.location != null and odsStodnScanInfoDTO.location != ''">
+			and LOCATION IN (${odsStodnScanInfoDTO.location})
+		</if>
+		<if test="odsStodnScanInfoDTO.begin != null and odsStodnScanInfoDTO.begin != ''" >
+			<![CDATA[
+                and CREATE_DATE >= TO_DATE(#{odsStodnScanInfoDTO.begin}||' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')
+            ]]>
+		</if>
+		<if test="odsStodnScanInfoDTO.end != null and odsStodnScanInfoDTO.end != ''" >
+			<![CDATA[
+                and CREATE_DATE <= TO_DATE(#{odsStodnScanInfoDTO.end}||' 23:59:59', 'yyyy-mm-dd hh24:mi:ss')
+            ]]>
+		</if>
+	</sql>
+	
+	<select id="get" resultMap="BaseResultMap" parameterType="long">
+		<include refid="selectAllOdsStoScanInfoColumns" />
+		where ROW_ID = #{rowId}
+	</select>
+	
+	<select id="getAll" resultMap="BaseResultMap">
+		<include refid="selectAllOdsStoScanInfoColumns" />
+	</select>
+	
+	<delete id="delete" parameterType="odsStoScanInfo" >
+	  delete from ODS_STO_SCAN_INFO where ROW_ID = #{rowId}
+	</delete>
+  
+  	<!-- 分页查询 -->
+	<select id="searchOdsStoScanInfoByPage" resultMap="BaseResultMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllOdsStoScanInfoColumns" />
+		<include refid="searchOdsStoScanInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsStoScanInfoCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllOdsStoScanInfoColumns" />
+		<include refid="searchOdsStoScanInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+	<!-- 条件查询列表 -->
+	<select id="getListByParam" resultMap="BaseResultMap">
+		<include refid="selectAllOdsStoScanInfoColumns" />
+		<include refid="searchOdsStoScanInfo_fragement" />
+	</select>
+
+	<!-- 条件查询列表 -->
+	<select id="getOdsStodnScanInfo" resultMap="BaseResultMap">
+		select ROW_ID, BARCODE, QTY
+		from ODS_STODN_SCAN_INFO
+		where STODN_NO = #{dto.orderNo}
+		and CREATE_BY = #{dto.scannedBy}
+		and ORDER_TYPE = #{dto.orderType}
+		and IN_OUT_FLAG = '0'
+	</select>
+
+	<select id="getListByBarcodes" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List"/>
+		from ODS_STO_SCAN_INFO
+		where ORDER_NO IN (${orderNo}) AND BARCODE in (${barcodes})
+	</select>
+
+	<select id="searchOdsStoDnScanInfosCount" resultType="java.lang.Long">
+		<include refid="count_Head" />
+		<include refid="selectStoDnAllResult" />
+		<include refid="selectStoDnByParameter" />
+		<include refid="count_Tail" />
+	</select>
+
+	<select id="searchStoDnList" resultMap="StoDnBaseResultMap">
+		<include refid="selectStoDnAllResult" />
+		<include refid="selectStoDnByParameter" />
+	</select>
+
+
+	<insert id="save" parameterType="odsStoScanInfo" >
+	  insert into ODS_STO_SCAN_INFO (ROW_ID, ORDER_TYPE, BIN, 
+	    STO_NO, STO_ITEM_NO, STODN_NO, 
+	    STODN_ITEM_NO, BATCH_NO, PLANT, 
+	    CUSTOMER_MODEL, LOCATION, MATERIAL_NO, 
+	    MATERIAL_DESP, UNIT, BARCODE, 
+	    VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE, 
+	    DELIVERY_NAME, SCANNED_BY, SCANNED_DATE, 
+	    DELIVERY_DATE, ORDER_ID, ORDER_NO, 
+	    CAR_NO, CREATE_BY, CREATE_DATE, 
+	    MODIFY_BY, MODIFY_DATE, FLAG, 
+	    VERSION, QTY, ORDER_ITEM, 
+	    SERIAL_NO, FINISH_FLAG, IN_OUT_FLAG, 
+	    IN_OUT_MSG, USED_FLAG, SUB_LOCATION, 
+	    REMARK)
+	  values (#{rowId,jdbcType=DECIMAL}, #{orderType,jdbcType=OTHER}, #{bin,jdbcType=OTHER}, 
+	    #{stoNo,jdbcType=OTHER}, #{stoItemNo,jdbcType=OTHER}, #{stoDnNo,jdbcType=OTHER}, 
+	    #{stoDnItemNo,jdbcType=OTHER}, #{batchNo,jdbcType=OTHER}, #{plant,jdbcType=OTHER}, 
+	    #{customerModel,jdbcType=OTHER}, #{location,jdbcType=OTHER}, #{materialNo,jdbcType=OTHER}, 
+	    #{materialDesp,jdbcType=OTHER}, #{unit,jdbcType=OTHER}, #{barcode,jdbcType=OTHER}, 
+	    #{vendorCode,jdbcType=OTHER}, #{vendorName,jdbcType=OTHER}, #{deliveryCode,jdbcType=OTHER}, 
+	    #{deliveryName,jdbcType=OTHER}, #{scannedBy,jdbcType=OTHER}, #{scannedDate,jdbcType=DATE}, 
+	    #{deliveryDate,jdbcType=DATE}, #{orderId,jdbcType=DECIMAL}, #{orderNo,jdbcType=OTHER}, 
+	    #{carNo,jdbcType=OTHER}, #{createBy,jdbcType=OTHER}, #{createDate,jdbcType=DATE}, 
+	    #{modifyBy,jdbcType=OTHER}, #{modifyDate,jdbcType=DATE}, #{flag,jdbcType=OTHER}, 
+	    #{version,jdbcType=DECIMAL}, #{qty,jdbcType=DECIMAL}, #{orderItem,jdbcType=OTHER}, 
+	    #{serialNo,jdbcType=OTHER}, #{finishFlag,jdbcType=OTHER}, #{inOutFlag,jdbcType=OTHER}, 
+	    #{inOutMsg,jdbcType=OTHER}, #{usedFlag,jdbcType=OTHER}, #{subLocation,jdbcType=OTHER}, 
+	    #{remark})
+	</insert>
+	
+	<insert id="insertSelective" parameterType="odsStoScanInfo" >
+	  insert into ODS_STO_SCAN_INFO
+	  <trim prefix="(" suffix=")" suffixOverrides="," >
+	    <if test="rowId != null" >
+	      ROW_ID,
+	    </if>
+	    <if test="orderType != null" >
+	      ORDER_TYPE,
+	    </if>
+	    <if test="bin != null" >
+	      BIN,
+	    </if>
+	    <if test="stoNo != null" >
+	      STO_NO,
+	    </if>
+	    <if test="stoItemNo != null" >
+	      STO_ITEM_NO,
+	    </if>
+	    <if test="stodnNo != null" >
+	      STODN_NO,
+	    </if>
+	    <if test="stodnItemNo != null" >
+	      STODN_ITEM_NO,
+	    </if>
+	    <if test="batchNo != null" >
+	      BATCH_NO,
+	    </if>
+	    <if test="plant != null" >
+	      PLANT,
+	    </if>
+	    <if test="customerModel != null" >
+	      CUSTOMER_MODEL,
+	    </if>
+	    <if test="location != null" >
+	      LOCATION,
+	    </if>
+	    <if test="materialNo != null" >
+	      MATERIAL_NO,
+	    </if>
+	    <if test="materialDesp != null" >
+	      MATERIAL_DESP,
+	    </if>
+	    <if test="unit != null" >
+	      UNIT,
+	    </if>
+	    <if test="barcode != null" >
+	      BARCODE,
+	    </if>
+	    <if test="vendorCode != null" >
+	      VENDOR_CODE,
+	    </if>
+	    <if test="vendorName != null" >
+	      VENDOR_NAME,
+	    </if>
+	    <if test="deliveryCode != null" >
+	      DELIVERY_CODE,
+	    </if>
+	    <if test="deliveryName != null" >
+	      DELIVERY_NAME,
+	    </if>
+	    <if test="scannedBy != null" >
+	      SCANNED_BY,
+	    </if>
+	    <if test="scannedDate != null" >
+	      SCANNED_DATE,
+	    </if>
+	    <if test="deliveryDate != null" >
+	      DELIVERY_DATE,
+	    </if>
+	    <if test="orderId != null" >
+	      ORDER_ID,
+	    </if>
+	    <if test="orderNo != null" >
+	      ORDER_NO,
+	    </if>
+	    <if test="carNo != null" >
+	      CAR_NO,
+	    </if>
+	    <if test="createBy != null" >
+	      CREATE_BY,
+	    </if>
+	    <if test="createDate != null" >
+	      CREATE_DATE,
+	    </if>
+	    <if test="modifyBy != null" >
+	      MODIFY_BY,
+	    </if>
+	    <if test="modifyDate != null" >
+	      MODIFY_DATE,
+	    </if>
+	    <if test="flag != null" >
+	      FLAG,
+	    </if>
+	    <if test="version != null" >
+	      VERSION,
+	    </if>
+	    <if test="qty != null" >
+	      QTY,
+	    </if>
+	    <if test="orderItem != null" >
+	      ORDER_ITEM,
+	    </if>
+	    <if test="serialNo != null" >
+	      SERIAL_NO,
+	    </if>
+	    <if test="finishFlag != null" >
+	      FINISH_FLAG,
+	    </if>
+	    <if test="inOutFlag != null" >
+	      IN_OUT_FLAG,
+	    </if>
+	    <if test="inOutMsg != null" >
+	      IN_OUT_MSG,
+	    </if>
+	    <if test="usedFlag != null" >
+	      USED_FLAG,
+	    </if>
+	    <if test="subLocation != null" >
+	      SUB_LOCATION,
+	    </if>
+	    <if test="remark != null" >
+	      REMARK,
+	    </if>
+	  </trim>
+	  <trim prefix="values (" suffix=")" suffixOverrides="," >
+	    <if test="rowId != null" >
+	      #{rowId,jdbcType=DECIMAL},
+	    </if>
+	    <if test="orderType != null" >
+	      #{orderType,jdbcType=OTHER},
+	    </if>
+	    <if test="bin != null" >
+	      #{bin,jdbcType=OTHER},
+	    </if>
+	    <if test="stoNo != null" >
+	      #{stoNo,jdbcType=OTHER},
+	    </if>
+	    <if test="stoItemNo != null" >
+	      #{stoItemNo,jdbcType=OTHER},
+	    </if>
+	    <if test="stoDnNo != null" >
+	      #{stoDnNo,jdbcType=OTHER},
+	    </if>
+	    <if test="stoDnItemNo != null" >
+	      #{stoDnItemNo,jdbcType=OTHER},
+	    </if>
+	    <if test="batchNo != null" >
+	      #{batchNo,jdbcType=OTHER},
+	    </if>
+	    <if test="plant != null" >
+	      #{plant,jdbcType=OTHER},
+	    </if>
+	    <if test="customerModel != null" >
+	      #{customerModel,jdbcType=OTHER},
+	    </if>
+	    <if test="location != null" >
+	      #{location,jdbcType=OTHER},
+	    </if>
+	    <if test="materialNo != null" >
+	      #{materialNo,jdbcType=OTHER},
+	    </if>
+	    <if test="materialDesp != null" >
+	      #{materialDesp,jdbcType=OTHER},
+	    </if>
+	    <if test="unit != null" >
+	      #{unit,jdbcType=OTHER},
+	    </if>
+	    <if test="barcode != null" >
+	      #{barcode,jdbcType=OTHER},
+	    </if>
+	    <if test="vendorCode != null" >
+	      #{vendorCode,jdbcType=OTHER},
+	    </if>
+	    <if test="vendorName != null" >
+	      #{vendorName,jdbcType=OTHER},
+	    </if>
+	    <if test="deliveryCode != null" >
+	      #{deliveryCode,jdbcType=OTHER},
+	    </if>
+	    <if test="deliveryName != null" >
+	      #{deliveryName,jdbcType=OTHER},
+	    </if>
+	    <if test="scannedBy != null" >
+	      #{scannedBy,jdbcType=OTHER},
+	    </if>
+	    <if test="scannedDate != null" >
+	      #{scannedDate,jdbcType=DATE},
+	    </if>
+	    <if test="deliveryDate != null" >
+	      #{deliveryDate,jdbcType=DATE},
+	    </if>
+	    <if test="orderId != null" >
+	      #{orderId,jdbcType=DECIMAL},
+	    </if>
+	    <if test="orderNo != null" >
+	      #{orderNo,jdbcType=OTHER},
+	    </if>
+	    <if test="carNo != null" >
+	      #{carNo,jdbcType=OTHER},
+	    </if>
+	    <if test="createBy != null" >
+	      #{createBy,jdbcType=OTHER},
+	    </if>
+	    <if test="createDate != null" >
+	      #{createDate,jdbcType=DATE},
+	    </if>
+	    <if test="modifyBy != null" >
+	      #{modifyBy,jdbcType=OTHER},
+	    </if>
+	    <if test="modifyDate != null" >
+	      #{modifyDate,jdbcType=DATE},
+	    </if>
+	    <if test="flag != null" >
+	      #{flag,jdbcType=OTHER},
+	    </if>
+	    <if test="version != null" >
+	      #{version,jdbcType=DECIMAL},
+	    </if>
+	    <if test="qty != null" >
+	      #{qty,jdbcType=DECIMAL},
+	    </if>
+	    <if test="orderItem != null" >
+	      #{orderItem,jdbcType=OTHER},
+	    </if>
+	    <if test="serialNo != null" >
+	      #{serialNo,jdbcType=OTHER},
+	    </if>
+	    <if test="finishFlag != null" >
+	      #{finishFlag,jdbcType=OTHER},
+	    </if>
+	    <if test="inOutFlag != null" >
+	      #{inOutFlag,jdbcType=OTHER},
+	    </if>
+	    <if test="inOutMsg != null" >
+	      #{inOutMsg,jdbcType=OTHER},
+	    </if>
+	    <if test="usedFlag != null" >
+	      #{usedFlag,jdbcType=OTHER},
+	    </if>
+	    <if test="subLocation != null" >
+	      #{subLocation,jdbcType=OTHER},
+	    </if>
+	    <if test="remark != null" >
+	      #{remark},
+	    </if>
+	  </trim>
+	</insert>
+	
+	<update id="updateSelectActive" parameterType="odsStoScanInfo" >
+	  update ODS_STO_SCAN_INFO
+	  <set >
+	    <if test="record.orderType != null" >
+	      ORDER_TYPE = #{record.orderType,jdbcType=OTHER},
+	    </if>
+	    <if test="record.bin != null" >
+	      BIN = #{record.bin,jdbcType=OTHER},
+	    </if>
+	    <if test="record.stoNo != null" >
+	      STO_NO = #{record.stoNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.stoItemNo != null" >
+	      STO_ITEM_NO = #{record.stoItemNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.stodnNo != null" >
+	      STODN_NO = #{record.stodnNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.stodnItemNo != null" >
+	      STODDN_ITEM_NO = #{record.stodnItemNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.batchNo != null" >
+	      BATCH_NO = #{record.batchNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.plant != null" >
+	      PLANT = #{record.plant,jdbcType=OTHER},
+	    </if>
+	    <if test="record.customerModel != null" >
+	      CUSTOMER_MODEL = #{record.customerModel,jdbcType=OTHER},
+	    </if>
+	    <if test="record.location != null" >
+	      LOCATION = #{record.location,jdbcType=OTHER},
+	    </if>
+	    <if test="record.materialNo != null" >
+	      MATERIAL_NO = #{record.materialNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.materialDesp != null" >
+	      MATERIAL_DESP = #{record.materialDesp,jdbcType=OTHER},
+	    </if>
+	    <if test="record.unit != null" >
+	      UNIT = #{record.unit,jdbcType=OTHER},
+	    </if>
+	    <if test="record.barcode != null" >
+	      BARCODE = #{record.barcode,jdbcType=OTHER},
+	    </if>
+	    <if test="record.vendorCode != null" >
+	      VENDOR_CODE = #{record.vendorCode,jdbcType=OTHER},
+	    </if>
+	    <if test="record.vendorName != null" >
+	      VENDOR_NAME = #{record.vendorName,jdbcType=OTHER},
+	    </if>
+	    <if test="record.deliveryCode != null" >
+	      DELIVERY_CODE = #{record.deliveryCode,jdbcType=OTHER},
+	    </if>
+	    <if test="record.deliveryName != null" >
+	      DELIVERY_NAME = #{record.deliveryName,jdbcType=OTHER},
+	    </if>
+	    <if test="record.scannedBy != null" >
+	      SCANNED_BY = #{record.scannedBy,jdbcType=OTHER},
+	    </if>
+	    <if test="record.scannedDate != null" >
+	      SCANNED_DATE = #{record.scannedDate,jdbcType=DATE},
+	    </if>
+	    <if test="record.deliveryDate != null" >
+	      DELIVERY_DATE = #{record.deliveryDate,jdbcType=DATE},
+	    </if>
+	    <if test="record.orderId != null" >
+	      ORDER_ID = #{record.orderId,jdbcType=DECIMAL},
+	    </if>
+	    <if test="record.orderNo != null" >
+	      ORDER_NO = #{record.orderNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.carNo != null" >
+	      CAR_NO = #{record.carNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.createBy != null" >
+	      CREATE_BY = #{record.createBy,jdbcType=OTHER},
+	    </if>
+	    <if test="record.createDate != null" >
+	      CREATE_DATE = #{record.createDate,jdbcType=DATE},
+	    </if>
+	    <if test="record.modifyBy != null" >
+	      MODIFY_BY = #{record.modifyBy,jdbcType=OTHER},
+	    </if>
+	    <if test="record.modifyDate != null" >
+	      MODIFY_DATE = #{record.modifyDate,jdbcType=DATE},
+	    </if>
+	    <if test="record.flag != null" >
+	      FLAG = #{record.flag,jdbcType=OTHER},
+	    </if>
+	    <if test="record.version != null" >
+	      VERSION = #{record.version,jdbcType=DECIMAL},
+	    </if>
+	    <if test="record.qty != null" >
+	      QTY = #{record.qty,jdbcType=DECIMAL},
+	    </if>
+	    <if test="record.orderItem != null" >
+	      ORDER_ITEM = #{record.orderItem,jdbcType=OTHER},
+	    </if>
+	    <if test="record.serialNo != null" >
+	      SERIAL_NO = #{record.serialNo,jdbcType=OTHER},
+	    </if>
+	    <if test="record.finishFlag != null" >
+	      FINISH_FLAG = #{record.finishFlag,jdbcType=OTHER},
+	    </if>
+	    <if test="record.inOutFlag != null" >
+	      IN_OUT_FLAG = #{record.inOutFlag,jdbcType=OTHER},
+	    </if>
+	    <if test="record.inOutMsg != null" >
+	      IN_OUT_MSG = #{record.inOutMsg,jdbcType=OTHER},
+	    </if>
+	    <if test="record.usedFlag != null" >
+	      USED_FLAG = #{record.usedFlag,jdbcType=OTHER},
+	    </if>
+	    <if test="record.subLocation != null" >
+	      SUB_LOCATION = #{record.subLocation,jdbcType=OTHER},
+	    </if>
+	    <if test="record.remark != null" >
+	      REMARK = #{record.remark},
+	    </if>
+	  </set>
+	</update>
+	
+	<update id="update" parameterType="odsStoScanInfo" >
+	  update ODS_STO_SCAN_INFO
+	  set 
+	    ORDER_TYPE = #{record.orderType,jdbcType=OTHER},
+	    BIN = #{record.bin,jdbcType=OTHER},
+	    STO_NO = #{record.stoNo,jdbcType=OTHER},
+	    STO_ITEM_NO = #{record.stoItemNo,jdbcType=OTHER},
+	    STODN_NO = #{record.stodnNo,jdbcType=OTHER},
+	    STODN_ITEM_NO = #{record.stodnItemNo,jdbcType=OTHER},
+	    BATCH_NO = #{record.batchNo,jdbcType=OTHER},
+	    PLANT = #{record.plant,jdbcType=OTHER},
+	    CUSTOMER_MODEL = #{record.customerModel,jdbcType=OTHER},
+	    LOCATION = #{record.location,jdbcType=OTHER},
+	    MATERIAL_NO = #{record.materialNo,jdbcType=OTHER},
+	    MATERIAL_DESP = #{record.materialDesp,jdbcType=OTHER},
+	    UNIT = #{record.unit,jdbcType=OTHER},
+	    BARCODE = #{record.barcode,jdbcType=OTHER},
+	    VENDOR_CODE = #{record.vendorCode,jdbcType=OTHER},
+	    VENDOR_NAME = #{record.vendorName,jdbcType=OTHER},
+	    DELIVERY_CODE = #{record.deliveryCode,jdbcType=OTHER},
+	    DELIVERY_NAME = #{record.deliveryName,jdbcType=OTHER},
+	    SCANNED_BY = #{record.scannedBy,jdbcType=OTHER},
+	    SCANNED_DATE = #{record.scannedDate,jdbcType=DATE},
+	    DELIVERY_DATE = #{record.deliveryDate,jdbcType=DATE},
+	    ORDER_ID = #{record.orderId,jdbcType=DECIMAL},
+	    ORDER_NO = #{record.orderNo,jdbcType=OTHER},
+	    CAR_NO = #{record.carNo,jdbcType=OTHER},
+	    CREATE_BY = #{record.createBy,jdbcType=OTHER},
+	    CREATE_DATE = #{record.createDate,jdbcType=DATE},
+	    MODIFY_BY = #{record.modifyBy,jdbcType=OTHER},
+	    MODIFY_DATE = #{record.modifyDate,jdbcType=DATE},
+	    FLAG = #{record.flag,jdbcType=OTHER},
+	    VERSION = #{record.version,jdbcType=DECIMAL},
+	    QTY = #{record.qty,jdbcType=DECIMAL},
+	    ORDER_ITEM = #{record.orderItem,jdbcType=OTHER},
+	    SERIAL_NO = #{record.serialNo,jdbcType=OTHER},
+	    FINISH_FLAG = #{record.finishFlag,jdbcType=OTHER},
+	    IN_OUT_FLAG = #{record.inOutFlag,jdbcType=OTHER},
+	    IN_OUT_MSG = #{record.inOutMsg,jdbcType=OTHER},
+	    USED_FLAG = #{record.usedFlag,jdbcType=OTHER},
+	    SUB_LOCATION = #{record.subLocation,jdbcType=OTHER},
+	    REMARK = #{record.remark}
+	   where ROW_ID = #{record.rowId}
+	</update>
+	<update id="updateStodnInfo" parameterType="odsStoScanInfo">
+	    update ODS_STO_SCAN_INFO 
+	    set stodn_no = #{odsStoScanInfo.stodnNo},
+	    stodn_item_no = #{odsStoScanInfo.stodnItemNo} 
+	    where order_no = #{odsStoScanInfo.orderNo}
+	    and material_no = #{odsStoScanInfo.materialNo}
+	</update>
+</mapper>

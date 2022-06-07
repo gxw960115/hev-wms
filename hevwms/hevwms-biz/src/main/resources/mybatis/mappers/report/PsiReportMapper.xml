@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.report.dao.PsiReportDAO">
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="psiReportMap" type="psiReport">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="warehouseCode" column="WH_CODE" />
+		<result property="warehouseName" column="WH_NAME" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="color" column="EXTERNAL_MAT_GROUP" />
+		<result property="division" column="DIVISION" />
+		<result property="openingQty" column="OQTY" />
+		<result property="inWareHouseQty" column="INQTY" />
+		<result property="outWarehouseQty" column="OUTQTY" />
+		<result property="wmsQty" column="QTY" />
+		<result property="flag" column="FLAG" />
+		<result property="createDate" column="CREATE_DATE" />
+	</resultMap>
+	
+	<sql id="searchPsiReportInfo_fragement">
+		select distinct
+			wh.name AS warehouseName,
+			s.location,
+			s.material_no as materialNo,
+			mat.material_desp as materialDesp,
+			mat.customer_model as customerModel,
+			mat.external_mat_group as color,
+			mat.division,
+			s.oqty as openingQty,
+			s.inqty as inWareHouseQty,
+			s.outqty as outWarehouseQty,
+			s.qty as wmsQty
+		from 
+			(
+				select 
+					inve.location,
+					inve.material_no,
+					sum(inve.oqty) as oqty,
+					sum(inve.inqty) as inqty,
+					sum(inve.outqty) as outqty,
+					sum(inve.qty) as qty
+				from 
+					(
+						select 
+							t.location,
+							t.material_no,
+                       		0 as oqty,
+                       		SUM(t.scanned_qty) as inqty,
+                       		0 as outqty,
+                       		0 as qty
+						from ODS_ORDER_INFO t
+						where t.order_type = '1' and t.flag='0' and t.sap_flag='1'
+		<if test="psiReportDTO.begin != null and psiReportDTO.begin != ''">
+		<![CDATA[ and t.create_date >= #{psiReportDTO.begin} ]]>
+		</if>
+		<if test="psiReportDTO.end != null and psiReportDTO.end != ''">
+		<![CDATA[ and t.create_date <= #{psiReportDTO.end} ]]>
+		</if>
+			group by t.location, t.material_no
+			UNION ALL
+				select 
+					t.location,
+                    t.material_no,
+                    0 as oqty,
+                    0 as inqty,
+                    sum(t.scanned_qty) as outqty,
+                    0 as qty
+				from ODS_ORDER_INFO t
+				where t.order_type = '2' and t.flag='0' and t.sap_flag = '1'
+		<if test="psiReportDTO.begin != null and psiReportDTO.begin != ''">
+		<![CDATA[
+			and t.create_date >= TO_DATE(concat(#{psiReportDTO.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+		<if test="psiReportDTO.end != null and psiReportDTO.end != ''">
+		<![CDATA[
+			and t.create_date <= TO_DATE(concat(#{psiReportDTO.end},'23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		]]>
+		</if>
+			group by t.location, t.material_no
+			UNION ALL
+				select 
+					i.location,
+	                i.material_no,
+	                0             as oqty,
+	                0             as inqty,
+	                0             as outqty,
+	                i.qty         as qty
+				from v_inventory_info i
+			union all
+                select 
+                	o.location,
+                    o.material_no,
+                    o.wms_qty     as oqty,
+                    0             as inqty,
+                    0             as outqty,
+                    0             as qty
+				from ods_inventory_info o
+		<if test="psiReportDTO.begin != null and psiReportDTO.begin != ''">
+		<![CDATA[
+			where o.INVENTORY_DATE= #{psiReportDTO.begin}
+		]]>
+		</if>
+					) inve
+				group by inve.location, inve.material_no
+			) s
+			LEFT JOIN md_mat_info mat on s.material_no = mat.material_no
+			LEFT JOIN cd_loc_info t ON t.code = s.location
+			LEFT JOIN cd_wh_info wh ON t.parent_id = wh.row_id
+			where 1=1
+		<if test="psiReportDTO.warehouseCode != null and psiReportDTO.warehouseCode != ''">
+			<![CDATA[ and wh.code=#{psiReportDTO.warehouseCode} ]]>
+		</if>
+		<if test="psiReportDTO.location != null and psiReportDTO.location != ''">
+			<![CDATA[ and s.location=#{psiReportDTO.location} ]]>
+		</if>
+		<if test="psiReportDTO.materialNo != null and psiReportDTO.materialNo != ''">
+        	<![CDATA[ and s.material_no=#{psiReportDTO.materialNo} ]]>
+    	</if>
+    	<if test="psiReportDTO.division != null and psiReportDTO.division != ''">
+        	<![CDATA[ and mat.division=#{psiReportDTO.division} ]]>
+    	</if>
+		order by wh.name,s.location,s.material_no
+	</sql>
+	
+	<select id="searchPsiReportInfos" resultMap="psiReportMap">
+		<include refid="pagination_Head" />
+		<include refid="searchPsiReportInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchPsiReportInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchPsiReportInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getPsiReportInfos" resultMap="psiReportMap">
+		<include refid="searchPsiReportInfo_fragement" />
+	</select>
+</mapper>

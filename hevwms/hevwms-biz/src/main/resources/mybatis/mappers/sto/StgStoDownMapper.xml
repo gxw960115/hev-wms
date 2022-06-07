@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.sto.dao.StgStoDownDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from (]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllStgStoDownColumns">
+		<![CDATA[
+		select
+			sto.ROW_ID,
+			sto.STO_NO,
+			sto.STO_ITEM_NO,
+			sto.GI_PLANT,
+			sto.GR_PLANT,
+			sto.PUR_ORG,
+			sto.STO_DOC_DATE,
+			sto.STO_LAST_MODIFY_DATE,
+			sto.STO_CREATE_BY,
+			sto.MATERIAL_NO,
+			sto.MATERIAL_DESP,
+			sto.QTY,
+			sto.ITEM_DELTET,
+			sto.STO_CLOSE,
+			sto.GR_LOCATION,
+			sto.GR_DATE,
+			sto.GI_LOCATION,
+			sto.GI_DATE,
+			sto.CREATE_DATE,
+			sto.MODIFY_DATE,
+			sto.GI_FINISH_QTY,
+			sto.GR_FINISH_QTY,
+			sto.VERSION,
+			sto.UNIT,
+			sto.prescan_flag,
+			sto.flag,
+			sto.sto_type,
+			sto.CHECK_FLAG,
+			sto.gi_finish_flag,
+			sto.gr_finish_flag
+		from 
+			STG_STO_DOWN sto
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="stgStoDownMap" type="stgStoDown">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="stoNo" column="STO_NO" />
+		<result property="stoItemNo" column="STO_ITEM_NO" />
+		<result property="giPlant" column="GI_PLANT" />
+		<result property="grPlant" column="GR_PLANT" />
+		<result property="purOrg" column="PUR_ORG" />
+		<result property="stoDocDate" column="STO_DOC_DATE" />
+		<result property="stoLastModifyDate" column="STO_LAST_MODIFY_DATE" />
+		<result property="stoCreateBy" column="STO_CREATE_BY" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="qty" column="QTY" />
+		<result property="itemDeltet" column="ITEM_DELTET" />
+		<result property="stoClose" column="STO_CLOSE" />
+		<result property="grLocation" column="GR_LOCATION" />
+		<result property="grDate" column="GR_DATE" />
+		<result property="giLocation" column="GI_LOCATION" />
+		<result property="giDate" column="GI_DATE" />
+		<result property="unit" column="UNIT" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="version" column="VERSION" />
+		<result property="prescanFlag" column="prescan_flag" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="giFinishQty" column="GI_FINISH_QTY" />
+		<result property="grFinishQty" column="GR_FINISH_QTY" />
+		<result property="giFinishFlag" column="GI_FINISH_FLAG" />
+		<result property="grFinishFlag" column="GR_FINISH_FLAG" />
+		<result property="flag" column="flag" />
+		<result property="stoType" column="STO_TYPE" />
+		<result property="checkFlag" column="CHECK_FLAG"/>
+		<result property="comeFromTms" column="COME_FROM_TMS"/>
+	</resultMap>
+	<!-- =========================================================== -->
+
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="stgStoDownMap">
+		<include refid="selectAllStgStoDownColumns" />
+	</select>
+	<select id="get" resultMap="stgStoDownMap" parameterType="long">
+		<include refid="selectAllStgStoDownColumns" />
+		<![CDATA[
+		where sto.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from STG_STO_DOWN where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from STG_STO_DOWN where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="closeStgStoDown">
+		<![CDATA[
+		update STG_STO_DOWN set flag = 1 where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<!-- 20140721 STO reopen chenp -->
+	<update id="openStgStoDown">
+		<![CDATA[
+		update  STG_STO_DOWN set flag = 0 where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<insert id="save" parameterType="stgStoDown">
+	    <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+            SELECT SEQ_STO_DOWN_ID.NEXTVAL AS ID FROM DUAL
+        </selectKey>
+		<![CDATA[
+		insert into STG_STO_DOWN
+		  (ROW_ID
+		  		,STO_NO
+				,STO_ITEM_NO
+				,GI_PLANT
+				,GR_PLANT
+				,PUR_ORG
+				,STO_DOC_DATE
+				,STO_LAST_MODIFY_DATE
+				,STO_CREATE_BY
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,ITEM_DELTET
+				,STO_CLOSE
+				,GR_LOCATION
+				,GR_FINISH_QTY
+				,GR_FINISH_FLAG
+				,GR_DATE
+				,GI_LOCATION
+				,GI_FINISH_QTY
+				,GI_FINISH_FLAG
+				,GI_DATE
+				,CREATE_DATE
+				,UNIT
+				,CREATE_BY
+				,STO_TYPE
+				,COME_FROM_TMS
+		   )
+		values
+		  (#{rowId}
+		        ,#{stoNo}
+				,#{stoItemNo}
+				,#{giPlant}
+				,#{grPlant}
+				,#{purOrg}
+				,#{stoDocDate}
+				,#{stoLastModifyDate}
+				,#{stoCreateBy}
+				,#{materialNo}
+				,#{customerModel}
+				,#{materialDesp}
+				,#{qty}
+				,#{itemDeltet}
+				,#{stoClose}
+				,#{grLocation}
+				,#{grFinishQty}
+				,#{grFinishFlag}
+				,#{grDate}
+				,#{giLocation}
+				,#{giFinishQty}
+				,#{giFinishFlag}
+				,#{giDate}
+				,#{createDate}
+				,#{unit}
+				,#{createBy}
+				,#{stoType}
+				,#{comeFromTms}
+			 )
+		]]>
+
+	    
+	</insert>
+	<update id="update" parameterType="stgStoDown">
+		<![CDATA[
+		update STG_STO_DOWN
+		   set 
+		   		 STO_NO = #{stoNo}
+				,STO_ITEM_NO = #{stoItemNo}
+				,GI_PLANT = #{giPlant}
+				,GR_PLANT = #{grPlant}
+				,PUR_ORG = #{purOrg}
+				,STO_DOC_DATE = #{stoDocDate}
+				,STO_LAST_MODIFY_DATE = #{stoLastModifyDate}
+				,STO_CREATE_BY = #{stoCreateBy}
+				,MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,QTY = #{qty}
+				,ITEM_DELTET = #{itemDeltet}
+				,STO_CLOSE = #{stoClose}
+				,GR_LOCATION = #{grLocation}
+				,GR_FINISH_QTY = #{grFinishQty}
+				,GR_FINISH_FLAG = #{grFinishFlag}
+				,GR_LOCATION = #{grLocation}
+				,GR_DATE = #{grDate}
+				,GI_LOCATION = #{giLocation}
+				,GI_FINISH_QTY = #{giFinishQty}
+				,GI_FINISH_FLAG = #{giFinishFlag}
+				,GI_DATE = #{giDate} 
+				,MODIFY_DATE = #{modifyDate} 
+				,prescan_flag=#{prescanFlag}
+				,UNIT=#{unit}
+				,STO_TYPE=#{stoType}
+				,MODIFY_BY=#{modifyBy}
+				,COME_FROM_TMS='TMS']]>
+		<if test="giFinishFlag != '' and giFinishFlag!=null">
+			, GI_FINISH_FLAG = #{giFinishFlag}
+		</if>
+		<if test="checkFlag != null and checkFlag != '' ">
+				,CHECK_FLAG = #{checkFlag}
+		</if>	
+		<![CDATA[
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchStgStoDown_fragement">
+		<include refid="selectAllStgStoDownColumns" />
+		<!-- <if test="stgStoDown.giFinishFlag ==  1 ">
+			left join (select
+			t.sap_order_no,t.sap_order_item,max(t.sap_flag) as sap_flag from
+			ods_order_info t
+			group by t.sap_order_no,t.sap_order_item ) s on
+			(s.sap_order_no=sto.STO_NO and
+			s.sap_order_item=sto.STO_ITEM_NO)
+		</if> -->
+			<![CDATA[
+				where  sto.ITEM_DELTET <> 'L'
+			]]>
+		<if test="stgStoDown.stoDnNo != null and stgStoDown.stoDnNo != ''">
+			and dn.STODN_NO=#{stgStoDown.stoDnNo}
+		</if>
+		<if test="stgStoDown.giFinishFlag == 1 ">
+			and sto.gi_finish_flag='1'
+		</if>
+		<if test="stgStoDown.giFinishFlag == 0 ">
+			<![CDATA[ and sto.gi_finish_qty = 0	]]>
+		</if>
+		<if test="stgStoDown.stoNo != null and stgStoDown.stoNo != '' ">
+			and sto.STO_NO = #{stgStoDown.stoNo}
+		</if>
+		<if test="stgStoDown.stoItemNo != null and stgStoDown.stoItemNo != '' ">
+			and sto.STO_ITEM_NO like '%'||#{stgStoDown.stoItemNo}||'%' 
+		</if>
+		<if test="stgStoDown.stoDocDate != null and stgStoDown.stoDocDate != '' ">
+			and sto.STO_DOC_DATE like '%'||#{stgStoDown.stoDocDate}||'%' 
+		</if>
+		<if test="stgStoDown.materialNo != null and stgStoDown.materialNo != '' ">
+			and sto.MATERIAL_NO like '%'||#{stgStoDown.materialNo}||'%' 
+		</if>
+		<if test="stgStoDown.stoClose != null and stgStoDown.stoClose != ''">
+			and sto.STO_CLOSE like '%'||#{stgStoDown.stoClose}||'%' 
+		</if>
+		<if test="stgStoDown.userType != null and stgStoDown.userType != 1">
+		    and (sto.gi_plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id= #{stgStoDown.userId}) or 
+			sto.gr_plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id= #{stgStoDown.userId}) )
+			and (sto.GI_LOCATION in (select loc_code from
+			cd_user_wh_loc where user_id=#{stgStoDown.userId}) or
+			sto.GR_LOCATION in (select loc_code from
+			cd_user_wh_loc
+			where user_id=#{stgStoDown.userId}) )
+		</if>
+		<if test="stgStoDown.begin != null and stgStoDown.begin != ''">
+			<![CDATA[
+				and sto.create_date >= TO_DATE(concat(#{stgStoDown.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="stgStoDown.end != null and stgStoDown.end != ''">
+			<![CDATA[
+				and sto.create_date <= TO_DATE(concat(#{stgStoDown.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="stgStoDown.checkFlag != null and stgStoDown.checkFlag != ''">
+			and sto.CHECK_FLAG = #{stgStoDown.checkFlag}
+		</if>
+		<if test="stgStoDown.giPlant != null and stgStoDown.giPlant != '' ">
+			and sto.gi_plant = #{stgStoDown.giPlant}
+		</if>
+		<if test="stgStoDown.grPlant != null and stgStoDown.grPlant != '' ">
+			and sto.gr_plant = #{stgStoDown.grPlant}
+		</if>
+		<if test="stgStoDown.giLocation != null and stgStoDown.giLocation != '' ">
+			and sto.GI_LOCATION IN (${stgStoDown.giLocation})
+		</if>
+		<if test="stgStoDown.grLocation != null and stgStoDown.grLocation != '' ">
+			and sto.GR_LOCATION IN (${stgStoDown.grLocation})
+		</if>
+		<if test="stgStoDown.stoType != null and stgStoDown.stoType != '' ">
+			and sto.sto_type like '%'||#{stgStoDown.stoType}||'%' 
+		</if>
+		ORDER BY sto.CREATE_DATE DESC, sto.STO_NO, sto.STO_ITEM_NO
+	</sql>
+	<select id="searchAllForStodnDown" resultMap="stgStoDownMap">
+		<include refid="selectAllStgStoDownColumns" />
+		<![CDATA[
+		where sto.sto_close=0 
+			and sto.CREATE_DATE >= (select date_sub(curdate(),interval 3 day))
+			and sto.CREATE_DATE <= (select date_sub(curdate(),interval -1 day)) 
+		order by sto.STO_DOC_DATE,sto.MATERIAL_NO
+		]]>
+	</select>
+	<select id="searchStgStoDowns" resultMap="stgStoDownMap">
+		<include refid="pagination_Head" />
+		<include refid="searchStgStoDown_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchStgStoDn" resultMap="stgStoDownMap">
+		<include refid="pagination_Head" />
+		<include refid="searchStgStoDown_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchStgStoDownsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchStgStoDown_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="searchStgStoDnCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchStgStoDown_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getStgStoDownByParam" resultMap="stgStoDownMap">
+		<include refid="selectAllStgStoDownColumns" />
+		where 1=1
+		<if test="stgStoDown.stoNo != null and stgStoDown.stoNo != ''">
+			and STO_NO = #{stgStoDown.stoNo}
+		</if>
+		<if test="stgStoDown.stoItemNo != null and stgStoDown.stoItemNo != ''">
+			and STO_ITEM_NO = #{stgStoDown.stoItemNo}
+		</if>
+	</select>
+
+	<select id="getListByParam" resultMap="stgStoDownMap">
+		<include refid="searchStgStoDown_fragement" />
+	</select>
+
+	<update id="updatePrescanByStoNo">
+		update stg_sto_down t set t.prescan_flag=1 where
+		t.sto_no= #{stoNo}
+	</update>
+
+	<update id="updateFinishQty">
+		update stg_sto_down t set
+		t.gi_finish_qty=t.qty,t.gi_finish_flag=1 where
+		t.sto_no= #{stoNo}
+	</update>
+	<update id="cleanFinishQty">
+		update stg_sto_down t set
+		t.gi_finish_qty=0,t.gi_finish_flag=0 where
+		t.sto_no= #{stoNo}
+	</update>
+	<select id="getStoByStodn" resultType="int" parameterType="stgStoDown">
+		SELECT count(*) FROM stg_sto_down t
+		where t.STO_NO=#{stgStoDown.stoNo} AND t.STO_ITEM_NO=right(#{stgStoDown.stoItemNo},5)
+		AND t.QTY=#{stgStoDown.qty}
+		AND t.ITEM_DELTET='L' 
+	</select>
+	
+	<update id="updateStoConfirm">
+		UPDATE STG_STO_DOWN SET CHECK_FLAG='1' WHERE STO_NO = #{stoNo}
+	</update>
+	
+	<!-- 从这里开始 -->
+	<select id="getStoItemsByStoNo" resultType="string">
+		select distinct sto.sto_item_no from stg_sto_down sto 
+		where sto.sto_no = #{stgStoDown.stoNo}
+	</select>
+	<select id="ifScanningStart" resultType="long">
+	    select count(0) from stg_sto_down sto 
+	    where sto.gi_finish_qty > 0 
+	    and sto.sto_no = #{stgStoDown.stoNo}
+	    and sto.sto_item_no = #{stgStoDown.stoItemNo}
+	</select>
+	
+	<insert id="bankupDeletedItems" parameterType="stgStoDown">
+		<![CDATA[
+		insert into STG_STO_DOWN_DELETE
+		  (ROW_ID
+		  		,STO_NO
+				,STO_ITEM_NO
+				,GI_PLANT
+				,GR_PLANT
+				,PUR_ORG
+				,STO_DOC_DATE
+				,STO_LAST_MODIFY_DATE
+				,STO_CREATE_BY
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,ITEM_DELTET
+				,STO_CLOSE
+				,GR_LOCATION
+				,GR_FINISH_QTY
+				,GR_FINISH_FLAG
+				,GR_DATE
+				,GI_LOCATION
+				,GI_FINISH_QTY
+				,GI_FINISH_FLAG
+				,GI_DATE
+				,CREATE_DATE
+				,UNIT
+				,CREATE_BY
+				,STO_TYPE
+		   )
+		   SELECT ROW_ID
+		  		,STO_NO
+				,STO_ITEM_NO
+				,GI_PLANT
+				,GR_PLANT
+				,PUR_ORG
+				,STO_DOC_DATE
+				,STO_LAST_MODIFY_DATE
+				,STO_CREATE_BY
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,ITEM_DELTET
+				,STO_CLOSE
+				,GR_LOCATION
+				,GR_FINISH_QTY
+				,GR_FINISH_FLAG
+				,GR_DATE
+				,GI_LOCATION
+				,GI_FINISH_QTY
+				,GI_FINISH_FLAG
+				,GI_DATE
+				,CREATE_DATE
+				,UNIT
+				,CREATE_BY
+				,STO_TYPE
+				FROM STG_STO_DOWN
+				WHERE STO_NO = #{stgStoDown.stoNo}
+				AND STO_ITEM_NO = #{stgStoDown.stoItemNo}
+	    ]]>
+	</insert>
+	<delete id="deleteByStoItems" parameterType="stgStoDown">
+	    DELETE FROM STG_STO_DOWN 
+	    	WHERE STO_NO = #{stgStoDown.stoNo}
+			AND STO_ITEM_NO = #{stgStoDown.stoItemNo}
+	</delete>
+	<select id="getExistingStoItem" resultMap="stgStoDownMap">
+		<include refid="selectAllStgStoDownColumns" />
+			WHERE STO_NO = #{stgStoDown.stoNo}
+			AND STO_ITEM_NO = #{stgStoDown.stoItemNo} 
+	</select>
+	
+	<update id="updateByStoItem" parameterType="stgStoDown">
+		<![CDATA[
+		update STG_STO_DOWN
+		   set MATERIAL_NO = #{stgStoDown.materialNo}
+		   	   ,MATERIAL_DESP = #{stgStoDown.materialDesp}
+		   	   ,QTY = #{stgStoDown.qty}
+		   	   ,UNIT = #{stgStoDown.unit}
+		   	   ,GI_PLANT = #{stgStoDown.giPlant}
+		   	   ,GI_LOCATION = #{stgStoDown.giLocation}
+		   	   ,GI_FINISH_QTY = #{stgStoDown.giFinishQty}
+		   	   ,GI_FINISH_FLAG = #{stgStoDown.giFinishFlag}
+		   	   ,GR_PLANT = #{stgStoDown.grPlant}
+		   	   ,GR_LOCATION = #{stgStoDown.grLocation}
+		   	   ,GR_FINISH_QTY = #{stgStoDown.grFinishQty}
+		   	   ,GR_FINISH_FLAG = #{stgStoDown.grFinishFlag}
+		   	   ,ITEM_DELTET = #{stgStoDown.itemDeltet}
+			   ,STO_CLOSE = #{stgStoDown.stoClose}
+			   ,STO_DOC_DATE = #{stgStoDown.stoDocDate}
+		   	   ,STO_CREATE_BY = #{stgStoDown.stoCreateBy}
+			   ,STO_LAST_MODIFY_DATE = #{stgStoDown.stoLastModifyDate}
+			   ,MODIFY_DATE = #{stgStoDown.modifyDate}
+			   ,MODIFY_BY=#{stgStoDown.modifyBy}
+			   ,STO_TYPE=#{stgStoDown.stoType}
+			   ,COME_FROM_TMS=#{stgStoDown.comeFromTms}
+		 where STO_NO = #{stgStoDown.stoNo}
+			AND STO_ITEM_NO = #{stgStoDown.stoItemNo} 
+		]]>
+	</update>
+	<select id="checkStoDeliveryExist" resultType="string">
+		<![CDATA[
+ 			select case when count(0)>0 then 'Y' else 'N' end 
+ 			from STG_STO_DOWN t 
+ 			where t.STO_no = #{inpara.orno}
+ 			AND T.STO_CLOSE = '0' 
+ 			AND T.ITEM_DELTET = '0'
+		]]>
+	</select>
+	<select id="checkStoReceiveExist" resultType="string">
+		<![CDATA[
+ 			select case when count(0)>0 then 'Y' else 'N' end 
+ 			from STG_STODN_DOWN t 
+ 			where t.STODN_no = #{inpara.orno}
+		]]>
+	</select>
+    <select id="checkStoDeliveryLoc" resultType="string">
+		<![CDATA[
+		SELECT CASE 
+		        WHEN COUNT(0) > 0 THEN 'Y'
+		        ELSE 'N'
+		    END
+		FROM STG_STO_DOWN t
+		WHERE t.sto_no = #{inpara.orno}
+			AND T.STO_CLOSE = '0'
+ 			AND T.ITEM_DELTET = '0'
+		    AND t.gi_plant IN (
+		        SELECT DISTINCT w.code
+		        FROM cd_user_wh_loc u, cd_wh_info w
+		        WHERE w.row_id = u.wh_id
+		            AND u.user_id = #{userId}
+		    )
+		    AND t.gi_LOCATION IN (
+		        SELECT loc_code
+		        FROM CD_USER_WH_LOC
+		        WHERE user_id = #{userId}
+		    )
+ 		]]>
+	</select>
+	    <select id="checkStoReceiveLoc" resultType="string">
+		<![CDATA[
+		SELECT CASE 
+		        WHEN COUNT(0) > 0 THEN 'Y'
+		        ELSE 'N'
+		    END
+		FROM STG_STODN_DOWN t
+		WHERE t.stodn_no = #{inpara.orno}
+		    AND t.gr_plant IN (
+		        SELECT DISTINCT w.code
+		        FROM cd_user_wh_loc u, cd_wh_info w
+		        WHERE w.row_id = u.wh_id
+		            AND u.user_id = #{userId}
+		    )
+		    AND t.gr_LOCATION IN (
+		        SELECT loc_code
+		        FROM CD_USER_WH_LOC
+		        WHERE user_id = #{userId}
+		    )
+ 		]]>
+	</select>
+
+	<select id="getGiLocationNameListBySTONO" resultType="string">
+<!-- 		SELECT DISTINCT NAME FROM CD_LOC_INFO WHERE CODE IN ( -->
+<!-- 			SELECT GI_LOCATION FROM STG_STO_DOWN WHERE STO_NO = #{stoNo} -->
+<!-- 		) -->
+		SELECT DISTINCT GI_LOCATION FROM STG_STO_DOWN WHERE STO_NO = #{stoNo}
+	</select>
+	<select id="getGrLocationNameListBySTONO" resultType="string">
+<!-- 		SELECT DISTINCT NAME FROM CD_LOC_INFO WHERE CODE IN ( -->
+<!-- 			SELECT GR_LOCATION FROM STG_STO_DOWN WHERE STO_NO = #{stoNo} -->
+<!-- 		) -->
+		SELECT DISTINCT GR_LOCATION FROM STG_STO_DOWN WHERE STO_NO = #{stoNo}
+	</select>
+
+	<select id="getComeFromTMS" resultType="string">
+		SELECT stg.COME_FROM_TMS
+		 FROM ODS_STO_GIGR_INFO sto
+	LEFT JOIN STG_STO_DOWN stg
+		   ON sto.STO_NO = stg.STO_NO
+		WHERE sto.ORDER_NO = #{orderNo}
+		  AND ROWNUM = 1
+	</select>
+
+</mapper>

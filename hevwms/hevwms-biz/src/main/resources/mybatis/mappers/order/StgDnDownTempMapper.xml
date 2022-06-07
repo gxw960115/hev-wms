@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+<typeAlias alias="stgDnDownTemp" type="com.haier.hevwms.order.domain.StgDnDownTemp" />
+ -->
+<mapper namespace="com.haier.hevwms.order.dao.StgDnDownTempDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllStgDnDownTempColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			DN_NO,
+			DN_ITEM_NO,
+			SELL_NO,
+			SELL_ORDER_TYPE,
+			PLANT,
+			DN_DOC_DATE,
+			DN_LAST_MODIFY_DATE,
+			DN_CREATE_BY,
+			MATERIAL_NO,
+			CUSTOMER_MODEL,
+			MATERIAL_DESP,
+			QTY,
+			LOCATION,
+			CUSTOMER_NO,
+			CUSTOMER_NAME,
+			DELIVERY_CODE,
+			DELIVERY_NAME,
+			DELIVERY_DATE,
+			CREATE_DATE,
+			MODIFY_DATE,
+			VERSION,
+			DN_CLOSE,
+			FINISH_QTY,
+			UNIT,
+			DELIVER_DATE,
+			BILLING,
+			BILLING_ITEM,
+			FINISH_FLAG,
+			FLAG,
+			CREATE_BY,
+			MODIFY_BY,
+			REGION,
+			CITY,
+			STNO,
+			DEAL_FLAG,
+			DEAL_TIME,
+			DEAL_DESC,
+			1
+		from 
+			STG_DN_DOWN_TEMP stg_dn_down_temp_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="stgDnDownTempMap" type="stgDnDownTemp">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="dnNo" column="DN_NO"/>
+		<result property="dnItemNo" column="DN_ITEM_NO"/>
+		<result property="sellNo" column="SELL_NO"/>
+		<result property="sellOrderType" column="SELL_ORDER_TYPE"/>
+		<result property="plant" column="PLANT"/>
+		<result property="dnDocDate" column="DN_DOC_DATE"/>
+		<result property="dnLastModifyDate" column="DN_LAST_MODIFY_DATE"/>
+		<result property="dnCreateBy" column="DN_CREATE_BY"/>
+		<result property="materialNo" column="MATERIAL_NO"/>
+		<result property="customerModel" column="CUSTOMER_MODEL"/>
+		<result property="materialDesp" column="MATERIAL_DESP"/>
+		<result property="qty" column="QTY"/>
+		<result property="location" column="LOCATION"/>
+		<result property="customerNo" column="CUSTOMER_NO"/>
+		<result property="customerName" column="CUSTOMER_NAME"/>
+		<result property="deliveryCode" column="DELIVERY_CODE"/>
+		<result property="deliveryName" column="DELIVERY_NAME"/>
+		<result property="deliveryDate" column="DELIVERY_DATE"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="modifyDate" column="MODIFY_DATE"/>
+		<result property="version" column="VERSION"/>
+		<result property="dnClose" column="DN_CLOSE"/>
+		<result property="finishQty" column="FINISH_QTY"/>
+		<result property="unit" column="UNIT"/>
+		<result property="deliverDate" column="DELIVER_DATE"/>
+		<result property="billing" column="BILLING"/>
+		<result property="billingItem" column="BILLING_ITEM"/>
+		<result property="finishFlag" column="FINISH_FLAG"/>
+		<result property="flag" column="FLAG"/>
+		<result property="createBy" column="CREATE_BY"/>
+		<result property="modifyBy" column="MODIFY_BY"/>
+		<result property="region" column="REGION"/>
+		<result property="city" column="CITY"/>
+		<result property="stno" column="STNO"/>
+		<result property="dealFlag" column="DEAL_FLAG"/>
+		<result property="dealTime" column="DEAL_TIME"/>
+		<result property="dealDesc" column="DEAL_DESC"/>
+	</resultMap>
+	<!-- =========================================================== -->
+    <!-- DAO方法中的基本增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+    <select id="getAll" resultMap="stgDnDownTempMap">
+		<include refid="selectAllStgDnDownTempColumns"/>
+	</select>
+	<select id="get" resultMap="stgDnDownTempMap" parameterType="long">
+		<include refid="selectAllStgDnDownTempColumns"/>
+		<![CDATA[
+		where stg_dn_down_temp_.row_id = #{rowId}
+		]]>	
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from STG_DN_DOWN_TEMP where row_id = #{rowId}
+		]]>	
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from STG_DN_DOWN_TEMP where row_id in
+		]]>	
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</delete>
+    <insert id="save" parameterType="stgDnDownTemp">	
+		<![CDATA[
+		insert into STG_DN_DOWN_TEMP
+		  (
+				 DN_NO
+				,DN_ITEM_NO
+				,SELL_NO
+				,SELL_ORDER_TYPE
+				,PLANT
+				,DN_DOC_DATE
+				,DN_LAST_MODIFY_DATE
+				,DN_CREATE_BY
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,LOCATION
+				,CUSTOMER_NO
+				,CUSTOMER_NAME
+				,DELIVERY_CODE
+				,DELIVERY_NAME
+				,DELIVERY_DATE
+				,CREATE_DATE
+				,MODIFY_DATE
+				,VERSION
+				,DN_CLOSE
+				,FINISH_QTY
+				,UNIT
+				,DELIVER_DATE
+				,BILLING
+				,BILLING_ITEM
+				,FINISH_FLAG
+				,FLAG
+				,CREATE_BY
+				,MODIFY_BY
+				,REGION
+				,CITY
+				,STNO
+				,DEAL_TIME
+				,DEAL_DESC
+				,SAP_FLAG
+				,SAP_MSG
+				,SAP_DOC
+		   )
+		values
+		  (
+				 #{dnNo}
+				,#{dnItemNo}
+				,#{sellNo}
+				,#{sellOrderType}
+				,#{plant}
+				,#{dnDocDate}
+				,#{dnLastModifyDate}
+				,#{dnCreateBy}
+				,#{materialNo}
+				,#{customerModel}
+				,#{materialDesp}
+				,#{qty}
+				,#{location}
+				,#{customerNo}
+				,#{customerName}
+				,#{deliveryCode}
+				,#{deliveryName}
+				,#{deliveryDate}
+				,#{createDate}
+				,#{modifyDate}
+				,#{version}
+				,#{dnClose}
+				,#{finishQty}
+				,#{unit}
+				,#{deliverDate}
+				,#{billing}
+				,#{billingItem}
+				,#{finishFlag}
+				,#{flag}
+				,#{createBy}
+				,#{modifyBy}
+				,#{region}
+				,#{city}
+				,#{stno}
+				,#{dealTime}
+				,#{dealDesc}
+				,#{sapFlag}
+				,#{sapMsg}
+				,#{sapDocNo}
+		   )
+	    ]]>	
+	</insert>
+	<update id="update" parameterType="stgDnDownTemp">
+		<![CDATA[
+		update STG_DN_DOWN_TEMP
+		   set 1=1
+				,DN_NO = #{dnNo}
+				,DN_ITEM_NO = #{dnItemNo}
+				,SELL_NO = #{sellNo}
+				,SELL_ORDER_TYPE = #{sellOrderType}
+				,PLANT = #{plant}
+				,DN_DOC_DATE = #{dnDocDate}
+				,DN_LAST_MODIFY_DATE = #{dnLastModifyDate}
+				,DN_CREATE_BY = #{dnCreateBy}
+				,MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,QTY = #{qty}
+				,LOCATION = #{location}
+				,CUSTOMER_NO = #{customerNo}
+				,CUSTOMER_NAME = #{customerName}
+				,DELIVERY_CODE = #{deliveryCode}
+				,DELIVERY_NAME = #{deliveryName}
+				,DELIVERY_DATE = #{deliveryDate}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_DATE = #{modifyDate}
+				,VERSION = #{version}
+				,DN_CLOSE = #{dnClose}
+				,FINISH_QTY = #{finishQty}
+				,UNIT = #{unit}
+				,DELIVER_DATE = #{deliverDate}
+				,BILLING = #{billing}
+				,BILLING_ITEM = #{billingItem}
+				,FINISH_FLAG = #{finishFlag}
+				,FLAG = #{flag}
+				,CREATE_BY = #{createBy}
+				,MODIFY_BY = #{modifyBy}
+				,REGION = #{region}
+				,CITY = #{city}
+				,STNO = #{stno}
+				,DEAL_FLAG = #{dealFlag}
+				,DEAL_TIME = #{dealTime}
+				,DEAL_DESC = #{dealDesc}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchStgDnDownTemp_fragement">
+		<include refid="selectAllStgDnDownTempColumns" />
+		where 1=1
+			<if test="stgDnDownTemp.dnNo != null">
+			and DN_NO like '%' || #{stgDnDownTemp.dnNo} || '%'
+			</if>
+			<if test="stgDnDownTemp.dnItemNo != null">
+			and DN_ITEM_NO like '%' || #{stgDnDownTemp.dnItemNo} || '%'
+			</if>
+			<if test="stgDnDownTemp.sellNo != null">
+			and SELL_NO like '%' || #{stgDnDownTemp.sellNo} || '%'
+			</if>
+			<if test="stgDnDownTemp.sellOrderType != null">
+			and SELL_ORDER_TYPE like '%' || #{stgDnDownTemp.sellOrderType} || '%'
+			</if>
+			<if test="stgDnDownTemp.plant != null">
+			and PLANT like '%' || #{stgDnDownTemp.plant} || '%'
+			</if>
+			<if test="stgDnDownTemp.dnDocDate != null">
+			and DN_DOC_DATE like '%' || #{stgDnDownTemp.dnDocDate} || '%'
+			</if>
+			<if test="stgDnDownTemp.dnLastModifyDate != null">
+			and DN_LAST_MODIFY_DATE like '%' || #{stgDnDownTemp.dnLastModifyDate} || '%'
+			</if>
+			<if test="stgDnDownTemp.dnCreateBy != null">
+			and DN_CREATE_BY like '%' || #{stgDnDownTemp.dnCreateBy} || '%'
+			</if>
+			<if test="stgDnDownTemp.materialNo != null">
+			and MATERIAL_NO like '%' || #{stgDnDownTemp.materialNo} || '%'
+			</if>
+			<if test="stgDnDownTemp.customerModel != null">
+			and CUSTOMER_MODEL like '%' || #{stgDnDownTemp.customerModel} || '%'
+			</if>
+			<if test="stgDnDownTemp.materialDesp != null">
+			and MATERIAL_DESP like '%' || #{stgDnDownTemp.materialDesp} || '%'
+			</if>
+			<if test="stgDnDownTemp.qty != null">
+			and QTY like '%' || #{stgDnDownTemp.qty} || '%'
+			</if>
+			<if test="stgDnDownTemp.location != null">
+			and LOCATION like '%' || #{stgDnDownTemp.location} || '%'
+			</if>
+			<if test="stgDnDownTemp.customerNo != null">
+			and CUSTOMER_NO like '%' || #{stgDnDownTemp.customerNo} || '%'
+			</if>
+			<if test="stgDnDownTemp.customerName != null">
+			and CUSTOMER_NAME like '%' || #{stgDnDownTemp.customerName} || '%'
+			</if>
+			<if test="stgDnDownTemp.deliveryCode != null">
+			and DELIVERY_CODE like '%' || #{stgDnDownTemp.deliveryCode} || '%'
+			</if>
+			<if test="stgDnDownTemp.deliveryName != null">
+			and DELIVERY_NAME like '%' || #{stgDnDownTemp.deliveryName} || '%'
+			</if>
+			<if test="stgDnDownTemp.deliveryDate != null">
+			and DELIVERY_DATE like '%' || #{stgDnDownTemp.deliveryDate} || '%'
+			</if>
+			<if test="stgDnDownTemp.createDate != null">
+			and CREATE_DATE like '%' || #{stgDnDownTemp.createDate} || '%'
+			</if>
+			<if test="stgDnDownTemp.modifyDate != null">
+			and MODIFY_DATE like '%' || #{stgDnDownTemp.modifyDate} || '%'
+			</if>
+			<if test="stgDnDownTemp.version != null">
+			and VERSION like '%' || #{stgDnDownTemp.version} || '%'
+			</if>
+			<if test="stgDnDownTemp.dnClose != null">
+			and DN_CLOSE like '%' || #{stgDnDownTemp.dnClose} || '%'
+			</if>
+			<if test="stgDnDownTemp.finishQty != null">
+			and FINISH_QTY like '%' || #{stgDnDownTemp.finishQty} || '%'
+			</if>
+			<if test="stgDnDownTemp.unit != null">
+			and UNIT like '%' || #{stgDnDownTemp.unit} || '%'
+			</if>
+			<if test="stgDnDownTemp.deliverDate != null">
+			and DELIVER_DATE like '%' || #{stgDnDownTemp.deliverDate} || '%'
+			</if>
+			<if test="stgDnDownTemp.billing != null">
+			and BILLING like '%' || #{stgDnDownTemp.billing} || '%'
+			</if>
+			<if test="stgDnDownTemp.billingItem != null">
+			and BILLING_ITEM like '%' || #{stgDnDownTemp.billingItem} || '%'
+			</if>
+			<if test="stgDnDownTemp.finishFlag != null">
+			and FINISH_FLAG like '%' || #{stgDnDownTemp.finishFlag} || '%'
+			</if>
+			<if test="stgDnDownTemp.flag != null">
+			and FLAG like '%' || #{stgDnDownTemp.flag} || '%'
+			</if>
+			<if test="stgDnDownTemp.createBy != null">
+			and CREATE_BY like '%' || #{stgDnDownTemp.createBy} || '%'
+			</if>
+			<if test="stgDnDownTemp.modifyBy != null">
+			and MODIFY_BY like '%' || #{stgDnDownTemp.modifyBy} || '%'
+			</if>
+			<if test="stgDnDownTemp.region != null">
+			and REGION like '%' || #{stgDnDownTemp.region} || '%'
+			</if>
+			<if test="stgDnDownTemp.city != null">
+			and CITY like '%' || #{stgDnDownTemp.city} || '%'
+			</if>
+			<if test="stgDnDownTemp.stno != null">
+			and STNO like '%' || #{stgDnDownTemp.stno} || '%'
+			</if>
+			<if test="stgDnDownTemp.dealFlag != null">
+			and DEAL_FLAG like '%' || #{stgDnDownTemp.dealFlag} || '%'
+			</if>
+			<if test="stgDnDownTemp.dealTime != null">
+			and DEAL_TIME like '%' || #{stgDnDownTemp.dealTime} || '%'
+			</if>
+			<if test="stgDnDownTemp.dealDesc != null">
+			and DEAL_DESC like '%' || #{stgDnDownTemp.dealDesc} || '%'
+			</if>
+	</sql>
+	<select id="searchStgDnDownTemps" resultMap="stgDnDownTempMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchStgDnDownTemp_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchStgDnDownTempsCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchStgDnDownTemp_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	<select id="searchStgDnTempSTNO" resultType="long">
+		<![CDATA[
+		select GETID('SEQ_STG_DN_DOWN_TEMP_STNO') as ROW_ID from dual
+		]]>
+	</select>
+	<select id="toDnDowm" statementType="CALLABLE"
+		parameterType="dnForTemp">  
+    <![CDATA[  
+        {call prc_stg_dn_down_temp(
+        #{dnForTemp.stno,mode=IN,jdbcType=VARCHAR},
+        #{dnForTemp.pStatus,mode=OUT,jdbcType=VARCHAR},
+        #{dnForTemp.pMsg,mode=OUT,jdbcType=VARCHAR}
+        )}
+    ]]>
+	</select>
+	<!-- added by Lynn 20160301 -->
+	<delete id="delDnDownTempHistory">
+		<![CDATA[
+		delete from STG_DN_DOWN_TEMP where deal_flag = ''
+		]]>	
+	</delete>
+	
+	<insert id="insertDnTempHistory">	
+		<![CDATA[
+			INSERT INTO stg_dn_down_temp_history (SELECT * FROM stg_dn_down_temp WHERE stg_dn_down_temp.DEAL_FLAG = '')
+	    ]]>	
+	</insert>
+	
+</mapper>

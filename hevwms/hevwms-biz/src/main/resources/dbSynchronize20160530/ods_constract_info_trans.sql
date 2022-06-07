@@ -1,0 +1,69 @@
+SELECT
+	ROW_ID,
+	CONTRACT_NO,
+	COMPANY_NAME,
+	O_CITY_NAME,
+	O_LOCATION,
+	D_CITY_NAME,
+	D_LOCATION,
+	VEHICLE_TYPE,
+	FREIGHT,
+	DAYS,
+	DATE_FORMAT(
+		BEGIN_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) BEGIN_DATE,
+	DATE_FORMAT(
+		END_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) END_DATE,
+	PAYMENT_TERM,
+	PAYMENT_METHOD,
+	CREATE_BY,
+	DATE_FORMAT(
+		CREATE_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) CREATE_DATE,
+	MODIFY_BY,
+	DATE_FORMAT(
+		MODIFY_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) MODIFY_DATE,
+	FLAG,
+	VERSION,
+	O_CITY_CODE,
+	D_CITY_CODE,
+	CONFIRM_FLAG,
+	CONFIRM_BY,
+	DATE_FORMAT(
+		CONFIRM_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) CONFIRM_DATE,
+	DELETE_BY,
+	DATE_FORMAT(
+		DELETE_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) DELETE_DATE,
+	REASON
+FROM
+	ods_contract_info
+WHERE
+	MODIFY_DATE > DATE_ADD(NOW(), INTERVAL - 30 DAY)
+AND (
+	O_CITY_CODE IN (
+		SELECT DISTINCT
+			cd.`CODE`
+		FROM
+			cd_factory cd
+		WHERE
+			cd.country_code = '6600'
+	)
+	OR D_CITY_CODE IN (
+		SELECT DISTINCT
+			cd.`CODE`
+		FROM
+			cd_factory cd
+		WHERE
+			cd.country_code = '6600'
+	)
+)

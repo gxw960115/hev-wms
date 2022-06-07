@@ -1,0 +1,74 @@
+{{#component "header js-comp"}}
+    <div id="chartArea"  onclick="clickit()" style="height:500px;border:1px solid #ccc;padding:10px;"></div>
+    <script>
+        function clickit(){
+            // Step:3 echarts & zrender as a Global Interface by the echarts-plain.js.
+            // Step:3 echarts和zrender被echarts-plain.js写入为全局接口
+            var myChart = echarts.init(document.getElementById('chartArea'));
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    orient : 'vertical',//菜单的展示方式    垂直分布
+                    x : 'left',//菜单展示  在左侧
+                    data:['直接访问','邮件营销','联盟广告','视频广告','搜索引擎'] //菜单内容
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : true,
+                        dataView : {readOnly: false},
+                        restore : true,
+                        saveAsImage : true
+                    }
+                },
+                calculable:true,
+                series : [//数据信息
+                    {
+                        name:'访问来源',
+                        type:'pie',
+                        radius : [80, 120],
+                        itemStyle :　{
+                normal : {
+                    label : {
+                        show : false
+                    },
+                    labelLine : {
+                        show : false
+                    }
+                },
+                emphasis : {
+                    label : {
+                        show : true,
+                                position : 'center',
+                                textStyle : {
+                            fontSize : '30',
+                                    fontWeight : 'bold'
+                        }
+                    }
+                }
+            },
+            data: (function(){
+                var a=['直接访问','邮件营销','联盟广告','视频广告','搜索引擎'];
+                var b=[335,310,234,135,1548];
+                var res = [];
+
+                for(var i=0;i<a.length;i++){
+
+
+                    res.push({
+                        name: a[i],
+                        value: b[i]
+                    });
+                }
+                return res;
+            })()
+
+        }
+        ]
+            });
+        }
+    </script>
+{{/component}}

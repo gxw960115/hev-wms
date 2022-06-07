@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WMS后台管理系统</title>
+    <!-- 页面基本设置禁止随意更改 -->
+    <meta charset="utf-8">
+    <meta name="author" content="forework">
+    <!-- 页面基本设置禁止随意更改 -->
+    <!-- 基础CSS类库可随意更改 -->
+    <!-- 
+    <script type="text/javascript">
+    		
+    		document.write("<scr"+"ipt src=\"/assets/scripts/easyui/jquery.min.js\"></sc"+"ript>");
+    		document.write("<scr"+"ipt src=\"/assets/scripts/easyui/jquery.easyui.min.js\"></sc"+"ript>");
+    		document.write("<scr"+"ipt src=\"/assets/scripts/easyui/easyloader.js\"></sc"+"ript>");
+         	document.write("<scr"+"ipt src=\"/assets/scripts/easyui/extends/jquery.easyui.function.extends.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/easyui/extends/jquery.easyui.grid.export.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/easyui/extends/jquery.easyui.mycard.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/easyui/extends/jquery.easyui.panel.extends.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/bootstrap/bootstrap.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/modernizr.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/jquery.sparkline.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/toggles.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/retina.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/jquery.cookies.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/flot/jquery.flot.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/flot/jquery.flot.resize.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/flot/jquery.flot.spline.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/morris.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/raphael-2.1.0.min.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/jquery.session.js\"></sc"+"ript>");
+            document.write("<scr"+"ipt src=\"/assets/scripts/js/common.js\"></sc"+"ript>");
+    </script>
+    -->
+   
+    <script src="/assets/scripts/My97DatePicker/WdatePicker.js"></script>
+    <!--easyui-->
+    <script src="/assets/scripts/easyui/jquery.min.js"></script>
+    <script src="/assets/scripts/js/jq.paginator.min.js"></script>
+    <script src="/assets/scripts/easyui/jquery.easyui.min.js"></script>
+    <script src="/assets/scripts/easyui/easyloader.js"></script>
+   	<script src="/assets/scripts/easyui/extends/jquery.easyui.function.extends.js"></script>
+    <script src="/assets/scripts/easyui/extends/jquery.easyui.grid.export.js"></script>
+    <script src="/assets/scripts/easyui/extends/jquery.easyui.mycard.js"></script>
+    <script src="/assets/scripts/easyui/extends/jquery.easyui.panel.extends.js"></script>
+    <script src="/assets/scripts/bootstrap/bootstrap.min.js"></script>
+    <script src="/assets/scripts/modernizr.min.js"></script>
+    <script src="/assets/scripts/jquery.sparkline.min.js"></script>
+    <script src="/assets/scripts/toggles.min.js"></script>
+    <script src="/assets/scripts/retina.min.js"></script>
+    <script src="/assets/scripts/jquery.cookies.js"></script>
+    <script src="/assets/scripts/flot/jquery.flot.min.js"></script>
+    <script src="/assets/scripts/flot/jquery.flot.resize.min.js"></script>
+    <script src="/assets/scripts/flot/jquery.flot.spline.min.js"></script>
+    <script src="/assets/scripts/morris.min.js"></script>
+    <script src="/assets/scripts/raphael-2.1.0.min.js"></script>
+    <script src="/assets/scripts/jquery.session.js"></script>
+    <script src="/assets/scripts/js/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/gray/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/icon.css">
+    <link href="/assets/styles/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/styles/bootstrap/bootstrap-override.css" rel="stylesheet">
+    <link href="/assets/styles/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/assets/styles/css.css" rel="stylesheet">
+    <link href="/assets/styles/jquery.datatables.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles/bootstrap/bootstrap-wysihtml5.css" />
+</head>
+<body>
+<div class="wrapper" style=" display:block; margin: -9px">
+
+    <div class="body_content">
+        <div class="content">
+
+            <!--中间内容项目执行-->
+            <div class="body_content_center w970" style="display:block;">
+                <!-- 提示区域 -->
+
+                {{{block "mainBlock"}}}
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+String.prototype.getQuery = function(name) { 
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");  
+    var r = this.substr(this.indexOf("\?")+1).match(reg);  
+    if (r != null) return unescape(r[2]);   
+    return  '';  
+}
+var suitHeight=window.location.toString().getQuery('suitHeight'); //获取高度的值  
+</script>
+</html>

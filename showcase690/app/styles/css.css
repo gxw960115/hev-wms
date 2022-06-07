@@ -1,0 +1,321 @@
+﻿/*查询区域div*/
+.searchDivlow{
+    padding-left: 15px;
+    padding-top: 12px;
+    height:125px;
+    overflow-y: hidden;
+    font-size: 14px;
+    color: #636E7B;
+}
+.searchDiv{
+    padding-left: 15px;
+    padding-top: 12px;
+    height:160px;
+    overflow-y: hidden;
+    font-size: 14px;
+    color: #636E7B;
+}
+.searchDivher{
+    padding-left: 15px;
+    padding-top: 12px;
+    height:190px;
+    overflow-y: hidden;
+    font-size: 14px;
+    color: #636E7B;
+}
+/*查询区域table( 区分combo故两个css)*/
+#searchTab{
+    display: inline-block;
+    margin-left: 8px;
+    margin-top: 4px;
+    width: 98%;
+}
+#searchTab tr{
+    height: 35px;
+}
+#searchTab input{
+    height: 30px;
+    width: 155px;
+    border: 1px solid #CCC;
+    border-radius: 3px;
+}
+#searchTab1{
+    display: inline-block;
+    margin-left: 8px;
+    margin-top: 4px;
+    width: 98%;
+}
+#searchTab1 tr{
+    height: 35px;
+}
+#searchTab1 input{
+    height: 30px;
+    width: 155px;
+}
+/*table td右对齐且设置左间距*/
+.rightCls{
+    text-align: right;
+    padding-left: 25px;
+}
+.centerCls{
+    text-align: center;
+    padding-left: 20px;
+}
+/*table td左对齐且设置左间距*/
+.leftCls{
+    text-align: left;
+    padding-left: 10px;
+}
+/*页面按钮样式 begin*/
+a.serchBtn:hover, a.saveBtn:hover,a.addBtn:hover,a.closBtn:hover,a.deleteBtn:hover,a.downloadGreyBtn:hover,a.downloadWhiteBtn:hover,a.editBtn:hover,a.exportBtn:hover,
+a.importBtn:hover,a.lockBtn:hover,a.openBtn:hover,a.paymentapplyBtn:hover,a.paymentReconciliationBtn:hover,a.printBtn:hover,
+a.processdifferenceBtn:hover,a.resetBtn:hover,a.scanBtn:hover  {
+	background-color: #25bba5;
+}
+a.serchBtn:active, a.saveBtn:active,a.addBtn:active,a.closBtn:active,a.deleteBtn:active,a.downloadGreyBtn:active,a.downloadWhiteBtn:active,a.editBtn:active,a.exportBtn:active,
+a.importBtn:active,a.lockBtn:active,a.openBtn:active,a.paymentapplyBtn:active,a.paymentReconciliationBtn:active,a.printBtn:active,
+a.processdifferenceBtn:active,a.resetBtn:active,a.scanBtn:active {
+	background-color: #13a08c;
+}
+a.serchBtn {
+    background: #1caf9a url("../images/icon-serch.png") no-repeat scroll 12px center;
+    height: 30px;
+    border-radius: 3px;
+    padding: 0px 12px 0px 33px;
+    display: inline-block;
+    text-decoration: none;
+    color: #FFF;
+    line-height: 30px;
+}
+a.saveBtn {
+    background: #1CAF9A url("../images/pop-icon-right.png") no-repeat scroll 20px center;
+    color: #FFF;
+    border-radius: 3px;
+    padding-right: 20px;
+    padding-left: 43px;
+    height: 30px;
+    display: inline-block;
+    line-height: 30px;
+    vertical-align: top;
+}
+a.scanBtn{
+	background: #1CAF9A url("../images/icon-scan.png") no-repeat scroll 20px center;
+    color: #FFF;
+    border-radius: 3px;
+    padding-right: 20px;
+    padding-left: 43px;
+    height: 30px;
+    display: inline-block;
+    line-height: 30px;
+    vertical-align: top;
+}
+a.closeBtn {
+    background: transparent url("../images/pop-icon-error.png") no-repeat scroll 12px center;
+    border: 1px solid #1CAF9A;
+    border-radius: 3px;
+    padding-right: 12px;
+    padding-left: 34px;
+    height: 30px;
+    display: inline-block;
+    line-height: 30px;
+    color: #4C4C4C;
+}
+a.addBtn{
+	background: url(../images/icon-add.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.closBtn{
+	background: url(../images/icon-close.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.deleteBtn{
+	background: url(../images/icon-delete.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.downloadGreyBtn{
+	background: url(../images/icon-download_grey.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.downloadWhiteBtn{
+	background: url(../images/icon-download_white.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.editBtn{
+	background: url(../images/icon-edit.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.exportBtn{
+	background: url(../images/icon-export.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.importBtn{
+	background: url(../images/icon-import.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.lockBtn{
+	background: url(../images/icon-lock.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.openBtn{
+	background: url(../images/icon-open.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.paymentapplyBtn{
+	background: url(../images/icon-payment_apply.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.paymentReconciliationBtn{
+	background: url(../images/icon-payment_Reconciliation.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.printBtn{
+	background: url(../images/icon-print.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.processdifferenceBtn{
+	background: url(../images/icon-process_difference.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.resetBtn{
+	background: url(../images/icon-reset.png)12px center no-repeat #1caf9a;
+	height: 30px;
+	border-radius: 3px;
+	padding: 0px 12px;
+	display: inline-block;
+	text-decoration: none;
+	color: #fff;
+	padding-left: 33px;
+	line-height: 30px;
+}
+a.btnStyle {
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 4px;
+}
+/*页面按钮样式 end*/
+body {
+    font-family: "LatoRegular","Lucida Grande","Lucida Sans Unicode",Helvetica,sans-serif !important;
+}
+/*按钮位置*/
+#toolbar{
+  /*   margin-top: 10px;
+    margin-left: 5px; */
+    margin-top: 10px;
+    float:right;
+    margin-right: 30px;
+}
+.selectType{
+	width:155px;	
+	/* transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1) inset; */
+}
+.selectType option{
+    height:27px;
+}
+/*上传文件框*/
+input, textarea {
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1) inset;
+}
+.radiusCls{
+    border: 1px solid #CCC;
+    border-radius: 3px;
+}

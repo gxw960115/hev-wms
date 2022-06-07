@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.OtcwmsOrderCheckDAO">
+	<resultMap type="stgInboundDown" id="inboundOrder">
+		<id property="rowId" column="row_id" javaType="long" jdbcType="NUMERIC" />
+		<result property="inboundDeliveryNo" column="inbound_delivery_no" />
+		<result property="inboundItemNo" column="inbound_item_no" />
+		<result property="poNo" column="po_no" />
+		<result property="poItemNo" column="po_item_no" />	
+	</resultMap>
+	<resultMap type="odsPdInfo" id="pdOrder">
+		<id property="rowId" column="row_id" javaType="long" jdbcType="NUMERIC" />
+		<result property="location" column="location" />
+		<result property="materialNo" column="material_no" />
+	</resultMap>
+	
+	<!-- 单据验证状态-->
+	<select id="orderCheck" resultType="string">
+		<if test="parmin.doctype == 'PO'"> 
+			select case when t.po_type = 'ZRE' then 'C' else 'R' end 
+			from STG_PO_DOWN t 
+			where t.po_no = #{parmin.orno} and ROWNUM = 1
+		</if>
+		<if test="parmin.doctype == 'DN'">
+		 SELECT CASE
+			WHEN T.SELL_ORDER_TYPE = 'ZSO' 
+				OR T.SELL_ORDER_TYPE = 'ZFO' 
+				OR t.SELL_ORDER_TYPE = 'ZFD' 
+				OR t.SELL_ORDER_TYPE = 'ZIDS' 
+				OR t.SELL_ORDER_TYPE = 'ZINS' 
+				OR t.SELL_ORDER_TYPE = 'ZIPS' 
+				OR t.SELL_ORDER_TYPE = 'ZKRP'
+				OR t.SELL_ORDER_TYPE = 'ZIMT'
+				OR t.SELL_ORDER_TYPE = 'ZKE'
+				THEN 'Billing'
+			WHEN T.SELL_ORDER_TYPE ='ZRE' 
+				OR T.SELL_ORDER_TYPE ='ZRP' 
+				OR t.SELL_ORDER_TYPE = 'ZKRR' 
+				THEN 'SRN'
+			WHEN T.SELL_ORDER_TYPE ='ZKA' THEN 'ConPickUp' 
+			WHEN T.SELL_ORDER_TYPE ='ZKB' THEN 'ConIssue'
+			END FROM
+				STG_DN_DOWN t 
+			where t.DN_NO = #{parmin.orno} and ROWNUM = 1
+		</if>
+	 	<!-- <if test="parmin.doctype == 'STO'">
+	 	 select case when count(*)>0 then 'Y' else 'N' end from
+			STG_STO_DOWN t
+			where t.STO_NO = #{parmin.orno} 
+		</if>  改成验证stodn  add by 孙艳飞2015-12-25 -->
+		<if test="parmin.doctype == 'STO'">
+			select case when count(*)>0 then 'Y' else 'N' end 
+			from STG_STODN_DOWN t
+			where t.STODN_NO = #{parmin.orno} 
+		</if>
+		<if test="parmin.doctype == 'GIFT'">
+			select case when t.ORDER_TYPE = '1' THEN 'R' else 'C' end 
+			from ODS_WMS_ORDER t
+			where t.Wms_Order_No = #{parmin.orno} and ROWNUM = 1
+		</if>
+		<if test="parmin.doctype == 'SCRAP'">
+			select case when t.ORDER_TYPE = '1' THEN 'R' else 'C' end 
+			from ODS_WMS_ORDER t
+			where t.Wms_Order_No = #{parmin.orno} and ROWNUM = 1
+		</if>  
+		<if test="parmin.doctype == 'PD'">
+			<![CDATA[
+			select case when count(*) > 0 then 'Y' else 'N' end 
+			from ODS_PD_INFO t
+			where NVL(t.ORDER_STATUS,0) <> 4 and t.ORDER_NO = #{parmin.orno} 
+			]]>
+		</if>
+		<if test="parmin.doctype == 'INBOUND'">
+			select case when count(*) >0 then 'Y' else 'N' end 
+			from STG_INBOUND_DOWN t
+			where t.INBOUND_DELIVERY_NO = #{parmin.orno} 
+		</if> 
+		<if test="parmin.doctype == 'TRANSFER'">
+			select case when count(*) > 0 then 'Y' else 'N' end 
+			from ods_transfer_info t
+			where t.trans_no = #{parmin.orno} 
+		</if>
+	</select>
+	
+	<select id="orderCheckByAvailableWh" resultType="string">
+		<if test="parmin.doctype == 'PO'"> 
+			select case when count(*) = 0 then 'N' when t.po_type = 'ZRE' then 'C'  else 'R' end 
+			from STG_PO_DOWN t 
+			where t.po_no = #{parmin.orno} 
+				and t.plant in 
+				(
+					select distinct w.code 
+					from cd_user_wh_loc u, cd_wh_info w 
+					where w.row_id = u.wh_id and u.user_id= #{userId}
+				)
+				and t.PO_LOCATION in 
+				(
+					select loc_code 
+					from cd_user_wh_loc 
+					where user_id=#{userId}
+				) 
+				and (t.submit_by is null or t.submit_by = '' or submit_by = #{userId})
+				and ROWNUM = 1
+		</if>
+		<if test="parmin.doctype == 'DN'">
+		 SELECT CASE
+			WHEN count(*) = 0 then 'N'
+			WHEN T.SELL_ORDER_TYPE = 'ZSO' 
+				OR T.SELL_ORDER_TYPE = 'ZFO' 
+				OR t.SELL_ORDER_TYPE = 'ZFD' 
+				OR t.SELL_ORDER_TYPE = 'ZIDS' 
+				OR t.SELL_ORDER_TYPE = 'ZINS' 
+				OR t.SELL_ORDER_TYPE = 'ZIPS' 
+				OR t.SELL_ORDER_TYPE = 'ZKRP'
+				OR t.SELL_ORDER_TYPE = 'ZIMT'
+				OR t.SELL_ORDER_TYPE = 'ZKE'
+				THEN 'Billing'
+			WHEN T.SELL_ORDER_TYPE ='ZRE' 
+				OR T.SELL_ORDER_TYPE ='ZRP' 
+				OR t.SELL_ORDER_TYPE = 'ZKRR' 
+				THEN 'SRN'
+			WHEN T.SELL_ORDER_TYPE ='ZKA' THEN 'ConPickUp' 
+			WHEN T.SELL_ORDER_TYPE ='ZKB' THEN 'ConIssue'
+			END FROM
+				STG_DN_DOWN t 
+			where t.DN_NO = #{parmin.orno} 
+			and t.plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id= #{userId})
+			and t.location in (select loc_code from
+			cd_user_wh_loc where user_id=#{userId})
+			and (t.submit_by is null or t.submit_by = '' 
+			or submit_by = #{userId}) limit 1
+		</if>
+		<if test="parmin.doctype == 'STO'">
+	 	 select case when count(*)>0 then 'Y' else 'N' end from
+			STG_STODN_DOWN t
+			LEFT JOIN stg_sto_down st ON (
+				st.STO_NO = t.STO_NO
+				AND st.STO_ITEM_NO = SUBSTR (t.STO_ITEM_NO,-5, 5)
+			)
+			where t.STODN_NO = #{parmin.orno} 
+			and (t.plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id= #{userId}) 
+			or st.gr_plant in(
+			select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id= #{userId}))
+			and (t.LOCATION in  (select loc_code from
+			cd_user_wh_loc where user_id=#{userId}) or
+			st.GR_LOCATION in  (select loc_code from
+			cd_user_wh_loc where user_id=#{userId}))
+			and (t.submit_by is null or t.submit_by = '' 
+			or submit_by = #{userId})
+		</if>
+<!-- 		<if test="parmin.doctype == 'GIFT'"> -->
+<!-- 		 select case when t.ORDER_TYPE = '1' THEN 'R' else 'C' end from -->
+<!-- 			ODS_WMS_ORDER t -->
+<!-- 			where t.Wms_Order_No =  #{parmin.orno}  limit 1 -->
+<!-- 		</if> -->
+		<if test="parmin.doctype == 'SCRAP'">
+		select case when count(*) = 0 then 'N'
+			when t.ORDER_TYPE = '1' THEN 'R' 
+			else 'C' end 
+			from ODS_WMS_ORDER t
+			where t.Wms_Order_No =  #{parmin.orno} 
+			and t.doc_tpye = 'SCRAP' 
+			and t.plant in (select distinct w.code from cd_user_wh_loc u, 
+			cd_wh_info w where w.row_id = u.wh_id and u.user_id= #{userId})
+			and t.LOCATION in (select loc_code from cd_user_wh_loc where
+			user_id= #{userId}) limit 1
+		</if>  
+		<if test="parmin.doctype == 'PD'">
+			<![CDATA[
+			select case when count(*)>0 then 'Y' else 'N' end 
+			from ODS_PD_INFO t
+			where NVL(t.ORDER_STATUS,0) <> 4 and t.ORDER_NO =  #{parmin.orno} 
+				and t.plant in 
+				(
+					select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+					where w.row_id = u.wh_id and u.user_id= #{userId})
+						and t.LOCATION in 
+						(select loc_code from cd_user_wh_loc where user_id= #{userId}
+				)  
+			]]>
+		</if>
+<!-- 		<if test="parmin.doctype == 'INBOUND'"> -->
+<!-- 		select case when count(*)>0 then 'Y' else 'N' end from -->
+<!-- 			STG_INBOUND_DOWN t -->
+<!-- 			where t.INBOUND_DELIVERY_NO = #{parmin.orno}  -->
+<!-- 		</if>  -->
+		<if test="parmin.doctype == 'TRANSFER'">
+	 	 select case when count(*)>0 then 'Y' else 'N' end from
+			ods_transfer_info t
+			where t.trans_no = #{parmin.orno} 
+			and t.item_delete = 0
+			and t.plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and u.user_id= #{userId})
+			and (t.gi_location in (select loc_code from cd_user_wh_loc where user_id=#{userId})
+			or t.gr_location in (select loc_code from cd_user_wh_loc where user_id=#{userId}))
+		</if>
+	</select>
+	
+	<select id="getInbdByOrderNo" resultMap="inboundOrder">
+		select row_id, po_no, po_item_no, inbound_delivery_no, inbound_item_no
+		from stg_inbound_down
+        where inbound_delivery_no = #{parmin.orno}
+	</select>
+	
+	<select id="getPoByOrderNoItem" parameterType="stgInboundDown" resultType="String">
+		select case when count(*)>0 then 'Y' else 'N' end 
+		from STG_PO_DOWN t
+        where t.PO_NO = #{stgInboundDown.poNo} and t.PO_ITEM_NO = #{stgInboundDown.inboundItemNo}
+	</select>
+	
+	<select id="getPoByAvailableWh" parameterType="stgInboundDown" resultType="String">
+		select case when count(*)>0 then 'Y' else 'N' end 
+		from STG_PO_DOWN t
+        where t.PO_NO = #{stgInboundDown.poNo} and t.PO_ITEM_NO = #{stgInboundDown.inboundItemNo}
+		and t.plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+		where w.row_id = u.wh_id and u.user_id= #{userId})
+		and t.po_location in (select loc_code from cd_user_wh_loc where user_id=#{userId})
+	</select>
+	
+	<select id="getPdLocation" resultType="string">
+		select DISTINCT t.location from ODS_PD_INFO t where  t.ORDER_NO = #{orderNo} 
+	</select>
+
+	<select id="getProcessPdLocation" resultType="string">
+		select DISTINCT t.location from ODS_PD_INFO t where  t.ORDER_NO = #{orderNo} and ORDER_STATUS = 1
+	</select>
+
+	<select id="getPdMat" resultType="string">
+		select material_no from ODS_PD_INFO where ORDER_NO = #{orderNo} and LOCATION = #{string}
+	</select>
+	<select id="checkDnSapFlag" resultType="string">
+		select case when ( t.sap_flag = '0' ) THEN 'S' else 'F' end 
+		from STG_DN_DOWN t 
+		where t.DN_NO = #{parmin.orno} ROWNUM = 1
+	</select>
+	
+	<select id="getRequiredTotalQty" resultType="string">
+		<if test="parmin.doctype == 'PO'">
+			select sum(qty) from STG_PO_DOWN t
+				where t.PO_NO = #{parmin.orno}
+		</if>
+		<if test="parmin.doctype == 'DN'">
+			select sum(qty) from STG_DN_DOWN t 
+	    		where t.DN_NO = #{parmin.orno}
+		</if>
+		<if test="parmin.doctype == 'STO'">
+			select sum(qty) from STG_STODN_DOWN t
+				where t.STODN_NO = #{parmin.orno} 
+		</if>
+		<if test="parmin.doctype == 'GIFT'">
+			select sum(require_qty) from ODS_WMS_ORDER t 
+	    		where t.wms_order_no = #{parmin.orno}
+		</if>
+		<if test="parmin.doctype == 'SCRAP'">
+			select sum(require_qty) from ODS_WMS_ORDER 
+				where WMS_ORDER_NO = #{parmin.orno}
+		</if>
+		<if test="parmin.doctype == 'INBOUND'">
+			select sum(qty) from stg_inbound_down 
+				where inbound_delivery_no = #{parmin.orno}
+		</if>
+		<if test="parmin.doctype == 'TRANSFER'">
+			select sum(qty) from ods_transfer_info 
+				where trans_no = #{parmin.orno}
+		</if>
+	</select>
+	<update id="updateCurrentScanner" parameterType="string">
+		<if test="docType == 'PO'">
+			UPDATE STG_PO_DOWN t SET T.SUBMIT_BY = #{userId}
+			where t.PO_NO = #{orderNo}
+		</if>
+		<if test="docType == 'DN'">
+			update STG_DN_DOWN t set t.submit_by = #{userId}
+			where t.DN_NO = #{orderNo}
+		</if>
+		<if test="docType == 'STO'">
+			update STG_STODN_DOWN t set t.submit_by = #{userId}
+			where t.STODN_NO = #{orderNo}
+		</if>
+		<if test="docType == 'INBOUND'">
+			update stg_inbound_down T SET T.submit_by = #{userId}
+			where T.inbound_delivery_no = #{orderNo}
+		</if>
+	</update>
+	<select id="orderCheckScannerInbound" resultType="string">
+		select case when count(0)> 0 then 'Y' else 'N' end 
+		from stg_inbound_down 
+		where inbound_delivery_no = #{orderNo}
+			and (submit_by = '' or submit_by is null or submit_by = #{userId})
+	</select>
+</mapper>

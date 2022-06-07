@@ -1,0 +1,19 @@
+{{#partial "realTitle"}}{{{block "realKpiTitle"}}}{{/partial}}
+{{#partial "realtopmenu"}}
+    {{#inject "topmenu"}}
+    {
+    "rootLevel":1,
+    "selectedId":7
+    }
+    {{/inject}}
+{{/partial}}
+{{#partial "realmenu"}}
+    {{#inject "menu"}}
+    {
+    "parentId":7,
+    "rootLevel":2
+    }
+    {{/inject}}
+{{/partial}}
+{{#partial "realBody"}}{{{block "realKpiBody"}}}{{/partial}}
+{{> main_layout }}

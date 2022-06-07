@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.basic.dao.GiftBarcodeDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	<sql id="selectAllGiftBarcodeColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			BARCODE,
+			ST_NO,
+			CREATE_BY,
+			to_char(CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATE_DATE
+		from 
+			GIFT_BARCODE gift_barcode_
+		]]>
+	</sql>
+	<sql id="searchGiftBarcode_fragement">
+		<include refid="selectAllGiftBarcodeColumns" />
+		where 1=1
+		<if test="giftBarcode.rowId != null and giftBarcode.rowId != ''">
+		and ROW_ID like '%'||#{giftBarcode.rowId}||'%' 
+		</if>
+		<if test="giftBarcode.materialNo != null and giftBarcode.materialNo != ''">
+		and MATERIAL_NO like '%'||#{giftBarcode.materialNo}||'%' 
+		</if>
+		<if test="giftBarcode.materialDesp != null and giftBarcode.materialDesp != ''">
+		and MATERIAL_DESP like '%'||#{giftBarcode.materialDesp}||'%' 
+		</if>
+		<if test="giftBarcode.barcode != null and giftBarcode.barcode != ''">
+		and BARCODE like '%'||#{giftBarcode.barcode}||'%' 
+		</if>
+		<if test="giftBarcode.stNo != null and giftBarcode.stNo != ''">
+		and ST_NO = #{giftBarcode.stNo}
+		</if>
+		<if test="giftBarcode.createBy != null and giftBarcode.createBy != ''">
+		and CREATE_BY like '%'||#{giftBarcode.createBy}||'%' 
+		</if>
+		<if test="giftBarcode.createDateB != null and giftBarcode.createDateB != ''">
+			<![CDATA[
+			and CREATE_DATE >= TO_DATE(CONCAT(#{giftBarcode.createDateB},' 00:00:00') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="giftBarcode.createDateE != null and giftBarcode.createDateE != ''">
+			<![CDATA[
+			and CREATE_DATE <= TO_DATE(CONCAT(#{giftBarcode.createDateE},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+	</sql>
+	<sql id="gift_barcode_coloumn_list">
+		ROW_ID,MATERIAL_NO,MATERIAL_DESP,BARCODE,ST_NO,CREATE_BY,CREATE_DATE
+	</sql>
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="giftBarcodeMap" type="giftBarcode">
+		<result property="rowId" column="ROW_ID" />
+		<result property="materialNo" column="MATERIAL_NO"  />
+		<result property="materialDesp" column="MATERIAL_DESP"  />
+		<result property="barcode" column="BARCODE"  />
+		<result property="stNo" column="ST_NO" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+	</resultMap>
+	<!-- =========================================================== -->
+    <!-- DAO方法中的基本增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+    <insert id="save" parameterType="giftBarcode">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_GIFT_BARCODE_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+			INSERT INTO GIFT_BARCODE 
+				( ROW_ID, MATERIAL_NO, MATERIAL_DESP, BARCODE, ST_NO, CREATE_BY, CREATE_DATE)
+			VALUES
+				( 
+					#{rowId} ,
+					#{materialNo}, 
+					#{materialDesp}, 
+					#{barcode}, 
+					#{stNo}, 
+					#{createBy}, 
+					sysdate
+				)
+	    ]]>	
+	</insert>
+    
+	<select id="selectSeq" resultType="String">
+		<![CDATA[
+			SELECT SEQ_GIFT_BARCODE_ID.NEXTVAL AS ID FROM DUAL
+		]]>
+	</select>
+	<select id="searchGiftBarcodes" resultMap="giftBarcodeMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchGiftBarcode_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchGiftBarcodesCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchGiftBarcode_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	
+	<select id="searchGiftBarcodeByMaterial" resultMap="giftBarcodeMap">
+	    select
+			ROW_ID,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			BARCODE,
+			ST_NO,
+			CREATE_BY,
+			to_char(CREATE_DATE, 'yyyy-MM-dd HH24:mi:ss') CREATE_DATE
+		from 
+			GIFT_BARCODE gift_barcode_
+		where gift_barcode_.material_no = 	#{materialNo}
+	    
+	</select>
+	
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+				  
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.ScanAndIOGPWhenPD">
+	<select id="orderScan" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_scan_when_pd(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{in.qty,mode=IN,jdbcType=INTEGER},
+		  #{in.location,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matdesc,mode=OUT,jdbcType=VARCHAR},		  
+		  #{out.scanqty,mode=OUT,jdbcType=INTEGER}
+		  )}
+		]]>
+	</select>
+	<select id="orderDelete" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_scan_delete_when_pd(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{in.qty,mode=IN,jdbcType=INTEGER},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+</mapper>

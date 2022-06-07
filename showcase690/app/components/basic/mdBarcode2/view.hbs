@@ -1,0 +1,213 @@
+{{#component "mdBarcode js-comp"}}
+    <style type="text/css">
+        #addPdForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addPdForm input{
+            height: 25px;
+            width: 160px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+        #addPdForm table tr{
+            height: 32px;;
+        }
+        #addPdForm table select{
+            width: 160px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+    </style>
+    <div id="mdBarcode2Div" class="easyui-layout"  style="width:100%;">
+        <div class="searchDiv" region="north">
+            <table id="searchTab">
+                <tr>
+                    <td style="text-align: right">Mat Code:</td> 
+                    <td class="leftCls"><input id="materialNo" type="text"  />
+                    <td style="text-align: right">Serial Number:</td> 
+                    <td class="leftCls"><input id="stNo" type="text"  />
+                    <td style="text-align: right">Created By:</td> 
+                    <td class="leftCls"><input id="createBy" type="text"  />
+                </tr>
+                <tr>
+                    <td style="text-align: right">Barcode:</td> 
+                    <td class="leftCls"><input id="barcode" type="text"  />
+                    <td style="text-align: right">Create Date:</td>
+                    <td class="leftCls"><input id="createDateB" value="" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'createDateE\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                        - <input id="createDateE"  value="" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'createDateB\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn" onclick="searchMdBarcode()">Search</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" id="addBtn" onclick="clearSearchForm()">Clear</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" id="orderOpenBtn">Create Barcode</a>
+                    <a href="javascript:void(0)" class="btnStyle printBtn" id="orderCloseBtn" onclick="printBarcode()">Print</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px;  overflow-y: hidden;  margin-top: -2px;">
+            <table id="mdBarcodeGrid"></table>
+        </div>
+    </div>
+    <!-- 添加窗口 -->
+    <div id="addPdWin" class="easyui-window" title="Add StockTaking Order"
+         data-options="modal:true,closed:true,iconCls:'icon-add', top:0, left:($(window).width() - 735) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+         style="width: 735px; height: 500px;">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style=" height: 230px; border:0">
+                <form id="addPdForm" method="post">
+                    <table  cellpadding="0" cellspacing="0" >
+                        <tr>
+                            <td align="right" valign="middle">Order No.:&nbsp;&nbsp;</td>
+                            <td colspan="3"><input id="planNo" type="text" size="16"
+                                                   readonly="readonly" /></td>
+
+                        </tr>
+                        <tr>
+                            <td align="right" valign="middle">Warehouse Code:&nbsp;&nbsp;</td>
+                            <td width="190"><input type="text" id="warehouseCode" class="easyui-combobox" data-options="width:140,height:30,editable:true,valueField:'rowId',textField:'code',
+                            url:'/warehouse/list/cbox'">
+                                <font color="red">*</font></td>
+                            <td align="left" valign="middle">Plant Code:&nbsp;&nbsp;</td>
+                            <td><input type="text" id="factory" class="easyui-combobox" data-options="width:140,height:30,editable:true,valueField:'rowId',textField:'code',url:'/plant/list/select'">
+                                <font color="red">*</font></td>
+                        </tr>
+                        <tr class="locTr">
+                            <td valign="top" align="right">Location<font color="red">*</font>：</td>
+                            <td  colspan="3" >
+                                <div style="height: 150px; border: 1px #ccc solid; width: 100%; overflow-y: scroll; overflow-x: auto;">
+                                    <ul id="locTree" class="easyui-tree"></ul>
+                                </div> <input id="locs" type="hidden" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div region="center">
+                <table id="selPdGrid" ></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 35px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="savePd();">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="closePdWin();">Cancel</a>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+         $(function(){
+            $('#mdBarcode2Div').height(suitHeight);
+		    var fullUrl = window.location.href;
+		    var arr = fullUrl.split("/");
+            var url= arr[0] + "//" + arr[2];
+
+	        var createUrl = "create('MdBarcode Add','" + url + "/basic/mdBarcodeAdd')";
+
+			$('#orderOpenBtn').attr("onclick","createUrl");
+
+            var templateColumns = [ [ {
+            field : 'ck',
+            checkbox : true,
+            width : 60,
+            align : 'center'
+        }, {
+            field : 'barcode',
+            title : 'Barcode ',
+            width : 200,
+            align : 'center',
+            sortable : true
+        },  {
+            field : 'materialDesp',
+            title : 'Mat Desc ',
+            width : 200,
+            align : 'center',
+            sortable : true
+        },{
+            field : 'materialNo',
+            title : 'Mat Code',
+            width : 100,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'stNo',
+            title : 'Serial Number',
+            width : 100,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'createBy',
+            title : 'Created By',
+            width : 100,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'createDate',
+            title : 'Created Date',
+            width : 200,
+            align : 'center',
+            sortable : true
+        } ] ];
+        var grid = $('#mdBarcodeGrid').datagrid({
+            rownumbers:true,
+            columns:templateColumns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            height:document.body.clientHeight - 660,
+            url:'/mdBarcode/search',
+            method:'post'
+        });
+        initPagination(grid);
+        gridScroll(grid);
+     });  
+
+     function searchMdBarcode(){
+        var grid= $('#mdBarcodeGrid').datagrid({
+            url:'/mdBarcode/search',
+            queryParams: {
+                'barcode' : $('#barcode').val(),
+                'materialNo' : $('#materialNo').val(),
+                'stNo' : $('#stNo').val(),
+                'createBy' : $('#createBy').val(),
+                'createDateB' : $('#createDateB').val(),
+                'createDateE' : $('#createDateE').val()
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+    }
+
+    //查询条件清除
+    function clearSearchForm() {
+        $('#barcode').val('');
+        $('#materialNo').val('');
+        $('#stNo').val('');
+        $('#createBy').val('');
+        $('#createDateB').val('');
+        $('#createDateE').val('');
+        $('#mdBarcodeGrid').datagrid('loadData', { total: 0, rows: [] });
+    } 
+
+    // 添加
+    function create(title,url){  
+            var jq = top.jQuery;    
+            if (jq("#centerTab").tabs('exists', title)){    
+                jq("#centerTab").tabs('select', title);    
+            } else {  
+                  var content = '<iframe scrolling="auto" frameborder="0"  src="'+url+'" style="width:100%;height:100%;"></iframe>';     
+                   jq("#centerTab").tabs('add',{    
+  
+                                      title:title,    
+                                      content:content,    
+                                      closable:true    
+                                    });    
+             }    
+        }
+    </script>
+{{/component}}

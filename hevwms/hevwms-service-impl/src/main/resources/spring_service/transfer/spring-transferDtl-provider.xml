@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 311 transfer Dtl 管理 -->
+	<bean id="odsTransferDtlServiceClient"
+		class="com.haier.openplatform.wms.transfer.impl.OdsTransferDtlServiceClientImpl">
+		<property name="odsTransferDtlService" ref="odsTransferDtlService"></property>
+		<property name="odsTransferInfoService" ref="odsTransferInfoService"></property>
+		<property name="rfWsService" ref="rfWsService"></property>
+	</bean>
+	
+	<dubbo:service
+		interface="com.haier.openplatform.wms.transfer.service.OdsTransferDtlServiceClient"
+		owner="Hevwms" ref="odsTransferDtlServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+</beans>

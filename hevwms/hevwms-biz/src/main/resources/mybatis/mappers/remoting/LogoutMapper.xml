@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.OtcwmsLogoutDAO">
+<!-- 用户登出-签名置空 -->
+	<update id="resetSign" parameterType="String">
+		<![CDATA[ update user_info u set u.rf_sign='' where u.name=#{name} ]]>	
+	</update>
+</mapper>

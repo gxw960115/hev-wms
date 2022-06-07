@@ -1,0 +1,26 @@
+{{#partial "leftBody"}}
+    <div class="share_left">
+        <ul>
+            <li class="one"><a href="/account/mission_application" ><span>业务申请</span></a></li>
+            <li><a href="/account/business_audit" ><span>业务审核</span></a></li>
+            <li ><a href="/account/finance_audit" ><span>共享审核</span></a></li>
+            <li><a href="/account/index" class="fa-caret-down"><span>业务处理</span></a></li>
+            <li>
+                <a href="#"><span class="peizhi_z ">系统配置</span></a>
+                <ul class="peizhi_s">
+                    <a href="/account/assistant_index"><li>模版配置</li></a>
+                    <a href="/account/assistant_index"><li>规则配置</li></a>
+                </ul>
+            </li>
+            <li ><a href="/account/assistant_index" ><span>辅导</span></a></li>
+        </ul>
+    </div>
+{{/partial}}
+{{#partial "rightBody"}}
+    {{inject "account_column"}}
+{{/partial}}
+{{#partial "styleBlock"}}
+    <link rel="stylesheet" type="text/css" href="/assets/styles/css/share_sh.css"/>
+    <link rel="stylesheet" type="text/css" href="/assets/styles/css/cxcalendar.css"/>
+{{/partial}}
+{{> main_none}}

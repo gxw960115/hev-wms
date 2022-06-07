@@ -1,0 +1,46 @@
+{{#component "mdBarcodePrint js-comp"}}
+<div style="padding-top:15px; padding-left:20px; width:200px;">
+    <a class="btnStyle printBtn" href="javascript:void(0)" onclick="print()" >Print</a>
+</div>
+<div id="imageDiv" style="margin-left:40px; width:900px">
+</div>
+
+<script> 
+ $('#imageDiv').height(window.screen.availHeight-224);
+ //alert(window.screen.availHeight);
+String.prototype.getQuery = function(name)  
+{ 
+ 
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");  
+
+    var r = this.substr(this.indexOf("\?")+1).match(reg);  
+
+    if (r != null) return unescape(r[2]);   
+
+    return  '';  
+
+}     
+var barcode=window.location.toString().getQuery('barcodes'); //获取id的值  
+var items=barcode.split(",");
+var images="<table>";
+    var fullUrl = window.location.href;
+	var arr = fullUrl.split("/");
+    var url= arr[0] + "//" + arr[2];
+
+for (var i = 0; i <items.length; i++) {//basic/
+    var ima=items[i];
+    //images+="<tr style='height:370px;width:600px;'><td style='margin-left:50px;'><img src='" + url + "/" + ima + "' /></td></tr>";
+    //images+="<tr style='height:370px;text-align:center;vertical-align:middle;'><td style='margin-left:50px;'><img src='" + url + "/" + ima + "' /></td></tr>";
+    images+="<tr style='height:270px;width:600px;'><td style='margin-left:50px;'><img src='" + url + "/" + ima + "' /></td></tr>";
+};
+	images+="</table>";
+	//alert(images);
+$('#imageDiv').html(images);
+
+//打印方法
+function  print(){
+	$("#imageDiv").jqprint();
+}
+</script>
+
+{{/component}}

@@ -1,0 +1,400 @@
+{{#component "scrapApproveOrder js-comp"}}
+    <div id="scrapAppDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDivlow" region="north" style="border: 0 ">
+            <table id="searchTab" style="margin-left: 10px">
+                <tr>
+                    <td style="text-align: right">OGP/IGP NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="orderNoP" type="text" /></td>
+                    <td class="rightCls">Material NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="materialNoP" type="text" /></td>
+                    <td class="rightCls">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="begin" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>&nbsp;&nbsp;
+                        - &nbsp;&nbsp;<input id="end" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchOdsOrderInfo()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchDtl()">Query Order Details</a>
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" onclick="add()">Confirm</a>
+              	    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden;">
+            <table id="odsOrderInfoGrid">
+
+            </table>
+        </div>
+    </div>
+    <!-- 添加窗口 -->
+    <div id="addOrderWin" class="easyui-window" title="Scrap Order Details"
+         data-options="modal:true,closed:true,iconCls:'icon-add', top:0, left:($(window).width() - 840) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+         style="width: 840px; height: 470px;">
+        <div class="easyui-layout" data-options="fit : true,border:false">
+            <div data-options="region:'center',border:false">
+                <table id="dtlGrid"></table>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 35px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveOrder();">Save</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="javascript:$('#addOrderWin').window('close');">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <div id="detailsWin" class="easyui-window" title="Scrap Order Details"
+         data-options="modal:true,closed:true,iconCls:'icon-add',top:0, left:($(window).width() - 835) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:false,resizable:false"
+         style="width: 835px; height: 470px;">
+        <table id="dtlQueryGrid"></table>
+    </div>
+    <script type="text/javascript">
+    var matColumns="";
+    $(function(){
+    	$('#scrapAppDiv').height(suitHeight);
+    	var selectedFlag = false;
+        var curRowIndex=-1;
+        //初始化日期
+        var date=new Date();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        var begin=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(begin,-1));var d=date.getDate();
+        date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#end').val(date);
+        var columns=[[{
+            field:'ck1',checkbox:true,
+            hidden : true
+        },{
+            field : 'wmsOrderNo',
+            title : 'Order No',
+            width:80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'checkFlag',
+            title : 'Check Flag',
+            align : 'center',
+            hidden:true,
+            width:80,
+            sortable : true,
+            formatter : function(val) {
+                /*  if (val == '0') {
+                      return '<s:text name="odsWmsOrder.checkFlag.0" />';
+                  } else if (val == '1') {
+                      return '<s:text name="odsWmsOrder.checkFlag.1" />';
+                  }*/
+                return val;
+            }
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            width:60,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width:100,
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width:100,
+            sortable : true
+        }, {
+            field : 'requireQty',
+            title : 'Require Qty',
+            width:100,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Scanned Qty',
+            align : 'center',
+            width:100,
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            width:60,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            width:120,
+            align : 'left',
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width:140,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'flag',
+            title : 'Delete Flag',
+            width:90,
+            align : 'center',
+            formatter : function(val) {
+                if (val == '0') {
+                    return 'Not Delete';
+                } else if (val == '1') {
+                    return 'Delete';
+                }
+                return val;
+            }
+        }]];
+        matColumns = [ [ {
+            field : 'sapOrderNo',
+            title : 'Order No',
+            align : 'center',
+            width : 80,
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            width : 80,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'barcode',
+            width : 85,
+            title : 'Barcode',
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'qty',
+            title : 'Qty',
+            align : 'center',
+            width : 50,
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            align : 'center',
+            width : 60,
+            sortable : true
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            width : 120,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width : 140,
+            align : 'center',
+            sortable : true
+        } ] ];
+        var grid = $('#odsOrderInfoGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            singleSelect:true,
+            url: '',
+//             url: '/order/searchGfOrder',
+//             queryParams: {
+//                 'flag' : '0',
+//                 'checkFlag' : '0',
+//                 'docTpye' : 'SCRAP',
+//                 'begin' : $('#begin').val(),
+//                 'end' : $('#end').val()
+//             },
+            method:'post',
+            onLoadSuccess : function(data) {
+                if (data.mess != null) {
+                    $.messager.alert('System Information',
+                            data.mess, 'warning');
+                    return;
+                }
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information>',
+                            'No records found.',
+                            'warning');
+                }
+                $(this).datagrid("fixRownumber");
+            },
+            onLoadError:function(){
+                $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+            onClickRow:function(rowIndex, rowData){
+            	if (!selectedFlag){
+                	grid.datagrid('selectRow', rowIndex);
+                	selectedFlag = true;
+                	curRowIndex = rowIndex;
+            	}else{
+            		if (curRowIndex == rowIndex){
+//             			grid.datagrid('unselectRow', rowIndex);
+            			grid.datagrid('clearSelections');
+            			selectedFlag = false;
+            		}else{
+            			grid.datagrid('clearSelections');
+                    	grid.datagrid('selectRow', rowIndex);
+                    	selectedFlag = true;
+                    	curRowIndex = rowIndex;
+            		}
+            	}
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+    })
+    function searchOdsOrderInfo(){
+        var grid=$('#odsOrderInfoGrid').datagrid({
+            url:'/order/searchGfOrder',
+            queryParams: {
+                'flag' : '0',
+                'checkFlag' : '0',
+                'docTpye' : 'SCRAP',
+                'wmsOrderNo' : $('#orderNoP').val(),
+                'materialNo' : $('#materialNoP').val(),
+                'begin' : $('#begin').val(),
+                'end' : $('#end').val(),
+                'location':$('#locationP').val()
+            },
+            onLoadSuccess : function(data) {
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                    gridScroll(grid);
+                }
+                $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid);
+    }
+    function add() {
+         var row = $('#odsOrderInfoGrid').datagrid('getSelections');
+         if (row.length != 1) {
+             $.messager.alert('System Information',
+                     'Please select one data!', 'warning');
+             return;
+         }
+        var dtlGrid= $('#dtlGrid').datagrid(
+                {
+                    rownumbers : true,
+                    pagination : true,
+                    striped : true,
+                    singleSelect : false,
+                    height : 400,
+                    fitColumns : false,
+                    pageNumber : 1,
+                    fit : true,
+                    columns : matColumns,
+                    url : '/order/searchOdsOrderInfoDtl',
+                    queryParams : {
+                        'flag' : '0',
+                        'sapOrderNo' : row[0].wmsOrderNo
+                    },
+                    onLoadSuccess : function(data) {
+                        if (data.mess != null) {
+                            $.messager.alert('System Information',
+                                    data.mess, 'warning');
+                            return;
+                        }
+                        if (data.total == 0 && data.rows.length == 0) {
+                            $.messager.alert('System Information',
+                                    'No records found.',
+                                    'warning');
+                        }
+                    },
+                    onLoadError:function(){
+                         $.messager.alert('System Information','Network Abnormal!','warning');
+                    }
+                });
+        initPagination(dtlGrid);
+        $('#addOrderWin').window('open');
+    }
+
+
+
+    function saveOrder() {
+        var row = $('#odsOrderInfoGrid').datagrid('getSelected');
+        $.post(
+                '/order/checkScrapOrder',
+                {
+                    'wmsOrderNo' : row.wmsOrderNo
+                },
+                function(data) {
+                    var data = eval('(' + data + ')');
+                    if (data.success) {
+                        $.messager.alert('System Information',
+                                'Check Success!', 'warning');
+                        $('#addOrderWin').window('close');
+                        searchOdsOrderInfo();
+                    } else {
+                        $.messager.alert('System Information',
+                                'Check Failure!,' + data.msg,
+                                'warning');
+                    }
+                    
+                }).error(
+                function() {
+                    $.messager.alert('System Information',
+                            'Network Abnormal!', 'warning');
+                });
+
+    }
+    function searchDtl() {
+        var row = $('#odsOrderInfoGrid').datagrid('getSelections');
+        if (row.length != 1) {
+              $.messager.alert('System Information',
+                      'Please select one data!', 'warning');
+              return;
+        }
+        var dtlQueryGrid=  $('#dtlQueryGrid').datagrid(
+                {
+                    rownumbers : true,
+                    pagination : true,
+                    striped : true,
+                    singleSelect : false,
+                    height : 400,
+                    fitColumns : false,
+                    fit : true,
+                    pageNumber : 1,
+                    columns : matColumns,
+                    url : '/order/searchOdsOrderInfoDtl',
+                    queryParams : {
+                        'flag' : '0',
+                        'sapOrderNo' : row[0].wmsOrderNo,
+                        'materialNo' : row[0].materialNo
+                    },
+                    onLoadSuccess : function(data) {
+                        if (data.mess != null) {
+                            $.messager.alert('System Information',
+                                    data.mess, 'warning');
+                            return;
+                        }
+                        if (data.total == 0 && data.rows.length == 0) {
+
+                        }
+                    },
+                    onLoadError:function(){
+                         $.messager.alert('System Information','Network Abnormal!','warning');
+                    }
+                });
+        initPagination(dtlQueryGrid);
+        $('#detailsWin').window('open');
+    }
+    </script>
+{{/component}}

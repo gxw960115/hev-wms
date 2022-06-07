@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- -->
+<mapper namespace="com.haier.hevwms.takestock.dao.OdsPdInfoDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[) s]]>
+	</sql>
+
+	<sql id="selectAllOdsPdInfoColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			ORDER_NO,
+			ORDER_TYPE,
+			ORDER_STATUS,
+			PLANT,
+			WAREHOUSE_CODE,
+			CUSTOMER_MODEL,
+			LOCATION,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			UNIT,
+			(SELECT SUM(QTY) FROM ODS_PD_INFO_DTL DTL
+			 WHERE DTL.ORDER_NO = ods_pd_info_.ORDER_NO AND DTL.PLANT = ods_pd_info_.PLANT
+   			 AND ods_pd_info_.LOCATION = DTL.LOCATION
+   			 AND ods_pd_info_.MATERIAL_NO = DTL.MATERIAL_NO) ACTUAL_QTY,
+			BEGIN_DATE,
+			END_DATE,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			VERSION,
+			BIN,
+			1
+		from 
+			ODS_PD_INFO ods_pd_info_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsPdInfoMap" type="odsPdInfo">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="orderType" column="ORDER_TYPE" />
+		<result property="orderStatus" column="ORDER_STATUS" />
+		<result property="plant" column="PLANT" />
+		<result property="warehouseCode" column="WAREHOUSE_CODE" />
+		<result property="warehouseName" column="WAREHOUSE_NAME" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="unit" column="UNIT" />
+		<result property="actualQty" column="ACTUAL_QTY" />
+		<result property="beginDate" column="BEGIN_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="bin" column="BIN" />
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="odsPdInfoMap">
+		<include refid="selectAllOdsPdInfoColumns" />
+	</select>
+	<select id="get" resultMap="odsPdInfoMap" parameterType="long">
+		<include refid="selectAllOdsPdInfoColumns" />
+		<![CDATA[
+		where ods_pd_info_.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_PD_INFO where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_PD_INFO where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="odsPdInfo">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_PD_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into ODS_PD_INFO
+		  (ROW_ID,
+		   		ORDER_NO
+				,ORDER_TYPE
+				,ORDER_STATUS
+				,PLANT
+				,WAREHOUSE_CODE
+				,WAREHOUSE_NAME
+				,CUSTOMER_MODEL
+				,LOCATION
+				,MATERIAL_NO
+				,MATERIAL_DESP
+				,UNIT
+				,ACTUAL_QTY 
+				,BEGIN_DATE
+				,END_DATE			
+				,CREATE_BY
+				,CREATE_DATE
+				,MODIFY_BY
+				,MODIFY_DATE
+				,FLAG
+				,VERSION
+				,BIN
+		   )
+		values
+		  (#{id}
+		  		,#{orderNo}
+				,#{orderType}
+				,#{orderStatus}
+				,#{plant}
+				,#{warehouseCode}
+				,#{warehouseName}
+				,#{customerModel}
+				,#{location}
+				,#{materialNo}
+				,#{materialDesp} 
+				,#{unit} 
+				,#{actualQty} 
+				,#{beginDate} 
+				,#{endDate} 
+				,#{createBy}
+				,#{createDate}
+				,#{modifyBy}
+				,#{modifyDate}
+				,#{flag}
+				,#{version}
+				,#{bin}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="odsPdInfo">
+		<![CDATA[
+		update ODS_PD_INFO
+		   set 1=1
+				,ORDER_NO = #{orderNo}
+				,ORDER_TYPE = #{orderType}
+				,ORDER_STATUS = #{orderStatus}
+				,PLANT = #{plant}
+				,WAREHOUSE_CODE = #{warehouseCode}
+				,WAREHOUSE_NAME = #{warehouseName}
+				,CUSTOMER_MODEL = #{customerModel}
+				,LOCATION = #{location}
+				,MATERIAL_NO = #{materialNo}
+				,MATERIAL_DESP = #{materialDesp}
+				,UNIT = #{unit}
+				,ACTUAL_QTY = #{actualQty}
+				,BEGIN_DATE = #{beginDate}
+				,END_DATE = #{endDate}
+				,CREATE_BY = #{createBy}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate}
+				,FLAG = #{flag}
+				,VERSION = #{version}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+
+	<update id="updateOrderStatus"  parameterType="odsPdInfo">
+		<![CDATA[
+		update ODS_PD_INFO
+		   set  
+				ORDER_STATUS = #{odsPdInfo.orderStatus} 
+				,MODIFY_BY = #{odsPdInfo.modifyBy}
+				,MODIFY_DATE = #{odsPdInfo.modifyDate} 
+		 where ORDER_NO = #{odsPdInfo.orderNo}
+		]]>
+	</update>
+	<sql id="searchOdsPdInfo_fragement">
+		<include refid="selectAllOdsPdInfoColumns" />
+		<![CDATA[
+		where 1 = 1
+		]]>
+		<if test="odsPdInfo.orderNo != null">
+			and ORDER_NO like '%'||#{odsPdInfo.orderNo}||'%' 
+		</if>
+		<if test="odsPdInfo.orderStatus == 0">
+		    and (ORDER_STATUS = 0 or order_status = '' or order_status is null)
+		</if>
+		<if test="odsPdInfo.orderStatus != 0 and odsPdInfo.orderStatus != -1">
+			and ORDER_STATUS = #{odsPdInfo.orderStatus} 
+		</if>
+		<if test="odsPdInfo.plant != null">
+			and PLANT like '%'||#{odsPdInfo.plant}||'%' 
+		</if>
+		<if test="odsPdInfo.location != null and odsPdInfo.location != ''">
+			and LOCATION IN (${odsPdInfo.location})
+		</if>
+		<if test="odsPdInfo.userType != null and odsPdInfo.userType != 1">
+		    and plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and u.user_id= #{odsPdInfo.userId})
+			and LOCATION in (select loc_code from
+			cd_user_wh_loc where user_id=#{odsPdInfo.userId})
+		</if>
+		<if test="odsPdInfo.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsPdInfo.materialNo}||'%' 
+		</if>
+		<if test="odsPdInfo.flag != null">
+			and FLAG like '%'||#{odsPdInfo.flag}||'%' 
+		</if>
+		<if test="odsPdInfo.begin != null and odsPdInfo.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{odsPdInfo.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsPdInfo.end != null and odsPdInfo.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsPdInfo.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		ORDER BY CREATE_DATE DESC, ORDER_NO
+	</sql>
+	<select id="searchOdsPdInfos" resultMap="odsPdInfoMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsPdInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsPdInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsPdInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="selectStocktakingOrderNo" parameterType="string" resultType="string" >
+		<![CDATA[
+		SELECT SUBSTR(TO_CHAR(SEQ_PD_ORDER_NO.NEXTVAL,'FM0000000000'),8) FROM DUAL
+		]]>
+	</select>
+
+	<select id="getListByParams" resultMap="odsPdInfoMap">
+		<include refid="selectAllOdsPdInfoColumns" />
+        <![CDATA[
+		where NVL(ORDER_STATUS,0)<>4 
+		]]>
+		<if test="odsPdInfo.orderNo != null">
+			and ORDER_NO like '%'||#{odsPdInfo.orderNo}||'%' 
+		</if>
+
+		<if test="odsPdInfo.orderStatus != null">
+			and ORDER_STATUS like '%'||#{odsPdInfo.orderStatus}||'%' 
+		</if>
+
+		<if test="odsPdInfo.warehouseCode != null">
+			and WAREHOUSE_CODE like '%'||#{odsPdInfo.warehouseCode}||'%' 
+		</if>
+
+		<if test="odsPdInfo.location != null and odsPdInfo.location != ''">
+			and LOCATION IN (${odsPdInfo.location})
+		</if>
+		<if test="odsPdInfo.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsPdInfo.materialNo}||'%' 
+		</if>
+
+
+		<if test="odsPdInfo.flag != null">
+			and FLAG like '%'||#{odsPdInfo.flag}||'%' 
+		</if>
+		<if test="odsPdInfo.begin != null and odsPdInfo.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{odsPdInfo.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+			</if>
+			<if test="odsPdInfo.end != null and odsPdInfo.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsPdInfo.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+			</if>
+		order by create_date DESC
+	</select>
+	
+	<select id="quertPdCountByParam" resultType="int">
+		select count(*) FROM ods_pd_info t 
+		where t.plant =#{odsPdInfo.plant}  and t.LOCATION=  #{odsPdInfo.location}
+		<if test="odsPdInfo.materialNo != null and odsPdInfo.materialNo !='ALL'">
+				and (t.MATERIAL_NO=#{odsPdInfo.materialNo} or t.MATERIAL_NO='ALL')
+		</if>
+		 and (t.ORDER_STATUS in ('0' ,'1' ) OR t.ORDER_STATUS IS NULL)
+	</select>
+	
+	<select id="checkPdNoExist" resultType="string">
+		<![CDATA[
+ 			SELECT CASE WHEN COUNT(0)>0 THEN 'Y' ELSE 'N' END 
+			FROM ODS_PD_INFO T 
+			WHERE T.ORDER_NO = #{inpara.orno} AND T.ORDER_STATUS = '1'
+		]]>
+	</select>
+	
+	<select id="checkPdLoc" resultType="string">
+		<![CDATA[
+	        select case when count(0)>0 then 'Y' else 'N' end 
+			from ODS_PD_INFO t 
+			where t.Order_No = #{inpara.orno} 
+			and t.Order_Status = 1
+			and t.plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id=#{userId})
+			and t.Location in (select loc_code from
+			cd_user_wh_loc where user_id=#{userId}) 
+ 		]]>
+	</select>
+	
+</mapper>

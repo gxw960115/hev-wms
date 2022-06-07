@@ -1,0 +1,385 @@
+label_a:BEGIN
+/*------------------------------------------------------------------------------
+  || 功能描述： 扫描条码号验证是否盘点和入库然后创建单据明细
+  || 备注描述： 盘点出入库验证，入库和单据重复验证
+  || 参数描述： 无           名称 ：prc_barcode_inbound_check   输入输出类型：VARCHAR
+  || 作    者： songyinglong 时间 : 2015-11-18
+  ||------------------------------------------------------------------------------
+  || 修改记录：
+  ||------------------------------------------------------------------------------
+  || 执行结果：as_return=0成功;1失败;2条码提示可删除;3确定location;4条码带输入数量
+  || 执行备注：
+  -------------------------------------------------------------------------------*/
+  declare v_mat_scan_type VARCHAR(20); -- 物料数量类型
+  declare v_user_location VARCHAR(10); -- 扫描人关联location
+  declare v_barcode_mat   VARCHAR(30); -- 条码解析物料号
+  declare v_mat_code      VARCHAR(30); -- 物料号
+  declare v_location      VARCHAR(30); -- 库存地点
+  declare v_sub_location  VARCHAR(30); -- 库位
+  declare v_pd_flag       VARCHAR(5); -- 盘点标志
+  declare v_unit          VARCHAR(30); -- 单位
+  declare v_order_exist   INTEGER; -- 单据中条码存在标志
+  declare v_qty           INTEGER; -- 数量
+  declare v_exc_n         INTEGER;
+  declare v_stock_qty     INTEGER;
+  declare v_use_qty       INTEGER;
+  declare v_plant         VARCHAR(30);
+  declare v_row_id        INTEGER; -- inbound 的row_id
+  declare v_inbound_no    VARCHAR(20); -- inbound单号
+  declare v_inbound_item_no VARCHAR(20); -- inbound 行项目
+  declare v_location_o      VARCHAR(20); -- 发货的时候订单location
+  declare v_po_no          VARCHAR(20);
+  declare v_po_item_no      VARCHAR(20);
+  declare V_SUM             INTEGER;
+	declare v_customer_model      VARCHAR(600);
+  declare v_finish_qty_o    INTEGER;
+  declare v_qty_o           INTEGER;
+	declare v_num                   INTEGER; -- 
+	DECLARE v_sqlstate				VARCHAR(32);
+	DECLARE v_sqlmsg					VARCHAR(2000);
+  declare temp_close      VARCHAR(5);
+  declare temp_finish     VARCHAR(5);
+  declare temp_flag       VARCHAR(5);
+  
+  DECLARE done INTEGER;
+
+  DECLARE cur CURSOR FOR SELECT t.ROW_ID,t.INBOUND_DELIVERY_NO,t.INBOUND_ITEM_NO,mt.CUSTOMER_MODEL
+      FROM STG_INBOUND_DOWN t left join md_mat_info mt on t.material_no = mt.material_no
+     WHERE t.INBOUND_DELIVERY_NO = as_order_no
+       AND t.material_no = v_mat_code
+       AND t.INBOUND_CLOSE = '0' -- 未关闭
+       AND t.Finish_Flag = '0'
+       AND t.flag = '0'
+     ORDER BY t.INBOUND_ITEM_NO asc;   
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET @done = 1;
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+    SET as_return='1';
+    
+    
+		GET DIAGNOSTICS CONDITION 1 v_sqlstate = RETURNED_SQLSTATE,v_sqlmsg= MESSAGE_TEXT;
+    
+    IF v_sqlstate='23000' THEN -- 根据orderNo和barCode，判断是否违反唯一性约束，如果违反唯一性约束，报 sqlState 2300,errorcode 1062异常
+			set as_return = '2'; -- 这种情况提示用户可以删除条码
+			set as_msg    = CONCAT('INBOUND_BARCODE_003 ERROR:This barcode has been scanning, please check.');
+		ELSE 
+			SET as_msg=SUBSTRING('INBOUND_BARCODE_100 ERROR:SYSTEM EXCEPTION', 1, 4000);
+      CALL p_log(SUBSTRING(concat('INBOUND_BARCODE_100: SYSTEM EXCEPTION: ',v_sqlmsg), 1, 4000),
+									'', 'system', '', 'INBOUND_BARCODE_100', 3, v_sqlstate);
+		END IF;
+  END;
+	
+   set autocommit = 0;
+   -- 设置返回值
+   set as_return = '0';
+   set as_msg = 'barcode scan success!';
+   set as_scan_qty = 0;
+   set as_order_qty = 0;
+   
+   -- 从条码上解析物料 
+   set v_barcode_mat = substring(as_barcode, 1, 9);
+   -- 查询条码号是否存在
+   set v_mat_code = f_get_mat_code(v_barcode_mat);
+   IF v_mat_code is null THEN
+		set v_barcode_mat = substring(as_barcode, 1, 10);
+		-- 查询条码号是否存在
+		set v_mat_code = f_get_mat_code(v_barcode_mat);
+		IF v_mat_code is null THEN
+				set as_return = '1';
+				set as_msg    = CONCAT('INBOUND_BARCODE_001 ERROR:Mat master data does not exist,barcode=',as_barcode,'order_no=',as_order_no);
+				ROLLBACK;
+				LEAVE label_a;
+		END IF;
+  END IF;
+		IF v_mat_code='DH1U60D15' THEN
+				SET v_mat_code ='DH1U60D24' ;
+		END IF;
+  -- 调用过程获取库存信息
+  call prc_barcode_r_inventory(as_barcode, -- 返回单号
+                              v_location, -- 返回库存地点
+                              v_sub_location, -- 库位
+                              v_unit, -- 返回单位
+                              v_stock_qty, -- 返回库存数量
+                              v_use_qty -- 返回占用数量
+                              );
+  -- 验证物料是否需要输入数量--
+  set v_mat_scan_type = f_get_mat_scan_type(v_mat_code);
+  IF v_mat_scan_type = 'SKU' THEN
+   -- 类型等于SKU传入的数量必须由用户填写
+    IF as_qty = 0 THEN
+      set as_return = '4';
+      set as_msg    = CONCAT('INBOUND_BARCODE_002 ERROR:Please import the qty,barcode=',
+                   as_barcode,'order_no=',as_order_no);
+      ROLLBACK;
+      LEAVE label_a;
+    END IF;
+    set v_qty = as_qty;
+  ELSE
+    -- v_qty:=1;
+    set v_qty = v_stock_qty - v_use_qty;
+  END IF;
+  
+  -- 根据条码查询单据明细是否有未操作的条码 
+  IF as_inout_flag = '1' THEN
+    SELECT count(1) -- 控制不同单据扫描同一个条码
+      into v_order_exist
+      FROM ODS_ORDER_INFO_DTL t
+     WHERE t.barcode = as_barcode;
+  ELSE
+    set v_order_exist = f_get_order_exist(as_barcode,
+                                       as_order_no,
+                                       as_inout_flag);
+  END IF;
+  -- 判断如果单据已存在
+  IF v_order_exist > 0 THEN
+    set as_return = '2'; -- 这种情况提示用户可以删除条码
+    set as_msg    = CONCAT('INBOUND_BARCODE_003 ERROR:This barcode has been scanning, please check.');
+    ROLLBACK;
+    LEAVE label_a;
+  END IF;
+  -- 根据条码号查询location验证条码是否存在，如果是出库可以验证扫描人的location权限--
+  -- v_location:=f_get_stock_location(as_barcode);
+  -- 如果是入库标志，则库存条码存在则报错
+  IF as_inout_flag = '1' THEN
+    IF v_location is not null THEN
+      set as_return = '1';
+      set as_msg    = CONCAT('INBOUND_BARCODE_004 ERROR:Barcode has existed in the inventory,barcode=',
+                   as_barcode,'order_no=',as_order_no);
+      ROLLBACK;
+      LEAVE label_a;
+    END IF;
+  ELSEIF as_inout_flag = '2' THEN
+    -- 出库标志时，如果库存条码不存在则报错
+    IF v_location is null THEN
+      set as_return = '1';
+      set as_msg    = CONCAT('INBOUND_BARCODE_005 ERROR:Barcode does not exist in the inventory,barcode=',
+                   as_barcode,'order_no=',as_order_no);
+      ROLLBACK;
+      LEAVE label_a;
+    END IF;
+  
+    -- 出库时验证扫描人的location权限--
+    set v_user_location = f_get_user_location(as_operator, v_location);
+    IF v_user_location = '0' THEN
+      set as_return = '1';
+      set as_msg    = CONCAT('INBOUND_BARCODE_006 ERROR:User cannot operate location,barcode=',
+                   as_barcode,'order_no=',as_order_no);
+      ROLLBACK;
+      LEAVE label_a;
+    END IF;
+  
+    -- 验证条码出库数量库存是否满足--
+    -- v_stock_remaining_qty:=f_get_stock_remaining_qty(as_barcode,v_qty);
+    -- IF v_stock_remaining_qty=0 THEN
+    IF v_stock_qty < v_qty + v_use_qty OR v_stock_qty = v_use_qty THEN
+      set as_return = '1';
+      set as_msg    = CONCAT('INBOUND_BARCODE_007 ERROR:GI_QTY more than BARCODE_QTY or BARCODE_QTY has scaned,barcode=',
+                   as_barcode,'order_no=',as_order_no,',allow_out_qty=',(v_stock_qty - v_use_qty));
+      ROLLBACK;
+      LEAVE label_a;
+    END IF;
+  ELSE
+    -- 出入库标志传入有问题
+    set as_return = '1';
+    set as_msg    = CONCAT('INBOUND_BARCODE_008 ERROR:Flag parameter exception,barcode=',
+                 as_barcode,'order_no=',as_order_no);
+    ROLLBACK;
+    LEAVE label_a;
+  END IF;
+	--  验证单号是否存在或者已完成
+  /* select count(t.row_id)
+      INTO v_num
+      FROM STG_INBOUND_DOWN t
+     WHERE t.INBOUND_DELIVERY_NO = as_order_no
+       AND t.material_no = v_mat_code
+       AND t.INBOUND_CLOSE = '0' -- 未关闭
+       AND t.Finish_Flag = '0'
+       AND t.flag = '0';
+   */
+  select t.INBOUND_CLOSE, t.Finish_Flag, t.flag into temp_close, temp_finish, temp_flag
+    FROM STG_INBOUND_DOWN t
+   WHERE t.INBOUND_DELIVERY_NO = as_order_no
+     AND t.material_no = v_mat_code and t.finish_flag = '0' limit 1;
+     /*
+       AND t.INBOUND_CLOSE = '0' -- 未关闭
+       AND t.Finish_Flag = '0'
+       AND t.flag = '0';
+     */  
+    /*
+   IF v_num < 1 THEN 
+    set as_return = '1';
+    set as_msg    = CONCAT('INBOUND_BARCODE_015 ERROR:scan Barcode of wrong material, or order has finished,or order closed
+																	,please check,barcode=',
+                 as_barcode,'order_no=',as_order_no);
+    ROLLBACK;
+    LEAVE label_a;
+   END IF;
+   */
+   IF ISNULL(temp_close) and ISNULL(temp_finish) and ISNULL(temp_flag) THEN
+    set as_return = '1';
+    set as_msg = CONCAT('INBOUND_BARCODE_018: No such material in Order: ', as_order_no, ', Material: ', v_mat_code);
+    ROLLBACK;
+    LEAVE label_a;
+   ELSEIF temp_close != 0 THEN 
+    set as_return = '1';
+    set as_msg = CONCAT('INBOUND_BARCODE_015: Order has been closed. Order: ', as_order_no, ', Material: ', v_mat_code);
+    ROLLBACK;
+    LEAVE label_a;
+   ELSEIF temp_finish != 0 THEN
+    set as_return = '1';
+    set as_msg = CONCAT('INBOUND_BARCODE_017: Order with this material code has been finished. Order: ', as_order_no, ', Material: ', v_mat_code);
+    ROLLBACK;
+    LEAVE label_a;
+   ELSEIF temp_flag != 0 THEN
+    set as_return = '1';
+    set as_msg = CONCAT('INBOUND_BARCODE_018: Order has been deleted. Order: ', as_order_no, ', Material: ', v_mat_code);
+    ROLLBACK;
+    LEAVE label_a;
+   END IF;
+  
+  OPEN cur;
+  fetch cur into v_row_id,v_inbound_no,v_inbound_item_no,v_customer_model;
+  -- 库存地点,入库则以SAP单据为准
+    IF as_inout_flag = '1' THEN
+      -- 获取location
+      select t.inbound_location, t.inbound_location into v_location, v_sub_location from stg_inbound_down t where t.row_id = v_row_id;
+      -- select t.inbound_location into v_sub_location from stg_inbound_down t where t.row_id = v_row_id;
+    ELSEIF as_inout_flag = '2' THEN
+    -- 获取订单的location 和条码的location做对比
+      select t.inbound_location into v_location_o from stg_inbound_down t where t.row_id = v_row_id;
+      IF v_location_o != v_location THEN
+        set as_return = '1';
+        set as_msg    = CONCAT('INBOUND_BARCODE_009 ERROR:Order_location is different from inventory_location,barcode=',as_barcode);
+        ROLLBACK;
+        LEAVE label_a;
+      END IF;
+    END IF;
+    
+    -- 如果累计数量+条码数量小等于inbound需求数量，则允许条码入单据信息
+		
+		select t.finish_qty,t.qty into v_finish_qty_o,v_qty_o  from STG_INBOUND_DOWN  t where t.row_id = v_row_id;
+	
+    IF v_qty + v_finish_qty_o <= v_qty_o THEN
+
+      -- 扫描INBOUND之前必须下载PO判断
+      select t.po_no,t.po_item_no into v_po_no,v_po_item_no from stg_inbound_down t where t.row_id = v_row_id;
+      select COUNT(t.PLANT)
+        into V_SUM
+        from STG_PO_DOWN t
+       where t.PO_NO = v_po_no
+         and t.PO_ITEM_NO = v_po_item_no;
+      IF V_SUM < 1 THEN
+        ROLLBACK;
+        set as_return = '1';
+        set as_msg    = CONCAT('INBOUND_BARCODE_011 ERROR: Please first download PO:',v_inbound_no);
+        LEAVE label_a;
+      END IF;
+			select t.PLANT
+        into v_plant
+        from STG_PO_DOWN t
+       where t.PO_NO = v_po_no
+         and t.PO_ITEM_NO = v_po_item_no LIMIT 1;
+			-- 盘点表验证
+    set v_pd_flag = f_get_pd_flag(v_mat_code, v_location,v_plant);
+    IF v_pd_flag != '0' THEN
+      set as_return = '1';
+      set as_msg    = CONCAT('INBOUND_BARCODE_010 ERROR:Stock taking is locking,location=',
+                   v_location,',material_no=', v_mat_code,'order_no=',as_order_no);
+      ROLLBACK;
+      LEAVE label_a;
+    END IF; 
+   -- 如果累计数量+条码数量等于inbound需求数量，则关闭inbound
+      IF v_qty + v_finish_qty_o = v_qty_o THEN
+        UPDATE STG_INBOUND_DOWN t
+           SET t.finish_qty = t.finish_qty + v_qty, t.Finish_Flag = '1'
+         WHERE t.row_id = v_row_id
+           AND t.qty >= t.finish_qty + v_qty;
+      ELSE
+        UPDATE STG_INBOUND_DOWN t
+           SET t.finish_qty = t.finish_qty + v_qty
+         WHERE t.row_id = v_row_id
+           AND t.qty >= t.finish_qty + v_qty;
+      END IF;
+      -- 判断是否会出现重复扫描
+      set v_exc_n = ROW_COUNT();
+      IF v_exc_n = 0 THEN
+        ROLLBACK;
+        set as_return = '1';
+        set as_msg    = CONCAT('INBOUND_BARCODE_012 ERROR:Order is useing,barcode=',
+                     as_barcode,'order_no=', as_order_no);
+        LEAVE label_a;
+      END IF;
+    
+      -- 插入单据明细信息
+      insert into ODS_ORDER_INFO_DTL
+        (ORDER_TYPE,
+         DOC_TYPE,
+         SAP_ORDER_NO,
+         SAP_ORDER_ITEM,
+         BATCH_NO,
+         PLANT,
+         CUSTOMER_MODEL,
+         LOCATION,
+         MATERIAL_NO,
+         MATERIAL_DESP,
+         UNIT,
+         BARCODE,
+         SCANNED_BY,
+         SCANNED_DATE,
+         DELIVERY_DATE,
+         CREATE_BY,
+         QTY,
+         SUB_LOCATION)
+      select
+         as_inout_flag, -- 出入库标志
+         'INBOUND',
+         as_order_no,
+         t.INBOUND_ITEM_NO,
+         CONCAT(v_mat_code,date_format(sysdate(),'%Y%m%d')),-- 批次号
+         v_plant, -- 工厂
+         t.customer_model,
+         v_location,
+         v_mat_code,
+         t.material_desp,
+         t.unit,
+         as_barcode,
+         as_operator,
+         sysdate(),
+         str_to_date(DELIVER_DATE, '%Y%m%d'),
+         as_operator,
+         v_qty,
+         v_sub_location
+      from stg_inbound_down t 
+      where t.row_id = v_row_id;
+    
+      -- 出库时，需要增加库存占用数量--
+      IF as_inout_flag = '2' THEN
+        UPDATE ODS_INVENTORY_INFO_DTL t
+           SET t.use_qty = t.use_qty + v_qty
+         WHERE t.barcode = as_barcode;
+      END IF;
+			
+			-- 若客户类型为空，取物料的客户类型
+			IF v_customer_model IS NULL OR v_customer_model="" THEN
+					SELECT  substring(t.CUSTOMER_MODEL,1,32) INTO v_customer_model FROM md_mat_info t where t.MATERIAL_NO=v_mat_code;
+			END IF;
+      -- 返回信息--
+      set as_mat_code  = v_mat_code;
+      set as_mat_desc  = v_customer_model;
+      set as_location  = v_location;
+      set as_scan_qty  = f_get_scan_qty(as_order_no, as_operator, v_mat_code);
+      set as_order_qty = f_get_order_qty(as_order_no, v_mat_code, 'INBOUND');
+	ELSE
+			 ROLLBACK;
+        SET as_return = '1';
+        SET as_msg    = CONCAT('INBOUND_BARCODE_016 ERROR:The Cumulative number plus bar code number exceeds the demand ,barcode=',as_barcode,'order_no=',as_order_no);
+        leave label_a;
+			
+    END IF;
+  CLOSE cur;
+  COMMIT;
+  leave label_a;
+END

@@ -1,0 +1,321 @@
+{{#component "soInfo js-comp"}}
+	<style type="text/css">
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            padding:2.5px;
+            height:25px;
+        }
+
+        .fileUpload input.upload {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
+    </style>
+    <div id="dndDiv" class="easyui-layout"  style="width:100%">
+        <div class="searchDiv" region="north">
+            <table id="searchTab1" >
+                <tr>
+                    <td style="text-align: right">DN NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls">
+                        <input id="sellNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Material No:&nbsp;&nbsp;</td>
+                    <td class="leftCls">
+                        <input id="materialNo" class="radiusCls" type="text" /></td>
+                    <td class="rightCls">Plant:&nbsp;&nbsp;</td> 
+                    <td class="leftCls">
+                        <input id="plant" type="text" class="easyui-combobox" style="border:0" data-options="border:false,
+                         width:155,height:30,editable:true,required:false"/></td> 
+                </tr>
+                <tr>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td>
+                    <td class="leftCls">
+                        <select id="locationP" name="location" class="easyui-combobox" data-options="editable:false,multiple:true,multiline:true,valueField:'id',textField:'id'" style="width:155px;height:30px"></select></td>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3">
+                        <input id="begin" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>&nbsp;&nbsp;
+                        - &nbsp;&nbsp;<input id="end" class="radiusCls" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="queryData()">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="dnReverse()">Reverse</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <br/><br/><br/><br/>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="stgDnDownGrid" style="width:120%;"></table>
+        </div>
+    </div>
+	
+    <script type="text/javascript">
+    var totalWidth = $('#stgDnDownGrid').width(); 
+    $(function(){  
+    	var currentUser = $.session.get("userName").toString();
+    	if(currentUser.toLowerCase().indexOf("admin")>=0){
+            $("#postBilling").css("display","");
+        }
+    	// if (currentUser.toLowerCase()=='punehub'||currentUser.toLowerCase()=='pankaj'){
+    	// 	$("#importBtn1, #downloadBtn1").css('display','');
+    	// }
+    	$('#dndDiv').height(suitHeight);
+        // $('#doFlagP').combobox({
+        //         data:[{"text":"ALL","value":"-1"},{"text":"UnDelivered","value":"0"},{"text":"Posting Success","value":"1"}],
+        //         value:'-1'
+        //     });
+        //初始化日期
+        var date=new Date();
+        var y=date.getFullYear();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(date,-7));
+        $('#end').val(date);
+        /**
+         * 表格头部
+         */
+        var columns = [ [ {
+            field : 'ck',
+            checkbox : true,
+            /* width : 80,*/
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'dnNo',
+            title : 'DN No',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'dnItemNo',
+            title : 'DN Item',
+            align : 'center',
+            width: fixWidth(0.06),
+            sortable : true
+        },{
+            field : 'sellOrderType',
+            title : 'Sale Type',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        }, {
+        	field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        } , {
+        	field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            width: fixWidth(0.21),
+            sortable : true
+        }, {
+            field : 'qty',
+            title : 'Qty',
+            align : 'center',
+            width: fixWidth(0.03),
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Finish Qty',
+            width: fixWidth(0.07),
+            align : 'center',
+            sortable : true,
+            formatter: function(val,row){
+            	return val;
+            },
+            styler: function(value,row,index){
+				if (row.qty>value&&value>0){
+					return 'background-color:yellow;color:red;';
+				}else if(row.qty==value&&value!=0){
+					return 'background-color:green;';
+				}
+			}
+
+        }, {
+            
+            field : 'plant',
+            title : 'Plant',
+            align : 'center',
+            width: fixWidth(0.04),
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'sapFlagStatus',
+            title : 'sapFlag',
+            align : 'center',
+            width: fixWidth(0.09),
+            sortable : true,
+            formatter : function(val) {
+                if (val == '0' || val == "" ||null == val) {
+                    return '<font color="#0000FF">generation</font>';
+                } else if (val == '1') {
+                    return '<font color="#0000FF">posted success</font>';
+                } else if (val == '2') {
+                    return '<font color="#0000FF">posted failed</font>';
+                } else {
+                    return '<font color="#0000FF">locked</font>';
+                }
+                return val;
+            }
+        }]];
+        var grid = $('#stgDnDownGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+			fit:true,
+            onLoadError:function(){
+                 $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+            onLoadSuccess:function(){
+                 $(this).datagrid("fixRownumber");
+            },
+            method:'post'
+        });
+        $.ajax({
+            url:'/plant/list/select',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                var dataRes = [];
+                if(data!=''||data!=null||data!=undefined){
+                   for(var i=0;i<data.length;i++){
+                       dataRes.push({ "text": data[i]['name'], "value": data[i]['code'] });
+                    }           
+                }
+                $('#plant').combobox({
+                    data:dataRes, 
+                    panelWidth:180
+                })
+            }
+        });
+        // 加载Location数据
+        $(document).ready(function () {
+            $("#plant").combobox({
+                onChange: function (record) {
+                    $.ajax({
+                        url: '/loc/getLocationList',
+                        type: 'post',
+                        dataType: 'json',
+                        data: {
+                           rowId: record.rowId,
+                           locationType: 0,
+                           parentId: record.rowId
+                        },
+                        success: function (data) {
+                            $("#locationP").combobox({
+                                data:data
+                            });
+                        }
+                    })
+                }
+            });
+        });
+        initPagination(grid);
+        gridScroll(grid);
+
+    })
+    
+    function fixWidth(percent) { 
+        return totalWidth * percent;   
+    }
+    
+    // 查询
+    function queryData(){
+        var locationArr = $('#locationP').combobox('getValues');
+        var locations = getLocationStr(locationArr);
+        var grid=$('#stgDnDownGrid').datagrid({
+            url : '/so/searchDnReverse',
+            queryParams : {
+                dnNo : $('#sellNo').val(),
+                materialNo : $('#materialNo').val(),
+                location: locations,
+                begin : $('#begin').val(),
+                end : $('#end').val(),
+                plant:$('#plant').combobox('getValue')
+            },
+            onLoadSuccess : function(data) {
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information', 'No records found.', 'warning');
+                    gridScroll(grid);
+                }
+                $(this).datagrid("fixRownumber");
+            },
+            onLoadError:function(){
+                 $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+        initPagination(grid);
+    }
+
+    function dnReverse(){
+        var rows = $('#stgDnDownGrid').datagrid('getSelections');
+        if (rows.length != 1) {
+            $.messager.alert('System Information','Please select one data!', 'warning');
+            return;
+        }
+        var orderNo = rows[0].dnNo;
+        var sellOrderType = rows[0].sellOrderType;
+        var orderType = "";
+        /**
+         * sellOrderType
+         * VRE : SO Return
+         * VKA : Con Pick-up
+         * VKB : Con Issue
+         * VOR/VOR1/VOR2/VFOC/VSAM/VSPE/V3RD/VRE2 : SO Delivery
+         */
+        if(sellOrderType == "VRE" || sellOrderType == "VKA"){
+            orderType = "1";
+        } else {
+            orderType = "2";
+        }
+        var notiMsg = "The whole order "+rows[0].dnNo+" will be reverse.Are you sure?";
+        $.messager.confirm('System Information',notiMsg,
+            function(r) {
+                if (r) {
+                    $.maskLoading();
+                    $.post(
+                        "/so/dnReverse",
+                        {
+                            'orno' : rows[0].dnNo,
+                            'orderType' : orderType
+                        },
+                        function(data) {
+                            if (data == "S") {
+                                $.messager.alert('System Information','Reverse success!','warning');
+                                $('#odsOrderInfoGrid').datagrid('reload');
+                            } else {
+                                $.messager.alert('System Information','Failed!'+(data==undefined?"":data),'warning');
+                            }
+                            queryData();
+                            $.maskEnd();
+                        })
+                        .error(function() {
+                            $.messager.alert('System Information','Network Abnormal!','warning');
+                            $.maskEnd();
+                        });
+                }
+            });
+    }
+
+    </script>
+{{/component}}

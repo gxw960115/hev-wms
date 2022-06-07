@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.security.dao.OperationLogDAO">
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<resultMap id="operationLogMap" type="operationLog">
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="userName" column="USER_NAME" javaType="String" jdbcType="VARCHAR" />
+		<result property="userId" column="USER_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="userNickName" column="USER_NICK_NAME" javaType="String" jdbcType="VARCHAR" />
+		<result property="passwordExpiryDate" column="PASWRD_EXPIRY_DATE" javaType="java.util.Date" jdbcType="DATE" />
+		<result property="operationType" column="OPERATION_TYPE" javaType="int" jdbcType="NUMERIC" />
+		<result property="gmtCreate" column="GMT_CREATE"/>
+		<result property="gmtModified" column="GMT_MODIFIED"/>
+		<result property="module" column="MODULE"/>
+		<result property="appName" column="APP_NAME"/>
+		<result property="description" column="DESCRIPTION"/>
+		<result property="originalData" column="ORIGINAL_DATA"/>
+		<result property="actualData" column="ACTUAL_DATA"/>
+	</resultMap>
+	
+	<!-- 查询OPERATION_LOG表的所有字段 -->
+	<sql id="selectAlloperationLogColumns">
+		<![CDATA[
+		select operation_log_.id,
+		       operation_log_.user_id,
+		       operation_log_.user_name,
+		       operation_log_.user_nick_name,
+		       operation_log_.operation_type,
+		       operation_log_.gmt_create,
+		       operation_log_.gmt_modified,
+		       operation_log_.module,
+		       operation_log_.app_name,
+		       operation_log_.description,
+		       operation_log_.original_data,
+		       operation_log_.actual_data
+		  from operation_log operation_log_
+		  ]]>
+	</sql>
+	
+	<!-- 根据ID查询日志记录 -->
+	<select id="get" parameterType="long" resultMap="operationLogMap">
+		<include refid="selectAlloperationLogColumns" />
+		<![CDATA[
+		where operation_log_.ID = #{id}
+		]]>
+	</select>
+	
+	<!-- 保存日志信息 -->
+	<insert id="save" parameterType="operationLog">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_OPERATION_LOG_ID.NEXTVAL AS ID FROM DUAL 
+ 		</selectKey>
+		<![CDATA[
+		insert into operation_log
+		  (id,
+		   user_id,
+		   user_name,
+		   user_nick_name,
+		   operation_type,
+		   gmt_create,
+		   gmt_modified,
+		   module,
+		   app_name,
+		   description,
+		   original_data,
+		   actual_data)
+		values
+		  (#{id},
+		   #{userId},
+		   #{userName},
+		   #{userNickName},
+		   #{operationType},
+		   #{gmtCreate},
+		   #{gmtModified},
+		   #{module},
+		   #{appName},
+		   #{description},
+		   #{originalData},
+		   #{actualData})
+		]]>
+	</insert>
+	
+	<!-- 分页查询业务日志 -->
+	<sql id="searchOperationLog_fragement">
+		<include refid="selectAlloperationLogColumns" />
+		where operation_log_.app_name = #{operationLog.appName}
+		<if test="from != null">
+			<![CDATA[and operation_log_.gmt_create >= #{from}]]>
+		</if>
+		<if test="to != null">
+			<![CDATA[and operation_log_.gmt_create <= #{to}]]>
+		</if>
+		order by operation_log_.id desc
+	</sql>
+	<select id="searchOperationLog" parameterType="operationLogSearchModel" resultMap="operationLogMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchOperationLog_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchOperationLogCount" parameterType="operationLogSearchModel" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchOperationLog_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+</mapper>

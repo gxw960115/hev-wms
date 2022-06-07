@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+				  
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.OtcwmsOrderIgpDAO">
+	<select id="orderIgp" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_igp(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+		  #{in.carNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.docType,mode=IN,jdbcType=VARCHAR},
+	      #{in.version,mode=IN,jdbcType=VARCHAR},
+	      #{in.vehicleType,mode=IN,jdbcType=VARCHAR},
+	      #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrDate,mode=IN,jdbcType=VARCHAR},
+		  #{in.invoiceNo,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.orId,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="orderOgp" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_ogp(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+		  #{in.carNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.docType,mode=IN,jdbcType=VARCHAR},
+		  #{in.version,mode=IN,jdbcType=VARCHAR},
+		  #{in.vehicleType,mode=IN,jdbcType=VARCHAR},
+		  #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrDate,mode=IN,jdbcType=VARCHAR},
+		  #{in.invoiceNo,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.orId,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<!-- 手持billing 出库汇总  begin -->
+	<select id="billingOgp" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_ogp_for_billing(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+		  #{in.carNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.docType,mode=IN,jdbcType=VARCHAR},
+		  #{in.version,mode=IN,jdbcType=VARCHAR},
+		  #{in.vehicleType,mode=IN,jdbcType=VARCHAR},
+		  #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrDate,mode=IN,jdbcType=VARCHAR},
+		  #{in.invoiceNo,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.orId,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<!-- 手持billing 出库汇总  end -->
+	<!--  add by sunyanfei-->
+	<select id="stodnOrderOgp" statementType="CALLABLE">
+		<![CDATA[
+		  {call sunyanfei_stodnOrderOgp(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+		  #{in.carNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.docType,mode=IN,jdbcType=VARCHAR},
+		  #{in.version,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.orId,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="dnOrderIgp" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_igp_ind(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+		  #{in.carNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.docType,mode=IN,jdbcType=VARCHAR},
+		  #{in.version,mode=IN,jdbcType=VARCHAR},
+  	      #{in.resDt,mode=IN,jdbcType=VARCHAR},
+  	      #{in.gooddt,mode=IN,jdbcType=VARCHAR},
+		  #{in.crmdt,mode=IN,jdbcType=VARCHAR},
+		  #{in.reasondt,mode=IN,jdbcType=VARCHAR},
+		  #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrNo,mode=IN,jdbcType=VARCHAR},
+		  #{in.lrDate,mode=IN,jdbcType=VARCHAR},
+		  #{in.invoiceNo,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.orId,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="orderMakeStorageIn" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_goods_rec(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="orderMakeStorageOut" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_goods_deli(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+</mapper>

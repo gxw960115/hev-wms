@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.OtcwmsOrderMoveStoDAO">
+	 <select id="moveStoUpload" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_sub(
+		  #{in.serialno,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+  		  #{in.sublocation,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{out.qty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="moveStoDoneCheck" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_exec_sub(
+		  #{in.serialno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.sublocation,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="moveStoDone" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_finish_sub(
+		  #{in.serialno,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	<select id="getXjxcList" resultMap="xjxclist" >
+		<if test="parmxjxcin.doctype == 'PO'"> 
+			<![CDATA[
+				select l.barcode,l.material_no,l.material_desp,l.QTY,l.UNIT
+				from view_order_dtl_list l,
+				(
+					select s.material_no,sum(s.qty) qty from stg_po_down s 
+					where s.po_no=#{parmxjxcin.ordno} 
+					group by s.material_no
+				) a
+				where l.MATERIAL_NO=a.material_no 
+				and l.S_QTY<=a.qty
+			]]>
+	    </if>
+		<if test="parmxjxcin.doctype == 'DN'">
+			<![CDATA[
+				select l.barcode,l.material_no,l.material_desp,l.QTY,l.UNIT
+				from view_order_dtl_list l,
+				(
+					select s.material_no,sum(s.qty) qty from stg_dn_down s 
+					where s.dn_no=#{parmxjxcin.ordno} 
+					group by s.material_no
+				) a
+				where l.MATERIAL_NO=a.material_no 
+				and l.S_QTY<=a.qty
+			]]>
+		</if>
+	 	<if test="parmxjxcin.doctype == 'STO'">
+			<![CDATA[
+				select l.barcode,l.material_no,l.material_desp,l.QTY,l.UNIT
+				from view_order_dtl_list l,
+				(
+					select s.material_no,sum(s.qty) qty 
+					from stg_sto_down s 
+					where s.sto_no=#{parmxjxcin.ordno} 
+					group by s.material_no
+				) a
+				where l.MATERIAL_NO=a.material_no 
+				and l.S_QTY <= a.qty
+			]]>
+		</if> 
+	</select>
+	<resultMap id="xjxclist" type="xjxclist">
+		<result property="barcode" column="barcode"/>
+		<result property="materialno" column="material_no"/>
+		<result property="materialDesc" column="material_desp"/>
+		<result property="qty" column="qty"/>
+		<result property="unit" column="unit"/>
+	</resultMap>
+	<select id="getMoveList" resultMap="movelist" >
+		<if test="parmin.doctype == 'SUB'">
+			select t.barcode,t.material_no,t.material_desp,t.qty,t.unit
+			from ODS_IN_SUB_LOCATION  t 
+			where t.SERIAL_NO =#{parmin.serialNo} and t.FLAG = '0' and t.FINISH_FLAG = '0'
+	    </if>
+		<if test="parmin.doctype == 'MOVE'">
+			select t.barcode,t.material_no,t.material_desp,t.qty,t.unit
+			from ODS_MOVE_INVENTORY  t 
+			where t.SERIAL_NO = #{parmin.serialNo} and t.FLAG = '0' and t.FINISH_FLAG = '0'
+		</if>
+	</select>
+	<resultMap id="movelist" type="movelist">
+		<result property="barcode" column="barcode"/>
+		<result property="materialno" column="material_no"/>
+		<result property="materialDesc" column="material_desp"/>
+		<result property="qty" column="qty"/>
+		<result property="unit" column="unit"/>
+	</resultMap>
+</mapper>

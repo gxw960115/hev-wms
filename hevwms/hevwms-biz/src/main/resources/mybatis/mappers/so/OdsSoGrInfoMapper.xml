@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.so.dao.OdsSoGrInfoDAO">
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+    <sql id="Base_Column_List">
+        ROW_ID, ORDER_NO, ORDER_ITEM, ORDER_TYPE, SAP_ORDER_NO, SAP_ORDER_ITEM,
+        BATCH_NO, PLANT, WAREHOUSE_CODE, WAREHOUSE_NAME, LOCATION, MATERIAL_NO,
+        CUSTOMER_MODEL, MATERIAL_DESP,
+        SCANNED_QTY, UNIT, VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE, DELIVERY_NAME,
+        DELIVERY_DATE, CAR_NO, HAND_FLAG, CREATE_BY, CREATE_DATE, MODIFY_BY, MODIFY_DATE, FLAG,
+        VERSION, SAP_FLAG, SAP_MSG, SAP_DOC_NO, SAP_SEND_ID, POSTING_DATE, IN_OUT_FLAG,
+        IN_OUT_MSG, REQUIRE_QTY, ORDER_CLOSE, CAR_ID, PRESACN_FLAG, CHECK_FLAG, CAR_FLAG,
+        HAND_POST_FLAG, VECHILE_TYPE, INVOICE_NO, LR_NO, LR_DATE, TRANSPORTER_CODE, SAP_DOC_YEAR, DN_NO,
+        DN_ITEM_NO
+    </sql>
+    
+	<sql id="selectAllOdsSoGrInfo">
+		select 
+		<include refid="Base_Column_List" />
+	    from ODS_SO_GR_INFO
+	</sql>
+
+	<resultMap id="odsSoGrInfoMap" type="odsSoGrInfo">
+		<result column="ROW_ID" property="rowId" />
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="ORDER_ITEM" property="orderItem" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="SAP_ORDER_NO" property="sapOrderNo" />
+		<result column="SAP_ORDER_ITEM" property="sapOrderItem" />
+		<result column="BATCH_NO" property="batchNo" />
+		<result column="PLANT" property="plant" />
+		<result column="WAREHOUSE_CODE" property="warehouseCode" />
+		<result column="WAREHOUSE_NAME" property="warehouseName" />
+		<result column="LOCATION" property="location" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="CUSTOMER_MODEL" property="customerModel" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="SCANNED_QTY" property="scannedQty" />
+		<result column="QTY" property="qty" />
+		<result column="UNIT" property="unit" />
+		<result column="VENDOR_CODE" property="vendorCode" />
+		<result column="VENDOR_NAME" property="vendorName" />
+		<result column="DELIVERY_CODE" property="deliveryCode" />
+		<result column="DELIVERY_NAME" property="deliveryName" />
+		<result column="DELIVERY_DATE" property="deliveryDate" jdbcType="DATE" />
+		<result column="CAR_NO" property="carNo" />
+		<result column="HAND_FLAG" property="handFlag" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+		<result column="FLAG" property="flag" />
+		<result column="VERSION" property="version" />
+		<result column="SAP_FLAG" property="sapFlag" />
+		<result column="SAP_MSG" property="sapMsg" />
+		<result column="SAP_DOC_NO" property="sapDocNo" />
+		<result column="SAP_SEND_ID" property="sapSendId" />
+		<result column="POSTING_DATE" property="postingDate" />
+		<result column="IN_OUT_FLAG" property="inOutFlag" />
+		<result column="IN_OUT_MSG" property="inOutMsg" />
+		<result column="REQUIRE_QTY" property="requireQty" />
+		<result column="ORDER_CLOSE" property="orderClose" />
+		<result column="CAR_ID" property="carId" />
+		<result column="PRESACN_FLAG" property="presacnFlag" />
+		<result column="CHECK_FLAG" property="checkFlag" />
+		<result column="CAR_FLAG" property="carFlag" />
+		<result column="HAND_POST_FLAG" property="handPostFlag" />
+		<result column="VECHILE_TYPE" property="vechileType" />
+		<result column="INVOICE_NO" property="invoiceNo" />
+		<result column="LR_NO" property="lrNo" />
+		<result column="LR_DATE" property="lrDate" />
+		<result column="TRANSPORTER_CODE" property="transporterCode" />
+		<result column="SAP_DOC_YEAR" property="sapDocYear" />
+		<result column="DN_NO" property="dnNo" />
+		<result column="DN_ITEM_NO" property="dnItemNo" />
+		<result column="GR_QTY" property="grQty" />
+		<result column="GI_QTY" property="giQty" />
+		<result column="STODN_NO" property="stodnNo" />
+		<result column="STO_ITEM" property="stoItem" />
+		<result column="STO_NO" property="stoNo" />
+		<result column="STODN_ITEM" property="stodnItem" />
+		<result column="GR_PLANT" property="grPlant" />
+		<result column="GR_LOCATION" property="grLocation" />
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="odsSoGrInfoMap">
+		<include refid="selectAllOdsSoGrInfo" />
+	</select>
+	<select id="get" resultMap="odsSoGrInfoMap" parameterType="long">
+		<include refid="selectAllOdsSoGrInfo" />
+		where ROW_ID = #{rowId}
+	</select>
+
+	<delete id="delete" parameterType="long">
+		delete from ODS_SO_GR_INFO where ROW_ID = #{rowId}
+	</delete>
+	<delete id="deleteAll">
+		delete from ODS_SO_GR_INFO where ROW_ID in
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="odsSoGrInfo">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_SO_GR_INFO_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+        insert into ODS_SO_GR_INFO 
+        (
+	        ROW_ID, ORDER_NO, ORDER_ITEM,
+	        ORDER_TYPE, SAP_ORDER_NO, SAP_ORDER_ITEM,
+	        BATCH_NO, PLANT, WAREHOUSE_CODE,
+	        WAREHOUSE_NAME, LOCATION, MATERIAL_NO,
+	        CUSTOMER_MODEL, MATERIAL_DESP, SCANNED_QTY,
+	        UNIT, VENDOR_CODE, VENDOR_NAME,
+	        DELIVERY_CODE, DELIVERY_NAME, DELIVERY_DATE,
+	        CAR_NO, HAND_FLAG, CREATE_BY,
+	        CREATE_DATE, MODIFY_BY, MODIFY_DATE,
+	        FLAG, VERSION, SAP_FLAG,
+	        SAP_MSG, SAP_DOC_NO, SAP_SEND_ID,
+	        POSTING_DATE, IN_OUT_FLAG, IN_OUT_MSG,
+	        REQUIRE_QTY, ORDER_CLOSE, CAR_ID,
+	        PRESACN_FLAG, CHECK_FLAG, CAR_FLAG,
+	        HAND_POST_FLAG, VECHILE_TYPE, INVOICE_NO,
+	        LR_NO, LR_DATE, TRANSPORTER_CODE,
+	        SAP_DOC_YEAR, DN_NO, DN_ITEM_NO
+        )
+        values 
+        (
+	        #{id}, #{orderNo}, #{orderItem},
+	        #{orderType}, #{sapOrderNo}, #{sapOrderItem},
+	        #{batchNo}, #{plant}, #{warehouseCode},
+	        #{warehouseName}, #{location}, #{materialNo},
+	        #{customerModel}, #{materialDesp},
+	        #{scannedQty},
+	        #{unit}, #{vendorCode}, #{vendorName},
+	        #{deliveryCode}, #{deliveryName},
+	        #{deliveryDate,jdbcType=DATE},
+	        #{carNo}, #{handFlag}, #{createBy},
+	        #{createDate,jdbcType=DATE}, #{modifyBy},
+	        #{modifyDate,jdbcType=DATE},
+	        #{flag}, #{version}, #{sapFlag},
+	        #{sapMsg}, #{sapDocNo}, #{sapSendId},
+	        #{postingDate}, #{inOutFlag}, #{inOutMsg},
+	        #{requireQty}, #{orderClose}, #{carId},
+	        #{presacnFlag}, #{checkFlag}, #{carFlag},
+	        #{handPostFlag}, #{vechileType},
+	        #{invoiceNo},
+	        #{lrNo}, #{lrDate}, #{transporterCode},
+	        #{sapDocYear}, #{dnNo}, #{dnItemNo}
+        )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="odsSoGrInfo">
+        update ODS_SO_GR_INFO
+        set 
+            ORDER_NO = #{orderNo},
+            ORDER_ITEM = #{orderItem},
+            ORDER_TYPE = #{orderType},
+            SAP_ORDER_NO = #{sapOrderNo},
+            SAP_ORDER_ITEM = #{sapOrderItem},
+            BATCH_NO = #{batchNo},
+            PLANT = #{plant},
+            WAREHOUSE_CODE = #{warehouseCode},
+            WAREHOUSE_NAME = #{warehouseName},
+            LOCATION = #{location},
+            MATERIAL_NO = #{materialNo},
+            CUSTOMER_MODEL = #{customerModel},
+            MATERIAL_DESP = #{materialDesp},
+            SCANNED_QTY = #{scannedQty},
+            UNIT = #{unit},
+            VENDOR_CODE = #{vendorCode},
+            VENDOR_NAME = #{vendorName},
+            DELIVERY_CODE = #{deliveryCode},
+            DELIVERY_NAME = #{deliveryName},
+            DELIVERY_DATE = #{deliveryDate,jdbcType=DATE},
+            CAR_NO = #{carNo},
+            HAND_FLAG = #{handFlag},
+            CREATE_BY = #{createBy},
+            CREATE_DATE = #{createDate,jdbcType=DATE},
+            MODIFY_BY = #{modifyBy},
+            MODIFY_DATE = #{modifyDate,jdbcType=DATE},
+            FLAG = #{flag},
+            VERSION = #{version},
+            SAP_FLAG = #{sapFlag},
+            SAP_MSG = #{sapMsg},
+            SAP_DOC_NO = #{sapDocNo},
+            SAP_SEND_ID = #{sapSendId},
+            POSTING_DATE = #{postingDate},
+            IN_OUT_FLAG = #{inOutFlag},
+            IN_OUT_MSG = #{inOutMsg},
+            REQUIRE_QTY = #{requireQty},
+            ORDER_CLOSE = #{orderClose},
+            CAR_ID = #{carId},
+            PRESACN_FLAG = #{presacnFlag},
+            CHECK_FLAG = #{checkFlag},
+            CAR_FLAG = #{carFlag},
+            HAND_POST_FLAG = #{handPostFlag},
+            VECHILE_TYPE = #{vechileType},
+            INVOICE_NO = #{invoiceNo},
+            LR_NO = #{lrNo},
+            LR_DATE = #{lrDate},
+            TRANSPORTER_CODE = #{transporterCode},
+            SAP_DOC_YEAR = #{sapDocYear},
+            DN_NO = #{dnNo},
+            DN_ITEM_NO = #{dnItemNo}
+        where ROW_ID = #{rowId}
+	</update>
+	
+	<sql id="searchOdsSoGrInfo_fragement">
+		where 1=1
+		<if test="odsSoGrInfo.orderNo != null and odsSoGrInfo.orderNo !=''">
+			and ORDER_NO like '%'||#{odsSoGrInfo.orderNo}||'%'
+		</if>
+		<if test="odsSoGrInfo.location != null and odsSoGrInfo.location !=''">
+			and LOCATION IN (${odsSoGrInfo.location})
+		</if>
+		<if test="odsSoGrInfo.orderType != null and odsSoGrInfo.orderType != '' and odsSoGrInfo.orderType != '-1' ">
+			and ORDER_TYPE = #{odsSoGrInfo.orderType}
+		</if>
+		<if	test="odsSoGrInfo.dnNo != null and odsSoGrInfo.dnNo != ''">
+			and DN_NO like '%'||#{odsSoGrInfo.dnNo}||'%' 
+		</if>
+		<if test="odsSoGrInfo.plant != null and odsSoGrInfo.plant != ''">
+			and PLANT like '%'||#{odsSoGrInfo.plant}||'%' 
+		</if>
+		<if test="odsSoGrInfo.materialNo != null and odsSoGrInfo.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsSoGrInfo.materialNo}||'%' 
+		</if>
+        <if test="odsSoGrInfo.sapFlag != null and odsSoGrInfo.sapFlag != '' and odsSoGrInfo.sapFlag != -1">
+            and SAP_FLAG = #{odsSoGrInfo.sapFlag}
+        </if>
+		<if test="odsSoGrInfo.transporterCode != null and odsSoGrInfo.transporterCode != ''">
+			and TRANSPORTER_CODE like '%'||#{odsSoGrInfo.transporterCode}||'%'
+		</if>
+		<if test="odsSoGrInfo.carFlag == '-1'">
+			and (CAR_FLAG is null or CAR_FLAG = 'SO')
+		</if>
+		<if test="odsSoGrInfo.carFlag != null and odsSoGrInfo.carFlag != '' and odsSoGrInfo.carFlag != '-1'">
+			and CAR_FLAG = #{odsSoGrInfo.carFlag}
+		</if>
+		<if test="odsSoGrInfo.begin != null and odsSoGrInfo.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{odsSoGrInfo.begin},' 00:00:00') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsSoGrInfo.end != null and odsSoGrInfo.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsSoGrInfo.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+	</sql>
+	<select id="getOdsSoGrInfoListByParm" parameterType="odsSoGrInfo" resultMap="odsSoGrInfoMap">
+		<include refid="selectAllOdsSoGrInfo" />
+		<include refid="searchOdsSoGrInfo_fragement" />
+	</select>
+	<select id="searchOdsSoGrInfoListByPage" parameterType="odsSoGrInfo" resultMap="odsSoGrInfoMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllOdsSoGrInfo" />
+		<include refid="searchOdsSoGrInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsSoGrInfoCount" parameterType="odsSoGrInfo" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllOdsSoGrInfo" />
+		<include refid="searchOdsSoGrInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+	<update id="updatePostResult" parameterType="odsSoGrInfo">
+	    update ods_so_gr_info 
+	        set
+	    	sap_flag = #{odsSoGrInfo.sapFlag},
+	    	sap_msg = #{odsSoGrInfo.sapMsg},
+	    	sap_doc_no = #{odsSoGrInfo.sapDocNo},
+	    	sap_doc_year = #{odsSoGrInfo.sapDocYear},
+	    	modify_by = #{odsSoGrInfo.modifyBy},
+	    	modify_date = #{odsSoGrInfo.modifyDate}
+	    where dn_no = #{odsSoGrInfo.dnNo}
+	</update>
+
+	<update id="updateFlag">
+	    update ODS_STODN_SCAN_INFO
+	        set
+			IN_OUT_FLAG = #{flag},
+			IN_OUT_MSG = #{msg},
+			MODIFY_DATE = SYSDATE,
+			MODIFY_BY = #{userName}
+	    where ORDER_NO = #{orderNo}
+		  and STODN_NO = #{stodnNo}
+	</update>
+
+	<update id="updateGiGrFlag">
+	    update ODS_STODN_GIGR_INFO
+	        set
+			TMS_FLAG = #{flag},
+			TMS_MSG = #{msg},
+			MODIFY_DATE = SYSDATE,
+			MODIFY_BY = #{userName}
+	    where ORDER_NO = #{orderNo}
+		  and STODN_NO = #{stodnNo}
+	</update>
+
+	<select id="getOdsSoGrInfoListByOGP" parameterType="odsSoGrInfo" resultMap="odsSoGrInfoMap">
+		<include refid="selectAllOdsSoGrInfo" />
+		where 1 = 1 
+		and sap_flag = #{odsSoGrInfo.sapFlag}
+		and dn_no = (select max(dn_no) from ods_so_gr_info where order_no = #{odsSoGrInfo.orderNo})
+	</select>
+
+	<select id="getOdsSoGrGiInfoByOGPOrIGP" parameterType="odsSoGrInfo" resultMap="odsSoGrInfoMap">
+		<![CDATA[
+			select s.MATERIAL_NO, s.QTY scannedQty, s.STODN_NO, s.CAR_NO, s.ORDER_NO
+			from ODS_STODN_GIGR_INFO s
+			where 1 = 1
+			and s.TMS_FLAG <> '1'
+		]]>
+		<if test="odsSoGrInfo.orderNo != null and odsSoGrInfo.orderNo !=''">
+			and s.ORDER_NO = #{odsSoGrInfo.orderNo}
+		</if>
+		<if test="odsSoGrInfo.stodnNo != null and odsSoGrInfo.stodnNo !=''">
+			and s.STODN_NO = #{odsSoGrInfo.stodnNo}
+		</if>
+		and rownum = 1
+	</select>
+
+	<select id="getMatListByStodn" parameterType="odsSoGrInfo" resultMap="odsSoGrInfoMap">
+		SELECT * FROM
+			(SELECT
+				t.STO_NO,
+				t.STO_ITEM,
+				t.STODN_NO,
+				t.STODN_ITEM,
+				t.MATERIAL_NO,
+				NVL(SUM(s.qty), 0) qty,
+				t.LOCATION,
+				t.UNIT,
+				t.PLANT,
+				t.GR_PLANT,
+				t.GR_LOCATION,
+				NVL(s.ORDER_TYPE, #{orderType}) ORDER_TYPE
+			FROM STG_STODN_INFO t
+			LEFT JOIN ODS_STODN_SCAN_INFO s ON t.STODN_NO = s.STODN_NO
+			AND t.MATERIAL_NO = s.MATERIAL_NO
+			WHERE t.STODN_NO = #{stodnNo}
+			GROUP BY
+				t.STO_NO,
+				t.STO_ITEM,
+				t.STODN_NO,
+				t.STODN_ITEM,
+				t.MATERIAL_NO,
+				t.LOCATION,
+				t.UNIT,
+				t.PLANT,
+				t.GR_PLANT,
+				t.GR_LOCATION,
+				s.ORDER_TYPE
+			) a
+		WHERE
+			ORDER_TYPE = #{orderType}
+	</select>
+</mapper>

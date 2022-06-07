@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haier.hevwms.gift.po.dao.GiftPoDownDAO">
+    <resultMap id="BaseResultMap" type="giftPoDown">
+        <id column="ROW_ID" property="rowId" jdbcType="DECIMAL"/>
+        <result column="GIFT_NO" property="giftNo" jdbcType="VARCHAR"/>
+        <result column="GIFT_ITEM_NO" property="giftItemNo" jdbcType="VARCHAR"/>
+        <result column="GIFT_TYPE" property="giftType" jdbcType="VARCHAR"/>
+        <result column="PLANT" property="plant" jdbcType="VARCHAR"/>
+        <result column="MATERIAL_NO" property="materialNo" jdbcType="VARCHAR"/>
+        <result column="CUSTOMER_MODEL" property="customerModel" jdbcType="VARCHAR"/>
+        <result column="MATERIAL_DESP" property="materialDesp" jdbcType="VARCHAR"/>
+        <result column="QTY" property="qty" jdbcType="DECIMAL"/>
+        <result column="LOCATION" property="location" jdbcType="VARCHAR"/>
+        <result column="CREATE_DATE" property="createDate" jdbcType="DATE"/>
+        <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE"/>
+        <result column="FINISH_QTY" property="finishQty" jdbcType="DECIMAL"/>
+        <result column="UNIT" property="unit" jdbcType="VARCHAR"/>
+        <result column="FINISH_FLAG" property="finishFlag" jdbcType="VARCHAR"/>
+        <result column="CREATE_BY" property="createBy" jdbcType="VARCHAR"/>
+        <result column="MODIFY_BY" property="modifyBy" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Page_Head">
+		<![CDATA[
+        select * from ( select row_.*, rownum rownum_ from (
+        ]]>
+	</sql>
+    <sql id="Page_End">
+		<![CDATA[
+        ) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1
+        ]]>
+	</sql>
+    <sql id="Count_Head">
+		<![CDATA[
+        select count(*) from (
+        ]]>
+	</sql>
+    <sql id="Count_end">
+		<![CDATA[
+        )
+        ]]>
+	</sql>
+
+    <sql id="Base_Column_List">
+        ROW_ID, GIFT_NO, GIFT_ITEM_NO, GIFT_TYPE, PLANT, MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP,
+        QTY, LOCATION, CREATE_DATE, MODIFY_DATE, FINISH_QTY, UNIT, FINISH_FLAG, CREATE_BY,
+        MODIFY_BY
+    </sql>
+
+    <sql id="selectAllColumn">
+        <include refid="Base_Column_List" />
+        FROM GIFT_PO_DOWN
+    </sql>
+
+    <sql id="Find_Param">
+        where 1=1
+        <if test="giftPoDown.dnNo != null and giftPoDown.dnNo != ''">
+            and GIFT_NO like '%'||#{giftPoDown.dnNo}||'%'
+        </if>
+        <if test="giftPoDown.dnItemNo != null and giftPoDown.dnItemNo != ''">
+            and GIFT_ITEM_NO = #{giftPoDown.dnItemNo}
+        </if>
+        <if test="giftPoDown.sellOrderType != null and giftPoDown.sellOrderType != ''">
+            and GIFT_TYPE like '%'||#{giftPoDown.giftType}||'%'
+        </if>
+        <if test="giftPoDown.plant != null and giftPoDown.plant != ''">
+            and PLANT like '%'||#{giftPoDown.plant}||'%'
+        </if>
+        <if test="giftPoDown.location != null and giftPoDown.location != ''">
+            and LOCATION IN (${giftPoDown.location})
+        </if>
+        <if test="giftPoDown.materialNo != null and giftPoDown.materialNo != ''">
+            and MATERIAL_NO like '%'||#{giftPoDown.materialNo}||'%'
+        </if>
+        <if test="giftPoDown.materialDesp != null and giftPoDown.materialDesp != ''">
+            and MATERIAL_DESP like '%'||#{giftPoDown.materialDesp}||'%'
+        </if>
+        <if test="giftPoDown.begin != null and giftPoDown.begin != ''">
+            <![CDATA[
+				and CREATE_DATE >= TO_DATE(CONCAT(#{giftPoDown.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+        </if>
+        <if test="giftPoDown.end != null and giftPoDown.end != ''">
+            <![CDATA[
+				and CREATE_DATE <= TO_DATE(CONCAT(#{giftPoDown.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+        </if>
+        ORDER BY CREATE_DATE DESC, GIFT_NO, GIFT_ITEM_NO
+    </sql>
+
+    <select id="searchGiftPoDownByPage" resultMap="BaseResultMap">
+        <include refid="Page_Head"/>
+        <include refid="selectAllColumn"/>
+        <include refid="Find_Param"/>
+        <include refid="Page_End"/>
+    </select>
+
+    <select id="searchGiftPoDownCount" resultType="long">
+        <include refid="Count_Head"/>
+        <include refid="selectAllColumn"/>
+        <include refid="Find_Param"/>
+        <include refid="Count_end"/>
+    </select>
+
+</mapper>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.remoting.rf.dao.StgOrdersWhenPDDAO">
+
+	<resultMap id="stgOrdersWhenPDMap" type="stgOrdersWhenPDDTO">
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="order_no"/>
+		<result property="orderItem" column="order_item"/>
+		<result property="orderType" column="order_type"/>
+		<result property="docTpye" column="doc_tpye"/>
+		<result property="materialNo" column="material_no"/>
+		<result property="unit" column="unit"/>
+		<result property="plant" column="plant"/>
+		<result property="locaton" column="location"/>
+		<result property="qty" column="qty"/>
+		<result property="finishQty" column="finish_qty"/>
+		<result property="finishFlag" column="finish_flag"/>
+		<result property="createBy" column="create_by"/>
+		<result property="createDate" column="create_date"/>
+		<result property="modifyBy" column="modify_by"/>
+		<result property="modifyDate" column="modify_date"/>
+	</resultMap>
+	
+	<insert id="save" parameterType="stgOrdersWhenPDDTO">
+		insert into STG_ORDERS_WHEN_PD
+			(
+				order_no,
+				order_item,
+				order_type,
+				doc_tpye,
+				material_no,
+				unit,
+				plant,
+				location,
+				qty,
+				create_by,
+				create_date
+			)
+			values
+			(
+				#{orderNo},
+				#{orderItem},
+				#{orderType},
+				#{docTpye},
+				#{materialNo},
+				#{unit},
+				#{plant},
+				#{locaton},
+				#{qty},
+				#{createBy},
+				#{createDate}
+			)
+	</insert>
+	<update id="update" parameterType="stgOrdersWhenPDDTO">
+		update STG_ORDERS_WHEN_PD set qty=#{qty},modify_by=#{modifyBy}, modify_date=#{modifyDate}
+			where order_no=#{orderNo}
+				and order_item=#{orderItem}
+	</update>
+	<select id="getOrders" parameterType="string" resultMap="stgOrdersWhenPDMap">
+		select * from STG_ORDERS_WHEN_PD
+		where order_no=#{orderNo}
+			and order_type=#{orderType}
+				and doc_tpye=#{docTpye}
+	</select>
+	<select id="searchOrderCount" resultType="long">
+		select count(*) from STG_ORDERS_WHEN_PD 
+			where order_no=#{orderNo}
+				and order_type=#{orderType}
+				and doc_tpye=#{docTpye}	
+	</select>
+	
+	<select id="getOrderCountNotFinish" resultType="long">
+		select count(*) from STG_ORDERS_WHEN_PD 
+			where order_no=#{in.orno}
+				and order_type=#{in.ordertype}			
+				and doc_tpye=#{in.doctype}	
+				and (qty!=finish_qty or finish_flag='0' or iogp_flag='1')
+	</select>
+	<update id="updateInoutFlag">
+		update STG_ORDERS_WHEN_PD
+			set in_out_flag='1',
+					iogp_flag='1'
+		where order_no=#{in.orno}
+				and order_type=#{in.ordertype}			
+				and doc_tpye=#{in.doctype}	
+				and qty=finish_qty 
+				and finish_flag='1'
+	</update>
+	<select id="getOrdersLocation" resultType="string">
+		select DISTINCT location 
+		from STG_ORDERS_WHEN_PD
+		where 
+			order_no=#{orderNo}
+			and order_type=#{orderType}
+			and doc_tpye=#{docTpye}
+	</select>
+</mapper>

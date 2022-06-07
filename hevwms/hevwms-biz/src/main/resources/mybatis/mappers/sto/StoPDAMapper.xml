@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.sto.dao.StoPDADAO">
+     <select id="orderDelete" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_STO_DELETE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.barcode,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.doctype,mode=IN,jdbcType=VARCHAR},
+          #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.matno,mode=OUT,jdbcType=VARCHAR},
+          #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{out.location,mode=OUT,jdbcType=VARCHAR},
+          #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="orderdnDelete" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_STODN_DELETE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.barcode,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.doctype,mode=IN,jdbcType=VARCHAR},
+          #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.matno,mode=OUT,jdbcType=VARCHAR},
+          #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{out.location,mode=OUT,jdbcType=VARCHAR},
+          #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="orderStodnDelete" statementType="CALLABLE">
+        <![CDATA[
+        {call PRC_BARCODE_STODN_SCAN_DELETE(
+                #{in.orno,mode=IN,jdbcType=VARCHAR},
+                #{in.barcode,mode=IN,jdbcType=VARCHAR},
+                #{in.user,mode=IN,jdbcType=VARCHAR},
+                #{in.doctype,mode=IN,jdbcType=VARCHAR},
+                #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+                #{out.status,mode=OUT,jdbcType=VARCHAR},
+                #{out.msg,mode=OUT,jdbcType=VARCHAR},
+                #{out.matno,mode=OUT,jdbcType=VARCHAR},
+                #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+                #{out.location,mode=OUT,jdbcType=VARCHAR},
+                #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+                #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+            )}
+        ]]>
+    </select>
+    <select id="scanStoCheck" statementType="CALLABLE">
+        <![CDATA[
+          {call prc_barcode_stoout_check(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.version,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="scanStoDnOutCheck" statementType="CALLABLE">
+         <![CDATA[
+        {call PRC_BARCODE_STODNOUT_CHECK(
+            #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+            #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+            #{inpara.user,mode=IN,jdbcType=VARCHAR},
+            #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+            #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+            #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+            #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+            #{result.status,mode=OUT,jdbcType=VARCHAR},
+            #{result.msg,mode=OUT,jdbcType=VARCHAR},
+            #{result.matno,mode=OUT,jdbcType=VARCHAR},
+            #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+            #{result.location,mode=OUT,jdbcType=VARCHAR},
+            #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+            #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+            )}
+        ]]>
+    </select>
+    <select id="scanStoDnInCheck" statementType="CALLABLE">
+        <![CDATA[
+          {call prc_barcode_stodnin_check(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.bin,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="scanStodnCheck" statementType="CALLABLE">
+        <![CDATA[
+          {call prc_barcode_stoin_check(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.bin,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.version,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="stoOrderOgp" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_STOOUT_COLLECT(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+          #{in.carNo,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.orId,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select> 
+    <select id="stodnOrderIgp" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_STOIN_COLLECT(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.postingdate,mode=IN,jdbcType=VARCHAR},
+          #{in.carNo,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{in.transpoterName,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.orId,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select> 
+    <select id="stoGoodsDelivery" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_STO_DELIVERY(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+    <select id="stoGoodsReceive" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_STO_RECEIVE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+</mapper>

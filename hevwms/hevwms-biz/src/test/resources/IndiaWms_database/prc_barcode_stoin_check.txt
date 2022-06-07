@@ -1,0 +1,557 @@
+label_a:BEGIN
+/*------------------------------------------------------------------------------
+  || 功能描述： 扫描条码号验证是否盘点和入库然后创建单据明细
+  || 备注描述： 盘点出入库验证，入库和单据重复验证
+  || 参数描述： 无          名称 ：prc_barcode_stoin_check   输入输出类型：VARCHAR
+  || 作    者： Song Yinglong  时间 : 2015-10-28
+  ||------------------------------------------------------------------------------
+  || 修改记录：
+  ||------------------------------------------------------------------------------
+  || 执行结果：as_return=0成功 as_return=1失败 as_return=2条码提示可删除
+  || 执行备注：
+  -------------------------------------------------------------------------------*/
+  declare v_mat_scan_type      VARCHAR(40); -- 物料数量类型
+  declare v_mat_location_check VARCHAR(20); -- 变更物料的库存地点状态
+  declare v_user_location      VARCHAR(20); -- 扫描人关联location
+  declare v_barcode_mat        VARCHAR(60); -- 条码解析物料号
+  declare v_mat_code           VARCHAR(60); -- 物料号
+  declare v_location           VARCHAR(60); -- 库存地点
+  declare v_sub_location       VARCHAR(60); -- 库位
+  declare v_order_exist        INTEGER; -- 单据中条码存在标志
+  declare v_qty                INTEGER; -- 数量
+  declare v_pd_flag            VARCHAR(10); -- 盘点标志
+  declare v_exc_n              INTEGER;
+  declare v_count              INTEGER; -- 
+  declare v_row_id        varchar(64);
+  declare v_sto_no        varchar(64);
+  declare v_sto_item_no   varchar(64);
+  declare v_stodn_no        varchar(64);
+  declare v_stodn_item_no   varchar(64);
+  declare v_gi_location   varchar(64);
+  declare v_gr_location   varchar(64);
+  declare v_unit_o        varchar(64);
+  declare v_gi_finish_qty  INTEGER;  -- 已发货扫描数量
+  declare v_gr_finish_qty  INTEGER;  -- 已收货扫描数量
+  declare v_order_qty      INTEGER;
+  declare v_num            INTEGER;
+	DECLARE v_success_num    INTEGER DEFAULT 0;
+	declare v_specil_plant   varchar(64);
+	DECLARE v_specil_location			VARCHAR(64);
+	declare m_sto_no 			VARCHAR(64);
+	declare m_stodn_no    VARCHAR(64);
+	DECLARE v_all_qty       INTEGER;
+	DECLARE v_grplant				VARCHAR(32);
+	DECLARE v_sqlstate				VARCHAR(32);
+	DECLARE v_sqlmsg					VARCHAR(2000);
+	DECLARE v_inventory_location		VARCHAR(64);
+	DECLARE v_inventory_sub_location		VARCHAR(64);
+	DECLARE v_inventory_unit			VARCHAR(64);
+	DECLARE v_inventory_qty				INTEGER;
+	DECLARE v_inventory_use_qty		INTEGER;
+  DECLARE done INTEGER DEFAULT 0;
+	DECLARE pdNum			INTEGER DEFAULT 0; -- 是否盘点过
+	DECLARE v_check_flag			VARCHAR(5); -- 审批标记
+	DECLARE need_check_sto_no			VARCHAR(64);
+  declare v_sto_rowid        varchar(64);
+  declare v_sto_count              INTEGER;
+	
+	DECLARE stoCur CURSOR FOR 
+    select DISTINCT t.stodn_no 
+    from stg_stodn_down t 
+    where t.sto_no =(select sto_no from stg_stodn_down where stodn_no=as_order_no limit 1)
+		ORDER BY t.stodn_no;
+       
+  DECLARE cur CURSOR FOR 
+    select t.ROW_ID,t.STO_NO,t.STO_ITEM_NO,t.STODN_NO,t.STODN_ITEM_NO,n.gr_plant
+    from  stg_stodn_down t ,stg_sto_down n
+    WHERE t.STODN_NO = as_order_no
+			and t.sto_no=n.sto_no
+			and right(t.sto_item_no, 5)=n.sto_item_no
+			and n.sto_close='0'-- 调拨入库扫描条码没有判断是否关闭调拨单 2016-12-07 wangzs-
+      AND t.material_no = v_mat_code
+      AND t.gr_finish_flag = '0'
+      AND t.flag = '0'
+    ORDER BY t.sto_no,t.sto_item_no ASC;   
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+   
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      SET as_return='1';
+			GET DIAGNOSTICS CONDITION 1 v_sqlstate = RETURNED_SQLSTATE,v_sqlmsg= MESSAGE_TEXT;
+
+      IF v_sqlstate='23000' THEN -- 根据orderNo和barCode，判断是否违反唯一性约束，如果违反唯一性约束，报 sqlState 2300,errorcode 1062异常
+				set as_return = '2'; -- 这种情况提示用户可以删除条码
+        set as_msg    = CONCAT('STOIN_BARCODE_004 ERROR:Barcode has scan repeat in the order,barcode=',as_barcode,',order_no=',as_order_no);
+			ELSE 
+				SET as_msg=SUBSTRING('STOIN_BARCODE_100: Operation failed, please contact with administrator.', 1, 4000);
+        CALL p_log(SUBSTRING(concat('STOIN_BARCODE_100: SYSTEM EXCEPTION: ',v_sqlmsg), 1, 4000),
+									'', 'system', '', 'prc_barcode_stoin_check', 3, v_sqlstate);
+			END IF;
+
+      
+    END;
+  
+   set autocommit = 0;
+   -- 返回信息0为成功
+   set as_scan_qty = 0;
+   set as_order_qty = 0;
+   set v_count   = 0; -- 
+   set as_return = '0';
+   set as_msg    = 'barcode scan success!';
+   -- 条码解析
+   set v_barcode_mat = substring(as_barcode, 1, 9);
+   set v_mat_code = f_get_mat_code(v_barcode_mat);
+
+    --  查询物料号是否存在--
+    IF v_mat_code IS NULL THEN
+				set v_barcode_mat = substring(as_barcode, 1, 10);
+				set v_mat_code = f_get_mat_code(v_barcode_mat);
+
+				IF v_mat_code IS NULL THEN
+						set as_return = '1';
+						set as_msg    = CONCAT('STOIN_BARCODE_001 ERROR:Mat master data does not exist,barcode=',as_barcode,',order_no=',as_order_no);
+						ROLLBACK;
+						LEAVE label_a;
+				END IF;
+    END IF;
+
+		IF v_mat_code='DH1U60D15' THEN
+		  SET v_mat_code ='DH1U60D24' ;
+		END IF;
+
+		IF v_mat_code='DH1T20D12' THEN
+		  SET v_mat_code ='DH1VH0D23' ;
+		END IF;
+
+		-- 验证条码是否已经存在于库存
+		call prc_barcode_r_inventory(as_barcode, -- 返回单号
+                              v_inventory_location, -- 返回库存地点
+                              v_inventory_sub_location, -- 库位
+                              v_inventory_unit, -- 返回单位
+                              v_inventory_qty, -- 返回库存数量
+                              v_inventory_use_qty -- 返回占用数量
+                              );
+
+		-- 库存location非空，所以不为空说明库存已经存在
+		IF v_inventory_location IS NOT NULL THEN
+			IF as_order_no != '5041277140' THEN 
+				set as_return = '1';
+				set as_msg    = CONCAT('STOIN_BARCODE_002 ERROR:BARCODE has exist in inventory ,please check,barcode=',as_barcode,',order_no=',as_order_no, ',inventory_location = ', v_inventory_location);
+				ROLLBACK;
+				LEAVE label_a;
+			END IF;
+    END IF;
+
+		select t.STODN_ITEM_NO,n.gi_plant,n.gi_location,n.check_flag,n.sto_no
+		into v_stodn_item_no,v_specil_plant,v_specil_location,v_check_flag,need_check_sto_no
+		from   stg_stodn_down t ,stg_sto_down n
+		WHERE t.STOdn_NO = as_order_no
+		  and t.sto_no=n.sto_no
+			and right(t.sto_item_no, 5)=n.sto_item_no
+			-- and n.sto_close='0'
+		  AND t.material_no = v_mat_code
+		  AND t.Gr_Finish_Flag = '0'
+		  AND t.flag = '0'
+	 ORDER BY t.sto_no,t.sto_item_no asc LIMIT 1;
+
+  -- plant来自9990 工厂的不需要验证过 '调拨入必须是调拨出的条码'
+	IF LEFT(v_specil_plant,2) <> '99' THEN
+			-- 调拨入必须是调拨出的条码--------------------------------------------
+			select count(1) INTO pdNum 
+      from ods_pd_info t where t.PLANT=v_specil_plant;
+
+			IF as_order_no = '5040981495' THEN 
+						SET pdNum=0;
+			END IF;
+ 
+			IF as_order_no = '5041337679' THEN 
+						SET pdNum=0;
+			END IF;
+			
+			IF as_order_no = '5041362813' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041344985' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041357586' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041099544' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041088754' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041360121' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041124495' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041277140' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041358035' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041360206' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5040365966' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041035303' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041047586' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041048752' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041328298' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041203842' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5040963004' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041098868' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041037373' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041061149' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041040079' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5040997562' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041038927' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041038928' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041080306' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5040995080' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5041341120' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF as_order_no = '5040222620' THEN 
+						SET pdNum=0;
+			END IF;
+
+			IF pdNum>0 THEN
+					select count(1) INTO pdNum 
+          from ods_pd_info t 
+					where t.PLANT=v_specil_plant 
+					  AND  t.LOCATION=v_specil_location 
+						AND t.ORDER_STATUS='1';
+
+					IF pdNum=0 THEN
+							SELECT COUNT(1) INTO v_count
+						  FROM ods_order_info_dtl
+							WHERE sap_order_no = as_order_no
+								 AND order_type = '2'
+								 AND doc_type = 'STO'
+								 AND barcode = as_barcode;
+
+						  set pdNum=1;
+
+							IF v_count = 0 THEN
+									set as_return = '1';
+									set as_msg    = CONCAT('STOIN_BARCODE_011 ERROR:Barcode ',as_barcode,' not in this delivery or have not do the OGP');
+									ROLLBACK;
+									LEAVE label_a;
+						  END IF;
+					END IF;
+			END IF;-- pdNum>0
+	END IF;
+
+
+  IF v_check_flag='0' THEN 
+			set as_return = '1';
+			set as_msg    = CONCAT('STOIN_BARCODE_012 ERROR:this order need Approve,please call Admin HO to approve at portal-> GR&GI-> STO Approve .sto_no:',need_check_sto_no
+												,',obd no:',as_order_no);
+			ROLLBACK;
+			LEAVE label_a;
+	END IF;
+
+  -- 验证物料是否需要输入数量--
+  set v_mat_scan_type = f_get_mat_scan_type(v_mat_code);
+
+	IF v_mat_scan_type = 'SKU' THEN
+		--  类型等于SKU传入的数量必须由用户填写
+		IF as_qty = 0 THEN
+			set as_return = '1';
+			set as_msg    = CONCAT('STOIN_BARCODE_003 ERROR:The Scan Type is SKU,please import the qty,barcode=',as_barcode,',order_no=',as_order_no);
+			ROLLBACK;
+			LEAVE label_a;
+		END IF;
+
+		set v_qty = as_qty;
+	ELSE
+		set v_qty = 1;
+	END IF;
+
+  -- 根据条码查询单据明细是否有未操作的条码
+	-- 一个 sto 对应多个stodn行项目时，若stodn——no 不同可能会导致重复扫描条码  add by sunyanffei
+	OPEN stoCur ;
+		barcode_check:	REPEAT 
+			FETCH stoCur INTO m_stodn_no;
+					IF done=1 then 
+						LEAVE barcode_check;
+					END IF;
+
+				set v_order_exist = f_get_order_exist(as_barcode, m_stodn_no, '1');
+
+				-- 判断如果单据已存在
+				IF v_order_exist > 0 THEN
+					IF m_stodn_no=as_order_no THEN
+						set as_return = '2'; -- 这种情况提示用户可以删除条码
+					ELSE 
+						SET as_return = '1';
+					END IF;
+
+					set as_msg    = CONCAT('STOIN_BARCODE_004 ERROR:Barcode has scan repeat in the order,barcode=',as_barcode,',order_no=',as_order_no);
+					ROLLBACK;
+					LEAVE label_a;
+				END IF;
+			UNTIL done=1
+			END REPEAT;
+	CLOSE stoCur;
+
+	set done=0;
+  -- 根据条码号查询location验证条码是否存在，如果是出库可以验证扫描人的location权限--
+  set v_location = f_get_stock_location(as_barcode);
+
+  -- 如果是入库标志，则库存条码存在则报错
+  IF v_location IS NOT NULL THEN
+		IF as_order_no != '5041277140' THEN 
+			set as_return = '1'; 
+			set as_msg    = CONCAT('STOIN_BARCODE_005 ERROR:Barcode has existed in the inventory,barcode=',as_barcode,',order_no=',as_order_no);
+			ROLLBACK;
+			LEAVE label_a;
+		END IF;
+  END IF;
+
+	-- 验证订单是否完成 或者不存在
+	select count(t.ROW_ID) into v_num
+	from  stg_stodn_down t ,stg_sto_down n
+	WHERE t.STODN_NO = as_order_no
+		and t.sto_no=n.sto_no
+		and right(t.sto_item_no, 5)=n.sto_item_no
+		-- and n.sto_close='0'
+		 AND t.material_no = v_mat_code
+		 AND t.gr_finish_flag = '0'
+		 AND t.flag = '0'
+	 ORDER BY t.sto_no,t.sto_item_no ASC;  
+ 
+    -- 如果是入库标志，则库存条码存在则报错
+    IF v_num < 1 THEN
+      set as_return = '1'; 
+      set as_msg    = CONCAT('STOIN_BARCODE_006 ERROR:The order has finished or not exist, please check order_no= ',as_order_no);
+      ROLLBACK;
+      LEAVE label_a;
+    END IF;
+
+
+  OPEN cur;
+  FETCH cur into v_row_id,v_sto_no,v_sto_item_no,v_stodn_no,v_stodn_item_no,v_grplant;
+		-- 获取订单的location 
+	 select t.GR_LOCATION into v_location  from stg_sto_down t where t.sto_no = v_sto_no and t.sto_item_no = right(v_sto_item_no,5);
+	 set v_sub_location = v_location;
+
+	 -- 盘点表验证
+		set v_pd_flag = f_get_pd_flag(v_mat_code, v_location,v_grplant);
+		IF v_pd_flag != '0' THEN
+			set as_return = '1';
+			set as_msg    = CONCAT('STOIN_BARCODE_007 ERROR:Stock taking is locking,please do not scan,plant=',v_grplant,',location=',v_location,',material_no=',v_mat_code);
+			ROLLBACK;
+			LEAVE label_a;
+		END IF;
+
+		-- 如果累计数量+条码数量小等于sto需求数量，则允许条码入单据信息
+		select t.QTY,t.GI_FINISH_QTY,t.GR_FINISH_QTY into v_all_qty,v_gi_finish_qty,v_gr_finish_qty from stg_stodn_down t 
+		where t.row_id = v_row_id;
+
+		IF LEFT(v_specil_plant,2) = '99' OR pdNum=0 THEN 
+				set v_gi_finish_qty=v_all_qty;
+		END IF;  
+
+      -- v_gi_finish_qty 已发货扫描数量
+      -- v_gr_finish_qty 已收货扫描数量
+
+			IF v_gi_finish_qty >= v_qty + v_gr_finish_qty THEN
+				-- 如果累计数量+条码数量等于stoDN需求数量，则关闭stoDN  
+
+					UPDATE stg_stodn_down t
+					 SET t.gr_finish_flag = if(t.gr_finish_qty + v_qty=t.qty,
+																				 '1',
+																				 '0'),
+								t.gr_finish_qty  = t.gr_finish_qty + v_qty
+							 
+				 WHERE t.row_id = v_row_id
+					 AND t.qty >= t.gr_finish_qty + v_qty
+					 AND v_gi_finish_qty >= t.gr_finish_qty + v_qty;
+
+				-- 判断是否会出现重复扫描
+				set v_exc_n = ROW_COUNT();
+				IF v_exc_n = 0 THEN
+					ROLLBACK;
+					set as_return = '1';
+					set as_msg    = CONCAT('STOIN_BARCODE_008 ERROR:Order(STODN) is useing,barcode=',
+											 as_barcode,',order_no=', as_order_no);
+					LEAVE label_a;
+				END IF;
+
+			-- 更新sto同时要更新 stodn表的数量  
+			select t.qty,t.GI_FINISH_QTY,t.GR_FINISH_QTY 
+				into v_all_qty,v_gi_finish_qty,v_gr_finish_qty 
+				from stg_sto_down t 
+			 where t.sto_no = v_sto_no and t.sto_item_no = right(v_sto_item_no,5);
+
+			IF LEFT(v_specil_plant,2) = '99' OR pdNum=0 THEN  
+				set v_gi_finish_qty=v_all_qty;
+			END IF;  
+
+
+		IF v_gi_finish_qty >= v_qty + v_gr_finish_qty THEN
+			-- 如果累计数量+条码数量等于sto需求数量，则关闭sto
+				
+						UPDATE stg_sto_down t
+					 SET t.gr_finish_flag = if(t.gr_finish_qty + v_qty=t.qty,
+																				 '1',
+																				 '0'),
+							t.gr_finish_qty  = t.gr_finish_qty + v_qty
+							 
+				 WHERE t.sto_no = v_sto_no
+					 AND t.sto_item_no = right(v_sto_item_no,5)
+					 AND t.qty >= t.gr_finish_qty + v_qty
+					 AND v_gi_finish_qty >= t.gr_finish_qty + v_qty;
+
+
+					 
+				
+				-- 判断是否会出现重复扫描
+					set v_exc_n = ROW_COUNT();
+
+					IF v_exc_n = 0 THEN
+						ROLLBACK;
+						set as_return = '1';
+						set as_msg    = CONCAT('STOIN_BARCODE_009 ERROR:Order(STO) is useing,barcode=',
+												 as_barcode,',order_no=', as_order_no);
+						LEAVE label_a;
+					END IF;
+
+				END IF;
+
+				-- 插入单据明细信息
+				INSERT INTO ods_order_info_dtl
+					(order_type,
+					 doc_type,
+					 sap_order_no,
+					 sap_order_item,
+					 batch_no,
+					 plant,
+					 customer_model,
+					 location,
+					 material_no,
+					 material_desp,
+					 unit,
+					 barcode,
+					 scanned_by,
+					 scanned_date,
+					 delivery_date,
+					 create_by,
+					 qty,
+					 sub_location)
+				select
+					 '1', -- 出入库标志
+					 'STO',
+					 as_order_no,
+					-- t.sto_item_no,
+					v_stodn_item_no,
+					 CONCAT(v_mat_code,date_format(sysdate(),'%Y%m%d')),
+					 t.gr_plant, -- 入库的工厂
+					 t.customer_model,
+					 v_location,
+					 v_mat_code,
+					 t.material_desp,
+					 t.unit,
+					 as_barcode,
+					 as_operator,
+					 SYSDATE(),
+					 str_to_date(DELIVER_DATE, '%Y-%m-%d'),
+					 as_operator,
+					 v_qty,
+					 v_sub_location
+			 from stg_sto_down t
+			 where t.sto_no = v_sto_no
+				 and t.sto_item_no = right(v_sto_item_no,5);
+
+			set v_success_num=1;
+			
+				-- 返回信息--
+				set as_mat_code  = v_mat_code;
+				select substring(t.material_desp,1,32) into as_mat_desc  from stg_sto_down t 
+								where t.sto_no = v_sto_no and t.sto_item_no = right(v_sto_item_no,5);
+				set as_location  = v_location;
+				set as_scan_qty  = f_get_sto_scan_qty(as_order_no, '1', v_mat_code);
+				set as_order_qty = f_get_order_qty(as_order_no, v_mat_code, 'STO');
+				
+				COMMIT;
+				LEAVE label_a;
+			END IF;
+  CLOSE cur;
+
+
+	IF v_success_num<1 THEN
+		ROLLBACK;
+		set as_return = '1';
+		set as_msg    = CONCAT('STOIN_BARCODE_010 ERROR:Barcode can not meet the demand or order has closed or have not do the OGP,barcode=',
+								 as_barcode,', as_order_no=',as_order_no);
+		LEAVE label_a;
+	END IF;
+END

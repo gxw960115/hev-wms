@@ -1,0 +1,29 @@
+.icons-choosed {
+  width: 258px;
+  height: 36px;
+  background: url(/images/icons.png) 0px 0px no-repeat; }
+
+.icons-title {
+  width: 137px;
+  height: 36px;
+  background: url(/images/icons.png) 0px -36px no-repeat; }
+
+.icons-logo {
+  width: 128px;
+  height: 128px;
+  background: url(/images/icons.png) 0px -72px no-repeat; }
+
+.icons-search {
+  width: 119px;
+  height: 29px;
+  background: url(/images/icons.png) -137px -36px no-repeat; }
+
+.icons-HAIER {
+  width: 95px;
+  height: 29px;
+  background: url(/images/icons.png) -128px -72px no-repeat; }
+
+.icons-rubish {
+  width: 16px;
+  height: 16px;
+  background: url(/images/icons.png) -223px -72px no-repeat; }

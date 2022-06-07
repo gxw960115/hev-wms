@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- -->
+<mapper namespace="com.haier.hevwms.order.dao.OdsTransferInventoryDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllTransInventoryInfoColumns">
+		<![CDATA[
+		SELECT
+			ROW_ID,
+			TRANS_NO,
+			TRANS_ITEM_NO,
+			QTY,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			CUSTOMER_MODEL,
+			ITEM_DELETE,
+			UNIT,
+			PLANT,
+			WAREHOUSE_CODE,
+			wh.NAME WAREHOUSE_NAME,
+			GI_LOCATION,
+			GR_LOCATION,
+			TRANS_CLOSE,
+			FLAG,
+			BEGIN_DATE,
+			END_DATE,
+			CREATE_DATE,
+			CREATE_BY,
+			MODIFY_BY,
+			MODIFY_DATE,
+			GI_DATE,
+			GI_FLAG,
+			VERSION,
+			FINISH_QTY,
+			FINISH_FLAG,
+			ORDER_STATUS,
+			ORDER_TYPE,
+			s.SAP_FLAG,
+			s.SAP_MSG,
+			s.SAP_DOC_NO,
+			REMARK,
+			PRESCAN_FLAG,
+			1
+		from 
+			ODS_TRANSFER_INFO transfer
+			LEFT JOIN (select t.NAME,t.CODE from cd_wh_info t) wh on wh.CODE=transfer.PLANT	
+			LEFT JOIN (
+			SELECT
+				t.sap_order_no,
+				t.sap_order_item,
+				max(t.sap_flag) AS sap_flag,
+				t.SAP_MSG,
+				t.SAP_DOC_NO
+			FROM
+				ods_order_info t
+			GROUP BY
+				t.sap_order_no,
+				t.sap_order_item
+		) s ON (
+			s.sap_order_no = transfer.TRANS_NO
+			and s.sap_order_item = transfer.TRANS_ITEM_NO
+		)
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsTransferInventoryMap" type="odsTransferInventoryDTO">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="transOrderNo" column="TRANS_NO" />
+		<result property="transItemNo" column="TRANS_ITEM_NO" />
+		<result property="qty" column="QTY" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="itemDel" column="ITEM_DELETE" />
+		<result property="unit" column="UNIT" />
+		<result property="plant" column="PLANT" />
+		<result property="giLocation" column="GI_LOCATION" />
+		<result property="grLocation" column="GR_LOCATION" />
+		<result property="transClose" column="TRANS_CLOSE" />
+		<result property="flag" column="FLAG" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="giDate" column="GI_DATE" />
+		<result property="version" column="VERSION" />
+		<result property="finishQty" column="FINISH_QTY" />
+		<result property="finishFlag" column="FINISH_FLAG" />
+		<result property="orderStatus" column="ORDER_STATUS" />
+		<result property="orderType" column="ORDER_TYPE" />
+		<result property="warehouseCode" column="WAREHOUSE_CODE" />
+		<result property="warehouseName" column="WAREHOUSE_NAME" />
+		<result property="beginDate" column="BEGIN_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="sapFlag" column="SAP_FLAG" />
+		<result property="sapMsg" column="SAP_MSG" />
+		<result property="sapDocNo" column="SAP_DOC_NO" />
+		<result property="remark" column="REMARK" />
+		<result property="prescanFlag" column="PRESCAN_FLAG" />
+		
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<insert id="save" parameterType="odsTransferInventoryDTO">
+		<![CDATA[
+		insert into ODS_TRANSFER_INFO
+		  (TRANS_NO
+		  		,TRANS_ITEM_NO
+				,ORDER_TYPE
+				,ORDER_STATUS
+				,PLANT
+				,WAREHOUSE_CODE
+				,WAREHOUSE_NAME
+				,CUSTOMER_MODEL
+				,GI_LOCATION
+				,GR_LOCATION
+				,MATERIAL_NO
+				,MATERIAL_DESP
+				,QTY 
+				,UNIT
+				,CREATE_BY
+				,CREATE_DATE
+		   )
+		values
+		  (#{transOrderNo}
+		  		,#{transItemNo}
+				,#{orderType}
+				,#{orderStatus}
+				,#{plant}
+				,#{warehouseCode}
+				,#{warehouseName}
+				,#{customerModel}
+				,#{giLocation}
+				,#{grLocation}
+				,#{materialNo}
+				,#{materialDesp}
+				,#{qty} 
+				,#{unit}
+				,#{createBy}
+				,#{createDate}
+		   )
+	    ]]>
+	</insert>
+
+	<update id="updateTransOrderStatus"  parameterType="odsTransferInventoryDTO">
+		<![CDATA[
+		update ODS_TRANSFER_INFO
+		   set  
+				ITEM_DELETE = #{odsTransferInventoryDTO.itemDel} 
+				,MODIFY_BY = #{odsTransferInventoryDTO.modifyBy}
+				,MODIFY_DATE = #{odsTransferInventoryDTO.modifyDate} 
+		 where TRANS_NO = #{odsTransferInventoryDTO.transOrderNo}
+		]]>
+	</update>
+	<sql id="searchTransInventoryInfo_fragement">
+		<include refid="selectAllTransInventoryInfoColumns" />
+		<![CDATA[
+		where 1=1
+		and ITEM_DELETE = '0'
+		]]>
+		<if test="odsTransferInventoryDTO.transOrderNo != null and odsTransferInventoryDTO.transOrderNo != ''">
+			and TRANS_NO like '%'||#{odsTransferInventoryDTO.transOrderNo}||'%'
+		</if>
+		<if test="odsTransferInventoryDTO.finishFlag == 0 ">
+			<![CDATA[and (finish_qty = 0 or s.sap_flag!='1') and transfer.SAP_FLAG='0']]>
+		</if>
+		<if test="odsTransferInventoryDTO.finishFlag == 1 ">
+			and s.sap_flag='1'
+		</if>
+		<if test="odsTransferInventoryDTO.finishFlag == 2 ">
+			<![CDATA[and transfer.SAP_FLAG = '2']]>
+		</if>
+		<if test="odsTransferInventoryDTO.warehouseCode != null and odsTransferInventoryDTO.warehouseCode != ''">
+			and WAREHOUSE_CODE like '%'||#{odsTransferInventoryDTO.warehouseCode}||'%' 
+		</if>
+		<if test="odsTransferInventoryDTO.giLocation != null and odsTransferInventoryDTO.giLocation != ''">
+			and GI_LOCATION like '%'||#{odsTransferInventoryDTO.giLocation}||'%'
+		</if>
+		<if test="odsTransferInventoryDTO.grLocation != null and odsTransferInventoryDTO.grLocation != ''">
+			and GR_LOCATION like '%'||#{odsTransferInventoryDTO.grLocation}||'%'
+		</if>
+		<if test="odsTransferInventoryDTO.materialNo != null and odsTransferInventoryDTO.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsTransferInventoryDTO.materialNo}||'%'
+		</if>
+		<if test="odsTransferInventoryDTO.flag != null and odsTransferInventoryDTO.flag != ''">
+			and FLAG = #{odsTransferInventoryDTO.flag}
+		</if>
+		<if test="odsTransferInventoryDTO.userType != null and odsTransferInventoryDTO.userType != 1 ">
+		    and plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and u.user_id= #{odsTransferInventoryDTO.userId})
+			and (gi_location in (select loc_code from cd_user_wh_loc where user_id=#{odsTransferInventoryDTO.userId})
+			or gr_location in (select loc_code from cd_user_wh_loc where user_id=#{odsTransferInventoryDTO.userId}))
+		</if>
+		<if test="odsTransferInventoryDTO.begin != null and odsTransferInventoryDTO.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{odsTransferInventoryDTO.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsTransferInventoryDTO.end != null and odsTransferInventoryDTO.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsTransferInventoryDTO.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		order by TRANS_NO DESC
+	</sql>
+	
+	<select id="searchTransInventoryInfos" resultMap="odsTransferInventoryMap">
+		<include refid="pagination_Head" />
+		<include refid="searchTransInventoryInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsTransInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchTransInventoryInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="selectTransferInventoryOrderNo" parameterType="string" resultType="string" >
+		<![CDATA[
+		select LPAD(getid(#{dateString}),10,'0') from dual
+		]]>
+	</select>
+	
+	<select id="getListByNo" resultMap="odsTransferInventoryMap" >
+		<include refid="selectAllTransInventoryInfoColumns" />
+		where TRANS_NO=#{odsTransferInventoryDTO.transOrderNo}
+	</select>
+
+	<select id="getList" resultMap="odsTransferInventoryMap">
+		<include refid="selectAllTransInventoryInfoColumns" />
+        <![CDATA[
+		where 1=1
+		and ITEM_DELETE = '0'
+		]]>
+		<if test="odsTransferInventoryDTO.transOrderNo != null and odsTransferInventoryDTO.transOrderNo != ''">
+			and TRANS_NO = #{odsTransferInventoryDTO.transOrderNo}
+		</if>
+
+		<if test="odsTransferInventoryDTO.warehouseCode != null and odsTransferInventoryDTO.warehouseCode != ''">
+			and WAREHOUSE_CODE = #{odsTransferInventoryDTO.warehouseCode}
+		</if>
+
+		<if test="odsTransferInventoryDTO.giLocation != null and odsTransferInventoryDTO.giLocation != ''">
+			and GI_LOCATION like '%'||#{odsTransferInventoryDTO.giLocation}||'%'
+		</if>
+		
+		<if test="odsTransferInventoryDTO.grLocation != null and odsTransferInventoryDTO.grLocation != ''">
+			and GR_LOCATION like '%'||#{odsTransferInventoryDTO.grLocation}||'%'
+		</if>
+		
+		<if test="odsTransferInventoryDTO.materialNo != null and odsTransferInventoryDTO.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsTransferInventoryDTO.materialNo}||'%'
+		</if>
+
+		<if test="odsTransferInventoryDTO.flag != null and odsTransferInventoryDTO.flag != ''">
+			and FLAG = #{odsTransferInventoryDTO.flag}
+		</if>
+		<if test="odsTransferInventoryDTO.begin != null and odsTransferInventoryDTO.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{odsTransferInventoryDTO.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsTransferInventoryDTO.end != null and odsTransferInventoryDTO.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsTransferInventoryDTO.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		order by create_date DESC
+	</select>
+	
+	<!-- 进入过账先设成失败 -->
+	<update id="updateErrorNoNotSuc" parameterType="odsTransferInventoryDTO">
+		<![CDATA[
+		update ods_transfer_info 
+			set sap_flag = '2'
+		where trans_no = #{odsTransferInventoryDTO.transOrderNo} and  sap_flag <> '1'
+		]]>
+	</update>
+	
+	<!-- 过账成功更新标记 -->
+	<update id="updatePostSuccess" parameterType="odsTransferInventoryDTO">
+		<![CDATA[
+		update ods_transfer_info 
+			set sap_flag = '1',
+				modify_by = #{odsTransferInventoryDTO.modifyBy}
+		where trans_no = #{stgDnDown.transOrderNo} and  sap_flag <> '1'
+		]]>
+	</update>
+	
+</mapper>

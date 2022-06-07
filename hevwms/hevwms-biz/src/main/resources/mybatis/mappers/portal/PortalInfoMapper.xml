@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- -->
+<mapper namespace="com.haier.hevwms.portal.dao.NoticeInfoDAO">
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="NoticeInfoMap" type="noticeInfoDTO">
+		<result property="noticeId" column="NOTICE_ID"/>
+		<result property="appCode" column="APP_CODE"/>
+		<result property="title" column="TITLE"/>
+		<result property="status" column="STATUS"/>
+		<result property="validTime" column="VALID_TIME"/>
+		<result property="invalidTime" column="INVALID_TIME"/>
+		<result property="publisherId" column="PUBLISHER_ID"/>
+		<result property="publishedTime" column="PUBLISHED_TIME"/>
+		<result property="createdTime" column="CREATED_TIME"/>
+		<result property="creatorId" column="CREATOR_ID"/>
+		<result property="isAppoved" column="IS_APPOVED"/>
+		<result property="approverCode" column="APPROVER_CODE"/>
+		<result property="approveResult" column="APPROVE_RESULT"/>
+		<result property="noticeType" column="NOTICE_TYPE"/>
+		<result property="noticeClass" column="NOTICE_CLASS"/>
+		<result property="topFlag" column="TOP_FLAG"/>
+		<result property="attachCnt" column="ATTACH_CNT"/>
+		<result property="readFlag" column="READ_FLAG"/>
+		<result property="content" column="CONTENT"/>
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本方法 -->
+	<!-- =========================================================== -->
+	 <select id="getNoticeData" resultMap="NoticeInfoMap">
+		select * from
+	     (select
+			NOTICE_ID,
+			APP_CODE,
+			TITLE,
+			STATUS,
+			VALID_TIME,
+			INVALID_TIME,
+			PUBLISHER_ID,
+			PUBLISHED_TIME,
+			CREATED_TIME,
+			CREATOR_ID,
+			IS_APPOVED,
+			APPROVER_CODE,
+			APPROVE_RESULT,
+			NOTICE_TYPE,
+			NOTICE_CLASS,
+			TOP_FLAG,
+			ATTACH_CNT,
+			READ_FLAG,
+			CONTENT
+		from 
+			SYS_NOTICE sys_notice_
+		order by sys_notice_.CREATED_TIME desc )
+		where rownum=1
+	</select>
+	
+	<insert id="save" parameterType="noticeInfoDTO">	
+	    <selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_SYS_NOTICE_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into SYS_NOTICE
+		  (NOTICE_ID
+		  		,APP_CODE
+				,TITLE
+				,STATUS
+				,VALID_TIME
+				,INVALID_TIME
+				,PUBLISHER_ID
+				,PUBLISHED_TIME
+				,CREATED_TIME
+				,CREATOR_ID
+				,IS_APPOVED
+				,APPROVER_CODE
+				,APPROVE_RESULT
+				,NOTICE_TYPE
+				,NOTICE_CLASS
+				,TOP_FLAG
+				,ATTACH_CNT
+				,READ_FLAG
+				,CONTENT
+		   )
+		values
+		  (#{id}
+		  		,#{appCode}
+				,#{title}
+				,#{status}
+				,#{validTime}
+				,#{invalidTime}
+				,#{publisherId}
+				,#{publishedTime}
+				,#{createdTime}
+				,#{creatorId}
+				,#{isAppoved}
+				,#{approverCode}
+				,#{approveResult}
+				,#{noticeType}
+				,#{noticeClass}
+				,#{topFlag}
+				,#{attachCnt}
+				,#{readFlag}
+				,#{content}
+		   )
+	    ]]>	
+	</insert>
+	<delete id="deleteNotice" parameterType="noticeInfoDTO">
+		delete from sys_notice
+	</delete>
+</mapper>

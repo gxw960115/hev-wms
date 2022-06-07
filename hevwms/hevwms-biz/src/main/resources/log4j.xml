@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration PUBLIC "-//log4j/log4j Configuration//EN" "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<!-- <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender"> <layout 
+		class="org.apache.log4j.PatternLayout"> <param name="ConversionPattern" value="%d 
+		%-5p %c.%M:%L - %m%n" /> </layout> </appender> <appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender"> 
+		<param name="file" value="${loggingRoot}/${server.name}/logs/${server.name}.log" 
+		/> Keep one backup file <layout class="org.apache.log4j.PatternLayout"> <param 
+		name="ConversionPattern" value="%d %-5p %c.%M:%L - %m%n" /> </layout> </appender> 
+		定时任务存放日志 <appender name="QUARZLOG" class="org.apache.log4j.DailyRollingFileAppender"> 
+		<param name="file" value="${loggingRoot}/${server.name}/logs/quarz.log" /> 
+		Keep one backup file <layout class="org.apache.log4j.PatternLayout"> <param 
+		name="ConversionPattern" value="%d %-5p %c.%M:%L - %m%n" /> </layout> </appender> 
+		specify the logging level for loggers from other libraries <logger name="com.opensymphony"> 
+		<level value="${loggingLevel}" /> </logger> <logger name="org.apache.struts2"> 
+		<level value="${loggingLevel}" /> </logger> <logger name="org.springframework"> 
+		<level value="${loggingLevel}" /> </logger> <logger name="org.apache.ibatis"> 
+		<level value="DEBUG" /> </logger> <logger name="com.opensymphony.module.sitemesh"> 
+		<level value="${loggingLevel}" /> </logger> 定时任务单独存放日志 begin <logger name="org.quartz" 
+		additivity="false"> <level value="${loggingLevel}" /> <appender-ref ref="QUARZLOG" 
+		/> </logger> <logger name="com.haier.openplatform.showcase.quartz" additivity="false"> 
+		<level value="${loggingLevel}" /> <appender-ref ref="QUARZLOG" /> </logger> 
+		定时任务单独存放日志 end <logger name="net.spy.memcached"> <level value="${loggingLevel}" 
+		/> </logger> <logger name="org.dbunit"> <level value="${loggingLevel}" /> 
+		</logger> for all other loggers log only info and above log messages <root> 
+		<priority value="ERROR" /> <appender-ref ref="FILE"/> <appender-ref ref="STDOUT" 
+		/> </root> -->
+
+	<appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p %c.%M:%L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="INFO" />
+			<param name="LevelMax" value="FATAL" />
+		</filter>
+	</appender>
+
+	<!-- 正常的日记文件INFO WARN -->
+
+	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File"
+			value="${loggingRoot}/${server.name}/logs/${server.name}.log" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p %c.%M:%L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="DEBUG" />
+			<param name="LevelMax" value="ERROR" />
+			<param name="AcceptOnMatch" value="true" />
+		</filter>
+	</appender>
+	<!-- 定时任务存放日志 -->
+	<appender name="QUARZLOG" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="file" value="${loggingRoot}/${server.name}/logs/quarz.log" />
+		<!-- Keep one backup file -->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p %c.%M:%L - %m%n" />
+		</layout>
+	</appender>
+	<!-- 出错的日记文件ERROR FATAL -->
+
+	<!-- <appender name="Error" class="org.apache.log4j.RollingFileAppender"> 
+		<param name="Append" value="false" /> <param name="File" value="G:/log/error.log" 
+		/> <param name="MaxFileSize" value="1024" /> <param name="MaxBackupIndex" 
+		value="2" /> <layout class="org.apache.log4j.PatternLayout"> <param name="ConversionPattern" 
+		value="%d [%t] %p - %m%n" /> </layout> <filter class="org.apache.log4j.varia.LevelRangeFilter"> 
+		<param name="LevelMin" value="ERROR" /> <param name="LevelMax" value="ERROR" 
+		/> <param name="AcceptOnMatch" value="true" /> </filter> </appender> -->
+
+
+
+	<appender name="IBatis" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p %c.%M:%L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="DEBUG" />
+			<param name="LevelMax" value="DEBUG" />
+		</filter>
+	</appender>
+
+	<logger name="org.apache.zookeeper" additivity="false">
+		<level value="WARN" />
+	</logger>
+
+	<logger name="com.jcabi.manifests" additivity="false">
+		<level value="WARN" />
+	</logger>
+
+	<logger name="com.dangdang.config.service.easyzk" additivity="false">
+		<level value="WARN" />
+	</logger>
+
+	<logger name="com.alibaba.dubbo" additivity="false">
+		<level value="WARN" />
+	</logger>
+
+	<logger name="druid.sql.Statement" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="druid.sql.Connection" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.springframework.jdbc.datasource" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.mybatis.spring.SqlSessionUtils" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.apache.cxf.phase" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.apache.cxf.endpoint" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.apache.cxf.transport" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.apache.cxf.configuration" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.apache.cxf.interceptor" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.apache.cxf.jaxb" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="org.springframework.beans.factory.support" additivity="false">
+		<level value="WARN" />
+	</logger>
+	
+	<logger name="com.ibatis" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+
+	<!-- <logger name="java.sql.Connection" additivity="true"> <level value="DEBUG" 
+		/> </logger> <logger name="java.sql.Statement" additivity="true"> <level 
+		value="DEBUG" /> </logger> -->
+
+	<logger name="java.sql.PreparedStatement" additivity="true">
+		<level value="DEBUG" />
+		<appender-ref ref="IBatis" />
+	</logger>
+
+	<!-- <logger name="java.sql.ResultSet" additivity="true">
+		<level value="DEBUG" />
+		<appender-ref ref="IBatis" />
+	</logger> -->
+
+	<!-- 定时任务单独存放日志 begin -->
+	<logger name="org.quartz" additivity="false">
+		<level value="${loggingLevel}" />
+		<appender-ref ref="QUARZLOG" />
+	</logger>
+	<logger name="com.haier.openplatform.showcase.quartz"
+		additivity="false">
+		<level value="${loggingLevel}" />
+		<appender-ref ref="QUARZLOG" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<!-- 定时任务单独存放日志 end -->
+	<root>
+		<!-- <appender-ref ref="STDOUT" /> -->
+		<appender-ref ref="IBatis" />
+		<appender-ref ref="FILE" />
+		<!-- <appender-ref ref="Access" /> -->
+		<!-- <appender-ref ref="Error" /> -->
+	</root>
+</log4j:configuration> 

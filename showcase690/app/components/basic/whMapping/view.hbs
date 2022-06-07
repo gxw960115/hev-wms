@@ -1,0 +1,388 @@
+{{#component "whMapping js-comp"}}
+    <style type="text/css">
+        #addInfoForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addInfoForm input{ 
+            height: 30px;
+            width: 155px; 
+        }
+        #addInfoForm table tr{
+            height: 36px;;
+        }
+        #addInfoForm table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            padding:2.5px;
+
+            height:25px;
+            }
+
+        .fileUpload input.upload {  
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            }
+	
+    </style>
+    <div id="whMappingDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab1" style="margin-top:15px">
+                <tr>
+                    <td class="rightCls" width = "100px"> Physical Warehouse:</td>
+		    		<td class="leftCls"><input id="physicalWhId" type="text" class="easyui-combobox" style="border:0" 
+                    	data-options="border:false,width:140,height:30,editable:true,required:false"/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle addBtn" id="addBtn">Add</a>
+		            <a href="javascript:void(0)" class="btnStyle editBtn" id="editBtn">Edit</a>
+		            <a href="javascript:void(0)" class="btnStyle deleteBtn" id="deleteBtn" >Delete</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px;  overflow-y: hidden;  margin-top: -2px;">
+            <table id="dataGrid" style="width:100%;"></table>
+        </div>
+        <!-- 添加窗口 -->
+        <div id="addWhMappingWin" 
+             data-options="modal:true,closed:true, top:75, left:($(window).width() - 500) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+             style="width: 500px; height: 350px; display:none">
+            <div class="easyui-layout" data-options="fit:true">
+                <div data-options="region:'center',border:false">
+                    <form id="addInfoForm" method="post">
+                        <table style="border: 0"  width="100%" cellpadding="20">
+                            <tr>
+                                <td align="right" valign="middle">Physical Warehouse:&nbsp;&nbsp;</td>
+                                <td colspan="3">
+                                	<input type="text" id="physicalWh" name="physicalWh" class="easyui-combobox" data-options="width:200,height:30,editable:true" />
+                            		<input type="hidden" name="rowId" id="rowId"/>
+                            	</td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">1st Branch:&nbsp;&nbsp;</td>
+                                <td>
+                                	<input type="text" id="correspondingWhA" name="correspondingWhA" class="easyui-combobox" data-options="width:200,height:30,editable:true" />
+                            	</td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">2nd Branch:&nbsp;&nbsp;</td>
+                                <td>
+                                	<input type="text" id="correspondingWhB" name="correspondingWhB" class="easyui-combobox" data-options="width:200,height:30,editable:true" />
+                                </td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">3rd Branch:&nbsp;&nbsp;</td>
+                                <td>
+                                	<input type="text" id="correspondingWhC" name="correspondingWhC" class="easyui-combobox" data-options="width:200,height:30,editable:true" />
+                                </td>
+	                        </tr>
+	                        <tr>
+	                        	<td align="right" valign="middle">4th Branch:&nbsp;&nbsp;</td>
+                                <td>
+                                	<input type="text" id="correspondingWhD" name="correspondingWhD" class="easyui-combobox" data-options="width:200,height:30,editable:true" />
+                                </td>
+	                        </tr>
+                        </table>
+                    </form>
+                </div>
+              
+                <div data-options="region:'south',border:false"
+                     style="text-align: right; padding: 1px; height: 35px">
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetWinData(this)">Reset</a>
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn" onclick="saveWhMapping();">Save</a>
+                    <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="closeWhMappingWin();">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var totalWidth = $('#dataGrid').width();
+    
+    // set width of column 
+	function fixWidth(percent) { 
+    	return totalWidth * percent;   
+	}
+    
+    $(function(){
+    	$('#whMappingDiv').height(suitHeight);
+        var columns=[[{
+            field : 'ck',
+            checkbox : true,
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'physicalWh',
+            title : 'Physical Warehouse',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+        	field : 'physicalWhName',
+            title : 'Physical Wh Name',
+            align : 'center',
+            width: fixWidth(0.16),
+            sortable : true
+        }, {
+            field : 'correspondingWhA',
+            title : '1st Branch',
+            align : 'center',
+            width: fixWidth(0.16),
+            sortable : true,
+            formatter: function(val,row){   
+                if (val != null && val != ''){
+                	return row.correspondingWhAName + " ( " + val + " )"
+            	} else {
+            		return '';
+            	}  
+            }
+        }, {
+            field : 'correspondingWhB',
+            title : '2nd Branch',
+            align : 'center',
+            width: fixWidth(0.16),
+            sortable : true,
+            formatter: function(val,row){    
+                if (val != null && val != ''){
+                	return row.correspondingWhBName + " ( " + val + " )"
+            	} else {
+            		return '';
+            	}   
+            }
+        }, {
+            field : 'correspondingWhC',
+            title : '3rd Branch',
+            align : 'center',
+            width: fixWidth(0.16),
+            sortable : true,
+            formatter: function(val,row){
+            	if (val != null && val != ''){
+            		return row.correspondingWhCName + " ( " + val + " )"
+            	} else {
+            		return '';
+            	}
+            }
+        }, {
+            field : 'correspondingWhD',
+            title : '4th Branch',
+            align : 'center',
+            width: fixWidth(0.16),
+            sortable : true,
+            formatter: function(val,row){
+            	if (val != null && val != ''){
+            		return row.correspondingWhDName + " ( " + val + " )"
+            	} else {
+            		return '';
+            	}
+                
+            }
+        }   ]];
+
+        var grid = $('#dataGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            url:'/basic/whMapping/search',
+            method:'post',
+            onLoadSuccess:function() {
+	                $('.datagrid-btable').find('div.datagrid-cell').css('text-align','left');
+	            },
+            onLoadError:function(){
+                    $.messager.alert('System Information','Network Abnormal!','warning');
+                }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#addBtn').on('click',function(){
+            addData();
+        })
+        $('#editBtn').on('click',function(){
+            editData();
+        })
+		$('#deleteBtn').on('click',function(){
+			deleteData();
+		})
+		
+		var dataRes = [];
+		//,valueField:'code',textField:'name',url:''
+		$.ajax({
+			url:'/warehouse/list/cbox',
+			type:'post',
+			dataType:'json',
+			success:function(data){
+				if (data!=''&&data!=null&&data!=undefined){
+					for (var i=0;i<data.length;i++){
+						dataRes.push({"text": data[i]['name'], "value": data[i]['code']});
+					}
+				}
+				$('#physicalWhId').combobox({
+					data:dataRes,
+					panelWidth:180
+				});
+				$('#physicalWh').combobox({data:dataRes});
+				$('#correspondingWhA').combobox({data:dataRes});
+				$('#correspondingWhB').combobox({data:dataRes});
+				$('#correspondingWhC').combobox({data:dataRes});
+				$('#correspondingWhD').combobox({data:dataRes});
+			}
+		})
+    });
+    
+    function queryData(){
+    	var grid=  $('#dataGrid').datagrid({
+            url:'/basic/whMapping/search',
+            queryParams: {
+            	physicalWh:$('#physicalWhId').combobox('getValue')
+
+            },
+            onLoadSuccess : function(data) {
+            	$('.datagrid-btable').find('div.datagrid-cell').css('text-align','left');
+                $("#dataGrid").datagrid('clearChecked');
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                }
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+    }
+    function addData(){
+
+		$('#addInfoForm').form('clear');       
+		$('#addWhMappingWin').show();
+	    $('#addWhMappingWin').window({
+	        title:'Add Warehouse Mapping',
+	        iconCls:'icon-add'
+	    });
+	    $('#physicalWh').combobox({readonly:false});
+	    
+	    $('#addWhMappingWin').window('open');
+		url="/basic/whMapping/save";
+    }
+
+    //新建保存
+    function saveWhMapping(){
+		if(!$("#addInfoForm").form("validate")){return}
+		$.post(
+			url,
+			$("#addInfoForm").serialize(),
+			function(data){
+		       if(data=='true'){
+					$.messager.alert('System Information',	'Save Success!');
+					closeWhMappingWin();
+					queryData();
+				}else if(data=='false'){
+					$.messager.alert('System Information',
+							'Add Failure!', 'warning');
+				}else{
+		            $.messager.alert('System Information',
+		                    data, 'warning');
+		        }
+        });
+    }
+
+    
+    //修改
+    function editData(){
+		var selectedRows = $("#dataGrid").datagrid('getChecked');
+		
+		if (selectedRows.length != 1) {
+		     $.messager.alert('System Information',
+		    'Please select one data!', 'warning');
+			return false;
+		}
+		var row = selectedRows[0];
+		//if (row) {
+	    $('#addWhMappingWin').show();
+	    $('#addWhMappingWin').window({
+	        title:'Update Warehouse Mapping',
+	        iconCls:'icon-edit'
+	    });
+	    $('#rowId').val(row.rowId);
+		$('#physicalWh').combobox({readonly:true}).combobox('setValue',row.physicalWh);
+		$('#correspondingWhA').combobox('setValue',row.correspondingWhA);
+		$('#correspondingWhB').combobox('setValue',row.correspondingWhB);
+		$('#correspondingWhC').combobox('setValue',row.correspondingWhC);
+		$('#correspondingWhD').combobox('setValue',row.correspondingWhD);
+	    
+		$('#addWhMappingWin').window('open');
+
+		url = "/basic/whMapping/update";
+    }
+		
+    function closeWhMappingWin(){
+        $('#addInfoForm').form('clear');
+        $('#addWhMappingWin').window('close');
+    }
+
+    function deleteData(){
+		var selectedRows = $("#dataGrid").datagrid('getChecked');
+		if (selectedRows.length < 1) {
+		     $.messager.alert('System Information',
+		    'Please select datas!', 'warning');
+			return false;
+		}
+		$.messager.confirm(
+	    	'System Information',
+	        'Are you sure delete material info?',
+			function(r) {
+            	if (r) {
+                	var codes = new Array();
+                    for ( var i = 0; i < selectedRows.length; i++) {
+                    	codes.push(selectedRows[i].rowId);
+                    }
+                    $.get(
+                        "/basic/whMapping/delete",
+                        {'ids' : codes.join()},
+                        function(data) {
+                            if (data!='true') {
+								$.messager.alert(
+									'System Information',
+									'Delete Failure!',
+									'warning'
+								);
+							} else {
+								$.messager.alert(
+									'System Information',
+									'Delete Success!',
+									'warning'
+								);
+								$('#dataGrid').datagrid('reload');
+							}
+                       	}
+                    );
+            	}
+           }
+	   );
+    }
+    
+    </script>
+{{/component}}

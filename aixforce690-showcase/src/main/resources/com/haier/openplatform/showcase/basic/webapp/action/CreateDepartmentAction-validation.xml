@@ -1,0 +1,28 @@
+<!DOCTYPE validators PUBLIC "-//Apache Struts//XWork Validator 1.0.2//EN" "http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+<validators>
+    <field name="department.name">
+        <field-validator type="requiredstring" short-circuit="true">
+            <message key="department.name.not.empty" />
+        </field-validator>
+        <field-validator type="stringlength">
+            <param name="minLength">3</param>
+            <param name="maxLength">16</param>
+            <message key="department.name.length.limit" />
+        </field-validator>
+    </field>
+        <field name="department.description">
+        <field-validator type="stringlength">
+            <param name="maxLength">128</param>
+            <message key="department.description.length.limit" />
+        </field-validator>
+    </field>
+    <field name="department.code" >
+    	<field-validator type="requiredstring" short-circuit="true">
+            <message key="department.code.not.empty" />
+        </field-validator>
+        <field-validator type="stringlength" short-circuit="true">
+            <param name="max">16</param>
+            <message key="department.code.length.limit" />
+        </field-validator>
+    </field>
+</validators>

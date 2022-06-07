@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haier.hevwms.scrap.dao.OdsScrapOrderDAO" >
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+		
+	<resultMap id="BaseResultMap" type="odsScrapOrder" >
+        <result column="ROW_ID" property="rowId" />
+        <result column="SCRAP_NO" property="scrapNo" />
+        <result column="SCRAP_ITEM_NO" property="scrapItemNo" />
+        <result column="ORDER_TYPE" property="orderType" />
+        <result column="PLANT" property="plant" />
+        <result column="WAREHOUSE_CODE" property="warehouseCode" />
+        <result column="WAREHOUSE_NAME" property="warehouseName" />
+        <result column="LOCATION" property="location" />
+        <result column="MATERIAL_NO" property="materialNo" />
+        <result column="CUSTOMER_MODEL" property="customerModel" />
+        <result column="MATERIAL_DESP" property="materialDesp" />
+        <result column="UNIT" property="unit" />
+        <result column="VENDOR_CODE" property="vendorCode" />
+        <result column="VENDOR_NAME" property="vendorName" />
+        <result column="DELIVERY_CODE" property="deliveryCode" />
+        <result column="DELIVERY_NAME" property="deliveryName" />
+        <result column="DELIVERY_DATE" property="deliveryDate" jdbcType="DATE" />
+        <result column="CREATE_BY" property="createBy" />
+        <result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+        <result column="MODIFY_BY" property="modifyBy" />
+        <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+        <result column="FLAG" property="flag" />
+        <result column="VERSION" property="version" />
+        <result column="REQUIRE_QTY" property="requireQty" />
+        <result column="ORDER_CLOSE" property="orderClose" />
+        <result column="PRESACN_FLAG" property="presacnFlag" />
+        <result column="CHECK_FLAG" property="checkFlag" />
+        <result column="FINISH_QTY" property="finishQty" />
+        <result column="CHECK_DATE" property="checkDate" jdbcType="DATE" />
+        <result column="CHECK_BY" property="checkBy" />
+        <result column="FINISH_FLAG" property="finishFlag" />
+        <result column="BIN" property="bin" />
+        <result column="SAP_FLAG" property="sapFlag" />
+        <result column="SAP_MSG" property="sapMsg" />
+        <result column="MAT_DOC" property="matDoc" />
+        <result column="DOC_YEAR" property="docYear" />
+        <result column="POSTING_DATE" property="postingDate" jdbcType="DATE" />
+        <result column="IN_OUT_FLAG" property="inOutFlag" />
+        <result column="IN_OUT_MSG" property="inOutMsg" />
+        <result column="COST_CENTER" property="costCenter" />
+	</resultMap>
+	
+	<!-- 数据库中所有字段 -->
+    <sql id="Base_Column_List">
+        ROW_ID, SCRAP_NO, SCRAP_ITEM_NO, ORDER_TYPE, PLANT, WAREHOUSE_CODE, WAREHOUSE_NAME,
+        LOCATION, MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP, UNIT, VENDOR_CODE, VENDOR_NAME,
+        DELIVERY_CODE, DELIVERY_NAME, DELIVERY_DATE, CREATE_BY, CREATE_DATE, MODIFY_BY, MODIFY_DATE,
+        FLAG, VERSION, REQUIRE_QTY, ORDER_CLOSE, PRESACN_FLAG, CHECK_FLAG, FINISH_QTY, CHECK_DATE,
+        CHECK_BY, FINISH_FLAG, BIN, SAP_FLAG, SAP_MSG, MAT_DOC, DOC_YEAR, POSTING_DATE, IN_OUT_FLAG,
+        IN_OUT_MSG, COST_CENTER
+    </sql>
+	
+	<sql id="selectAllOdsScrapOrder">
+		select 
+		<include refid="Base_Column_List" /> 
+		from ODS_SCRAP_ORDER
+	</sql>
+	
+	<select id="get" resultMap="BaseResultMap" parameterType="long">
+		<include refid="selectAllOdsScrapOrder" />
+		where ROW_ID = #{rowId}
+	</select>
+	
+	<select id="getAll" resultMap="BaseResultMap">
+		<include refid="selectAllOdsScrapOrder" />
+	</select>
+	
+	<delete id="delete" parameterType="odsScrapOrder" >
+		delete from ODS_SCRAP_ORDER WHERE ROW_ID = {rowId}
+	</delete>
+	
+	<insert id="save" parameterType="odsScrapOrder" >
+        <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+            SELECT SEQ_SCRAP_ORDER_ID.NEXTVAL AS ID FROM DUAL
+        </selectKey>
+        insert into ODS_SCRAP_ORDER 
+        (
+            ROW_ID, SCRAP_NO, SCRAP_ITEM_NO,
+            ORDER_TYPE, PLANT, WAREHOUSE_CODE,
+            WAREHOUSE_NAME, LOCATION, MATERIAL_NO,
+            CUSTOMER_MODEL, MATERIAL_DESP, UNIT,
+            VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE,
+            DELIVERY_NAME, DELIVERY_DATE, CREATE_BY,
+            CREATE_DATE, MODIFY_BY, MODIFY_DATE,
+            FLAG, VERSION, REQUIRE_QTY,
+            ORDER_CLOSE, PRESACN_FLAG, CHECK_FLAG,
+            FINISH_QTY, CHECK_DATE, CHECK_BY,
+            FINISH_FLAG, BIN, SAP_FLAG,
+            SAP_MSG, MAT_DOC, DOC_YEAR,
+            POSTING_DATE, IN_OUT_FLAG, IN_OUT_MSG,
+            COST_CENTER
+        )
+        values 
+        (
+            #{rowId}, #{scrapNo}, #{scrapItemNo},
+            #{orderType}, #{plant}, #{warehouseCode},
+            #{warehouseName}, #{location}, #{materialNo},
+            #{customerModel}, #{materialDesp}, #{unit},
+            #{vendorCode}, #{vendorName}, #{deliveryCode},
+            #{deliveryName}, #{deliveryDate,jdbcType=DATE}, #{createBy},
+            #{createDate,jdbcType=DATE}, #{modifyBy},
+            #{modifyDate,jdbcType=DATE},
+            #{flag}, #{version}, #{requireQty},
+            #{orderClose}, #{presacnFlag}, #{checkFlag},
+            #{finishQty}, #{checkDate,jdbcType=DATE}, #{checkBy},
+            #{finishFlag}, #{bin}, #{sapFlag},
+            #{sapMsg}, #{matDoc}, #{docYear},
+            #{postingDate,jdbcType=DATE}, #{inOutFlag},
+            #{inOutMsg}, #{costCenter}
+        )
+	</insert>
+	
+	<update id="update" parameterType="odsScrapOrder" >
+		update ODS_SCRAP_ORDER
+		set 
+	        SCRAP_NO = #{record.scrapNo},
+	        SCRAP_ITEM_NO = #{record.scrapItemNo},
+	        ORDER_TYPE = #{record.orderType},
+	        PLANT = #{record.plant},
+	        WAREHOUSE_CODE = #{record.warehouseCode},
+	        WAREHOUSE_NAME = #{record.warehouseName},
+	        LOCATION = #{record.location},
+	        MATERIAL_NO = #{record.materialNo},
+	        CUSTOMER_MODEL = #{record.customerModel},
+	        MATERIAL_DESP = #{record.materialDesp},
+	        UNIT = #{record.unit},
+	        VENDOR_CODE = #{record.vendorCode},
+	        VENDOR_NAME = #{record.vendorName},
+	        DELIVERY_CODE = #{record.deliveryCode},
+	        DELIVERY_NAME = #{record.deliveryName},
+	        DELIVERY_DATE = #{record.deliveryDate,jdbcType=DATE},
+	        CREATE_BY = #{record.createBy},
+	        CREATE_DATE = #{record.createDate,jdbcType=DATE},
+	        MODIFY_BY = #{record.modifyBy},
+	        MODIFY_DATE = #{record.modifyDate,jdbcType=DATE},
+	        FLAG = #{record.flag},
+	        VERSION = #{record.version},
+	        REQUIRE_QTY = #{record.requireQty},
+	        ORDER_CLOSE = #{record.orderClose},
+	        PRESACN_FLAG = #{record.presacnFlag},
+	        CHECK_FLAG = #{record.checkFlag},
+	        FINISH_QTY = #{record.finishQty},
+	        CHECK_DATE = #{record.checkDate,jdbcType=DATE},
+	        CHECK_BY = #{record.checkBy},
+	        FINISH_FLAG = #{record.finishFlag},
+	        BIN = #{record.bin},
+	        SAP_FLAG = #{record.sapFlag},
+	        SAP_MSG = #{record.sapMsg},
+	        MAT_DOC = #{record.matDoc},
+	        DOC_YEAR = #{record.docYear},
+	        POSTING_DATE = #{record.postingDate,jdbcType=DATE},
+	        IN_OUT_FLAG = #{record.inOutFlag},
+	        IN_OUT_MSG = #{record.inOutMsg},
+	        COST_CENTER = #{record.costCenter}
+		where ROW_ID = #{odsScrapOrder.rowId}
+	</update>
+	
+	<!-- 查询条件 -->
+	<sql id="searchOdsScrapOrder_fragement">
+		where 1=1 
+		<if test="odsScrapOrder.rowId != null" >
+	      and ROW_ID = #{odsScrapOrder.rowId},
+	    </if>
+	    <if test="odsScrapOrder.bin != null and odsScrapOrder.bin != ''" >
+	      and BIN like '%'||#{odsScrapOrder.bin}||'%' 
+	    </if>
+	    <if test="odsScrapOrder.scrapNo != null and odsScrapOrder.scrapNo != ''" >
+	      and SCRAP_NO like '%'||#{odsScrapOrder.scrapNo}||'%' 
+	    </if>
+	    <if test="odsScrapOrder.scrapItemNo != null and odsScrapOrder.scrapItemNo != ''" >
+	      and SCRAP_ITEM_NO like '%'||#{odsScrapOrder.scrapItemNo}||'%' 
+	    </if>
+	    <if test="odsScrapOrder.plant != null and odsScrapOrder.plant != ''" >
+	      and PLANT like '%'||#{odsScrapOrder.plant}||'%' 
+	    </if>
+	    <if test="odsScrapOrder.sapFlag != null and odsScrapOrder.sapFlag != '' and odsScrapOrder.sapFlag != -1" >
+	      and sap_flag = #{odsScrapOrder.sapFlag}
+	    </if>
+	    <if test="odsScrapOrder.customerModel != null and odsScrapOrder.customerModel != ''" >
+	      and CUSTOMER_MODEL like '%'||#{odsScrapOrder.customerModel}||'%'  
+	    </if>
+	    <if test="odsScrapOrder.location != null and odsScrapOrder.location != ''" >
+	      and LOCATION IN (${odsScrapOrder.location})
+	    </if>
+	    <if test="odsScrapOrder.materialNo != null and odsScrapOrder.materialNo != ''" >
+	      and MATERIAL_NO like '%'||#{odsScrapOrder.materialNo}||'%' 
+	    </if>
+	    <if test="odsScrapOrder.flag != null and odsScrapOrder.flag != -1" >
+	      and FLAG = #{odsScrapOrder.flag}
+	    </if>
+	    <if test="odsScrapOrder.checkFlag != null and odsScrapOrder.checkFlag != ''" >
+	      and CHECK_FLAG = #{odsScrapOrder.checkFlag}
+	    </if>
+	    <if test="odsScrapOrder.finishFlag != null and odsScrapOrder.finishFlag != ''" >
+	      and FINISH_FLAG = #{odsScrapOrder.finishFlag}
+	    </if>
+	    <if test="odsScrapOrder.begin != null and odsScrapOrder.begin != ''" >
+	      	<![CDATA[
+				and CREATE_DATE >= TO_DATE(#{odsScrapOrder.begin}||' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+	    <if test="odsScrapOrder.end != null and odsScrapOrder.end != ''" >
+	      	<![CDATA[
+				and CREATE_DATE <= TO_DATE(#{odsScrapOrder.end}||' 23:59:59', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+        ORDER BY CREATE_DATE DESC, SCRAP_NO, SCRAP_ITEM_NO
+	</sql>
+	
+	<!-- 分页条件查询 -->
+	<select id="searchOdsScrapOrderByPage" resultMap="BaseResultMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllOdsScrapOrder" />
+		<include refid="searchOdsScrapOrder_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	
+	<select id="searchOdsScrapOrderCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllOdsScrapOrder" />
+		<include refid="searchOdsScrapOrder_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+	<delete id="deleteAll" >
+		<![CDATA[ delete from ODS_SCRAP_ORDER where ROW_ID in ]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+	  	</foreach>
+	</delete>
+	
+	<update id="confirmScrapOrder">
+		update ODS_SCRAP_ORDER
+			set CHECK_FLAG = 1,
+				CHECK_DATE = sysdate,
+				CHECK_BY = #{userName}
+		where ROW_ID in 
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+	  	</foreach>
+	</update>
+	
+	<update id="updateCostCenter" parameterType="odsScrapOrder">
+		update ODS_SCRAP_ORDER
+			set cost_center = #{odsScrapOrder.costCenter},
+				modify_date = sysdate,
+				modify_by = #{odsScrapOrder.modifyBy}
+		where scrap_no = #{odsScrapOrder.scrapNo}
+	</update>
+	
+	<!-- 条件查询 -->
+	<select id="getOdsScrapOrderListByParm" resultMap="BaseResultMap">
+		<include refid="selectAllOdsScrapOrder" />
+		<include refid="searchOdsScrapOrder_fragement" />
+	</select>
+
+    <select id="getScrapSequence" resultType="long">
+	    SELECT SEQ_SCRAP_ORDER_NO.NEXTVAL FROM dual
+	</select>
+
+    <update id="updateSapReMsg" parameterType="odsScrapOrder">
+		update ODS_SCRAP_ORDER 
+			set SAP_FLAG=#{odsScrapOrder.sapFlag},
+			SAP_MSG=#{odsScrapOrder.sapMsg},
+			mat_doc=#{odsScrapOrder.matDoc},
+			DOC_YEAR=#{odsScrapOrder.docYear}
+		where ROW_ID=#{odsScrapOrder.rowId} 
+			and plant = #{odsScrapOrder.plant}
+	</update>
+	
+	<!-- 手持订单扫描检查 -->
+    <select id="checkScrapOrderByPDA" resultType="string">
+       <![CDATA[
+            SELECT CHECK_FLAG
+			FROM (SELECT T.CHECK_FLAG FROM ODS_SCRAP_ORDER T WHERE T.SCRAP_NO = #{scrapNo} ORDER BY T.CHECK_FLAG)
+			WHERE ROWNUM < 2
+        ]]>
+    </select>
+    
+    <!-- 手持，用户权限检查 -->
+    <select id="checkScrapOrderLoc" resultType="string">
+        <![CDATA[
+        SELECT CASE 
+                WHEN COUNT(0) > 0 THEN 'Y'
+                ELSE 'N'
+            END
+        FROM ODS_SCRAP_ORDER t
+        WHERE t.SCRAP_NO = #{scrapNo}
+            AND t.plant IN (
+                SELECT DISTINCT w.code
+                FROM cd_user_wh_loc u, cd_wh_info w
+                WHERE w.row_id = u.wh_id
+                    AND u.user_id = #{id}
+            )
+            AND t.LOCATION IN (
+                SELECT loc_code
+                FROM CD_USER_WH_LOC
+                WHERE user_id = #{id}
+            )
+        ]]>
+    </select>
+    
+    <select id="scanStatus" resultMap="BaseResultMap">
+    	<![CDATA[
+    		SELECT SAP_FLAG,FINISH_FLAG
+    		FROM ODS_SCRAP_ORDER S
+    		WHERE S.SCRAP_NO = #{orderNo}
+    	]]>
+    </select>
+    
+</mapper>

@@ -1,0 +1,36 @@
+SELECT
+	ROW_ID,
+	PLANT,
+	CUSTOMER_MODEL,
+	LOCATION,
+	MATERIAL_NO,
+	MATERIAL_DESP,
+	WMS_QTY,
+	UNIT,
+	BATCH_NO,
+	CREATE_BY,
+	DATE_FORMAT(
+		CREATE_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) CREATE_DATE,
+	MODIFY_BY,
+	DATE_FORMAT(
+		MODIFY_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) MODIFY_DATE,
+	FLAG,
+	VERSION,
+	SUB_LOCATION,
+	INVENTORY_DATE
+FROM
+	ods_inventory_info
+WHERE
+	MODIFY_DATE > DATE_ADD(NOW(), INTERVAL - 30 DAY)
+AND plant IN (
+	SELECT DISTINCT
+		cd.`CODE`
+	FROM
+		cd_factory cd
+	WHERE
+		cd.country_code = '6600'
+)

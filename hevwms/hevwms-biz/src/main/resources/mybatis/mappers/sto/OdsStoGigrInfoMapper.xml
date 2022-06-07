@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haier.hevwms.sto.dao.OdsStoGigrInfoDAO">
+    <!-- oracle 分页头 -->
+    <sql id="pagination_Head">
+        <![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+    </sql>
+    <!-- oracle 分页尾 -->
+    <sql id="pagination_Tail">
+      <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+    </sql>
+    <!-- count * from -->
+    <sql id="count_Head">
+        <![CDATA[select count(*) from ( ]]>
+    </sql>
+    <sql id="count_Tail">
+        <![CDATA[)]]>
+    </sql>
+
+	<resultMap id="BaseResultMap" type="odsStoGigrInfo">
+		<result column="ROW_ID" property="rowId" />
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="ORDER_ITEM" property="orderItem" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="STO_NO" property="stoNo" />
+		<result column="STO_ITEM_NO" property="stoItemNo" />
+		<result column="BATCH_NO" property="batchNo" />
+		<result column="PLANT" property="plant" />
+		<result column="WAREHOUSE_CODE" property="warehouseCode" />
+		<result column="WAREHOUSE_NAME" property="warehouseName" />
+		<result column="LOCATION" property="location" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="CUSTOMER_MODEL" property="customerModel" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="SCANNED_QTY" property="scannedQty" />
+		<result column="UNIT" property="unit" />
+		<result column="VENDOR_CODE" property="vendorCode" />
+		<result column="VENDOR_NAME" property="vendorName" />
+		<result column="DELIVERY_CODE" property="deliveryCode" />
+		<result column="DELIVERY_NAME" property="deliveryName" />
+		<result column="DELIVERY_DATE" property="deliveryDate" jdbcType="DATE" />
+		<result column="CAR_NO" property="carNo" />
+		<result column="HAND_FLAG" property="handFlag" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+		<result column="FLAG" property="flag" />
+		<result column="VERSION" property="version" />
+		<result column="SAP_FLAG" property="sapFlag" />
+		<result column="SAP_MSG" property="sapMsg" />
+		<result column="SAP_DOC_NO" property="sapDocNo" />
+		<result column="SAP_SEND_ID" property="sapSendId" />
+		<result column="POSTING_DATE" property="postingDate" />
+		<result column="IN_OUT_FLAG" property="inOutFlag" />
+		<result column="IN_OUT_MSG" property="inOutMsg" />
+		<result column="REQUIRE_QTY" property="requireQty" />
+		<result column="ORDER_CLOSE" property="orderClose" />
+		<result column="CAR_ID" property="carId" />
+		<result column="PRESACN_FLAG" property="presacnFlag" />
+		<result column="CHECK_FLAG" property="checkFlag" />
+		<result column="CAR_FLAG" property="carFlag" />
+		<result column="HAND_POST_FLAG" property="handPostFlag" />
+		<result column="VECHILE_TYPE" property="vechileType" />
+		<result column="INVOICE_NO" property="invoiceNo" />
+		<result column="LR_NO" property="lrNo" />
+		<result column="LR_DATE" property="lrDate" />
+		<result column="TRANSPORTER_CODE" property="transporterCode" />
+		<result column="SAP_DOC_YEAR" property="sapDocYear" />
+		<result column="STODN_NO" property="stodnNo" />
+		<result column="STODN_ITEM_NO" property="stodnItemNo" />
+		<result column="VNPT_NO" property="vnptNo" />
+	</resultMap>
+
+	<resultMap id="StoDnBaseResultMap" type="odsStoDnGigrInfo">
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="STO_NO" property="stoNo" />
+		<result column="PLANT" property="plant" />
+		<result column="LOCATION" property="location" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="QTY" property="qty" />
+		<result column="UNIT" property="unit" />
+		<result column="TMS_MSG" property="tmsMsg" />
+		<result column="TMS_FLAG" property="tmsFlag" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+		<result column="FLAG" property="flag" />
+		<result column="POST_DATE" property="postDate" />
+		<result column="IN_OUT_FLAG" property="inOutFlag" />
+		<result column="IN_OUT_MSG" property="inOutMsg" />
+		<result column="CAR_NO" property="carNo" />
+		<result column="TRANSPORTER" property="transporter" />
+		<result column="STODN_NO" property="stodnNo" />
+		<result column="STODN_ITEM" property="stodnItem" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ROW_ID, ORDER_NO, ORDER_ITEM, ORDER_TYPE, STO_NO, STO_ITEM_NO, BATCH_NO,
+		PLANT, WAREHOUSE_CODE,
+		WAREHOUSE_NAME, LOCATION, MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP, SCANNED_QTY,
+		UNIT, VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE, DELIVERY_NAME,
+		DELIVERY_DATE, CAR_NO,
+		HAND_FLAG, CREATE_BY, CREATE_DATE, MODIFY_BY, MODIFY_DATE, FLAG, VERSION,
+		SAP_FLAG,
+		SAP_MSG, SAP_DOC_NO, SAP_SEND_ID, POSTING_DATE, IN_OUT_FLAG, IN_OUT_MSG,
+		REQUIRE_QTY,
+		ORDER_CLOSE, CAR_ID, PRESACN_FLAG, CHECK_FLAG, CAR_FLAG, HAND_POST_FLAG,
+		VECHILE_TYPE,
+		INVOICE_NO, LR_NO, LR_DATE, TRANSPORTER_CODE, SAP_DOC_YEAR, STODN_NO,
+		STODN_ITEM_NO, VNPT_NO
+	</sql>
+
+	<sql id="selectAllResult">
+	   select
+	   		ROW_ID, ORDER_NO, ORDER_ITEM, ORDER_TYPE, STO_NO, STO_ITEM_NO, BATCH_NO,
+			PLANT, WAREHOUSE_CODE,
+			WAREHOUSE_NAME, LOCATION, MATERIAL_NO, CUSTOMER_MODEL, MATERIAL_DESP, SCANNED_QTY,
+			UNIT, VENDOR_CODE, VENDOR_NAME, DELIVERY_CODE, DELIVERY_NAME,
+			DELIVERY_DATE, CAR_NO,
+			HAND_FLAG, CREATE_BY, CREATE_DATE, MODIFY_BY, MODIFY_DATE, FLAG, VERSION,
+			SAP_FLAG,
+			SAP_MSG, SAP_DOC_NO, SAP_SEND_ID, POSTING_DATE, IN_OUT_FLAG, IN_OUT_MSG,
+			REQUIRE_QTY,
+			ORDER_CLOSE, CAR_ID, PRESACN_FLAG, CHECK_FLAG, CAR_FLAG, HAND_POST_FLAG,
+			VECHILE_TYPE,
+			INVOICE_NO, LR_NO, LR_DATE, TRANSPORTER_CODE, SAP_DOC_YEAR, STODN_NO,
+			STODN_ITEM_NO,VNPT_NO,
+			(SELECT NAME FROM CD_WH_INFO S WHERE S.CODE = ODS_STO_GIGR_INFO.PLANT ) plantName,
+      		(SELECT NAME FROM CD_LOC_INFO S WHERE S.CODE = ODS_STO_GIGR_INFO.LOCATION) locationName
+	   from ODS_STO_GIGR_INFO
+	</sql>
+
+	<sql id="selectStoDnAllResult">
+		select
+			ORDER_NO,
+			ORDER_TYPE,
+			STO_NO,
+            STODN_NO,
+            STODN_ITEM,
+            PLANT,
+            LOCATION,
+            QTY,
+            UNIT,
+            MATERIAL_NO,
+            MATERIAL_DESP,
+            TMS_FLAG,
+            TMS_MSG,
+            CAR_NO,
+            POST_DATE,
+            TRANSPORTER,
+            CREATE_BY,
+            CREATE_DATE,
+            MODIFY_BY,
+            MODIFY_DATE,
+            IN_OUT_FLAG,
+            IN_OUT_MSG
+		from ODS_STODN_GIGR_INFO
+	</sql>
+
+	<sql id="selectByParameter">
+	   where 1=1
+	   <if test="odsStoGigrInfo.stoNo != null and odsStoGigrInfo.stoNo != ''">
+	       and STO_NO like '%'||#{odsStoGigrInfo.stoNo}||'%'
+	   </if>
+	   <if test="odsStoGigrInfo.stodnNo != null and odsStoGigrInfo.stodnNo != ''">
+	       and STODN_NO like '%'||#{odsStoGigrInfo.stodnNo}||'%'
+	   </if>
+	   <if test="odsStoGigrInfo.orderNo != null and odsStoGigrInfo.orderNo != ''">
+	       and ORDER_NO like '%'||#{odsStoGigrInfo.orderNo}||'%'
+	   </if>
+	   <if test="odsStoGigrInfo.handFlag != null and odsStoGigrInfo.handFlag != ''">
+	       and HAND_FLAG like '%'||#{odsStoGigrInfo.handFlag}||'%'
+	   </if>
+	   <if test="odsStoGigrInfo.sapFlag != null and odsStoGigrInfo.sapFlag != '' and odsStoGigrInfo.sapFlag != -1">
+	       and SAP_FLAG like '%'||#{odsStoGigrInfo.sapFlag}||'%'
+	   </if>
+	   <if test="odsStoGigrInfo.materialNo != null and odsStoGigrInfo.materialNo != ''">
+	       and MATERIAL_NO like '%'||#{odsStoGigrInfo.materialNo}||'%'
+	   </if>
+	   <if test="odsStoGigrInfo.plant != null and odsStoGigrInfo.plant != ''">
+	       and PLANT like '%'||#{odsStoGigrInfo.plant}||'%'
+	   </if>
+	   <if test="odsStoGigrInfo.location != null and odsStoGigrInfo.location != ''">
+	       and LOCATION IN (${odsStoGigrInfo.location})
+	   </if>
+	   <if test="odsStoGigrInfo.begin != null and odsStoGigrInfo.begin != ''" >
+            <![CDATA[
+                and CREATE_DATE >= TO_DATE(#{odsStoGigrInfo.begin}||' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')
+            ]]>
+        </if>
+        <if test="odsStoGigrInfo.end != null and odsStoGigrInfo.end != ''" >
+            <![CDATA[
+                and CREATE_DATE <= TO_DATE(#{odsStoGigrInfo.end}||' 23:59:59', 'yyyy-mm-dd hh24:mi:ss')
+            ]]>
+        </if>
+	</sql>
+
+	<sql id="selectStoDnByParameter">
+		where 1=1
+		<if test="odsStodnGigrInfo.stoNo != null and odsStodnGigrInfo.stoNo != ''">
+			and STO_NO like '%'||#{odsStodnGigrInfo.stoNo}||'%'
+		</if>
+		<if test="odsStodnGigrInfo.stodnNo != null and odsStodnGigrInfo.stodnNo != ''">
+			and STODN_NO like '%'||#{odsStodnGigrInfo.stodnNo}||'%'
+		</if>
+		<if test="odsStodnGigrInfo.orderNo != null and odsStodnGigrInfo.orderNo != ''">
+			and ORDER_NO like '%'||#{odsStodnGigrInfo.orderNo}||'%'
+		</if>
+		<if test="odsStodnGigrInfo.tmsFlag != null and odsStodnGigrInfo.tmsFlag != '' and odsStodnGigrInfo.tmsFlag != -1">
+			and TMS_FLAG like '%'||#{odsStodnGigrInfo.tmsFlag}||'%'
+		</if>
+		<if test="odsStodnGigrInfo.materialNo != null and odsStodnGigrInfo.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsStodnGigrInfo.materialNo}||'%'
+		</if>
+		<if test="odsStodnGigrInfo.plant != null and odsStodnGigrInfo.plant != ''">
+			and PLANT like '%'||#{odsStodnGigrInfo.plant}||'%'
+		</if>
+		<if test="odsStodnGigrInfo.location != null and odsStodnGigrInfo.location != ''">
+			and LOCATION IN (${odsStodnGigrInfo.location})
+		</if>
+		<if test="odsStodnGigrInfo.begin != null and odsStodnGigrInfo.begin != ''" >
+			<![CDATA[
+                and CREATE_DATE >= TO_DATE(#{odsStodnGigrInfo.begin}||' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')
+            ]]>
+		</if>
+		<if test="odsStodnGigrInfo.end != null and odsStodnGigrInfo.end != ''" >
+			<![CDATA[
+                and CREATE_DATE <= TO_DATE(#{odsStodnGigrInfo.end}||' 23:59:59', 'yyyy-mm-dd hh24:mi:ss')
+            ]]>
+		</if>
+	</sql>
+
+	<delete id="delete" parameterType="odsStoGigrInfo">
+		DELETE FROM ODS_STO_GIGR_INFO
+	</delete>
+
+	<delete id="deleteAll" parameterType="odsStoGigrInfo">
+		DELETE FROM ODS_STO_GIGR_INFO WHERE ROW_ID IN
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</delete>
+
+	<insert id="save" parameterType="odsStoGigrInfo">
+		insert into ODS_STO_GIGR_INFO (
+			ROW_ID, ORDER_NO, ORDER_ITEM,
+			ORDER_TYPE, STO_NO, STO_ITEM_NO,
+			BATCH_NO, PLANT, WAREHOUSE_CODE,
+			WAREHOUSE_NAME, LOCATION, MATERIAL_NO,
+			CUSTOMER_MODEL, MATERIAL_DESP, SCANNED_QTY,
+			UNIT, VENDOR_CODE, VENDOR_NAME,
+			DELIVERY_CODE, DELIVERY_NAME, DELIVERY_DATE,
+			CAR_NO, HAND_FLAG, CREATE_BY,
+			CREATE_DATE, MODIFY_BY, MODIFY_DATE,
+			FLAG, VERSION, SAP_FLAG,
+			SAP_MSG, SAP_DOC_NO, SAP_SEND_ID,
+			POSTING_DATE, IN_OUT_FLAG, IN_OUT_MSG,
+			REQUIRE_QTY, ORDER_CLOSE, CAR_ID,
+			PRESACN_FLAG, CHECK_FLAG, CAR_FLAG,
+			HAND_POST_FLAG, VECHILE_TYPE, INVOICE_NO,
+			LR_NO, LR_DATE, TRANSPORTER_CODE,
+			SAP_DOC_YEAR, STODN_NO, STODN_ITEM_NO
+		)
+		values (
+			#{rowId}, #{orderNo},#{orderItem},
+			#{orderType}, #{stoNo}, #{stoItemNo},
+			#{batchNo}, #{plant},#{warehouseCode},
+			#{warehouseName}, #{location}, #{materialNo},
+			#{customerModel}, #{materialDesp},
+			#{scannedQty},#{unit}, #{vendorCode}, #{vendorName},
+			#{deliveryCode}, #{deliveryName},
+			#{deliveryDate,jdbcType=DATE},
+			#{carNo}, #{handFlag}, #{createBy},
+			#{createDate,jdbcType=DATE}, #{modifyBy},
+			#{modifyDate,jdbcType=DATE},
+			#{flag}, #{version}, #{sapFlag},
+			#{sapMsg}, #{sapDocNo},
+			#{sapSendId},#{postingDate}, #{inOutFlag}, #{inOutMsg},
+			#{requireQty}, #{orderClose},
+			#{carId},#{presacnFlag}, #{checkFlag}, #{carFlag},
+			#{handPostFlag}, #{vechileType},
+			#{invoiceNo},#{lrNo}, #{lrDate}, #{transporterCode},
+			#{sapDocYear}, #{stodnNo},#{stodnItemNo}
+		)
+	</insert>
+
+	<update id="update" parameterType="odsStoGigrInfo">
+		update ODS_STO_GIGR_INFO
+		set
+			ORDER_NO = #{record.orderNo},
+			ORDER_ITEM = #{record.orderItem},
+			ORDER_TYPE = #{record.orderType},
+			STO_NO = #{record.stoNo},
+			STO_ITEM_NO = #{record.stoItemNo},
+			BATCH_NO = #{record.batchNo},
+			PLANT = #{record.plant},
+			WAREHOUSE_CODE = #{record.warehouseCode},
+			WAREHOUSE_NAME = #{record.warehouseName},
+			LOCATION = #{record.location},
+			MATERIAL_NO = #{record.materialNo},
+			CUSTOMER_MODEL = #{record.customerModel},
+			MATERIAL_DESP = #{record.materialDesp},
+			SCANNED_QTY = #{record.scannedQty},
+			UNIT = #{record.unit},
+			VENDOR_CODE = #{record.vendorCode},
+			VENDOR_NAME = #{record.vendorName},
+			DELIVERY_CODE = #{record.deliveryCode},
+			DELIVERY_NAME = #{record.deliveryName},
+			DELIVERY_DATE = #{record.deliveryDate,jdbcType=DATE},
+			CAR_NO = #{record.carNo},
+			HAND_FLAG = #{record.handFlag},
+			CREATE_BY = #{record.createBy},
+			CREATE_DATE = #{record.createDate,jdbcType=DATE},
+			MODIFY_BY = #{record.modifyBy},
+			MODIFY_DATE = #{record.modifyDate,jdbcType=DATE},
+			FLAG = #{record.flag},
+			VERSION = #{record.version},
+			SAP_FLAG = #{record.sapFlag},
+			SAP_MSG = #{record.sapMsg},
+			SAP_DOC_NO = #{record.sapDocNo},
+			SAP_SEND_ID = #{record.sapSendId},
+			POSTING_DATE = #{record.postingDate},
+			IN_OUT_FLAG = #{record.inOutFlag},
+			IN_OUT_MSG = #{record.inOutMsg},
+			REQUIRE_QTY = #{record.requireQty},
+			ORDER_CLOSE = #{record.orderClose},
+			CAR_ID = #{record.carId},
+			PRESACN_FLAG = #{record.presacnFlag},
+			CHECK_FLAG = #{record.checkFlag},
+			CAR_FLAG = #{record.carFlag},
+			HAND_POST_FLAG = #{record.handPostFlag},
+			VECHILE_TYPE = #{record.vechileType},
+			INVOICE_NO = #{record.invoiceNo},
+			LR_NO = #{record.lrNo},
+			LR_DATE = #{record.lrDate},
+			TRANSPORTER_CODE = #{record.transporterCode},
+			SAP_DOC_YEAR = #{record.sapDocYear},
+			STODN_NO = #{record.stodnNo},
+			STODN_ITEM_NO = #{record.stodnItemNo}
+		where ROW_ID = #{record.rowId}
+	</update>
+
+	<!-- 以下为自定义CRUD -->
+	<select id="searchOdsStoGiGrInfos" resultMap="BaseResultMap">
+        <include refid="pagination_Head" />
+        <include refid="selectAllResult" />
+        <include refid="selectByParameter" />
+        <include refid="pagination_Tail" />
+	</select>
+
+	<select id="searchOdsStoGiGrInfosCount" resultType="long">
+        <include refid="count_Head" />
+        <include refid="selectAllResult" />
+        <include refid="selectByParameter" />
+        <include refid="count_Tail" />
+	</select>
+
+	<select id="searchOdsStoDnGiGrInfosCount" resultType="long">
+        <include refid="count_Head" />
+        <include refid="selectStoDnAllResult" />
+        <include refid="selectStoDnByParameter" />
+        <include refid="count_Tail" />
+	</select>
+
+	<select id="searchList" resultMap="BaseResultMap">
+        <include refid="selectAllResult" />
+        <include refid="selectByParameter" />
+	</select>
+
+	<select id="searchStoDnList" resultMap="StoDnBaseResultMap">
+        <include refid="selectStoDnAllResult" />
+        <include refid="selectStoDnByParameter" />
+	</select>
+
+	<update id="updatePostResult">
+        update ods_sto_gigr_info
+            set stodn_no = #{odsStoGigrInfo.stodnNo},
+            stodn_item_no = #{odsStoGigrInfo.stodnItemNo},
+            sap_flag = #{odsStoGigrInfo.sapFlag},
+            sap_msg = #{odsStoGigrInfo.sapMsg},
+            sap_doc_no = #{odsStoGigrInfo.sapDocNo},
+            modify_by = #{odsStoGigrInfo.modifyBy},
+            modify_date = #{odsStoGigrInfo.modifyDate}
+        where order_no = #{odsStoGigrInfo.orderNo}
+            and order_type = #{odsStoGigrInfo.orderType}
+        <if test="odsStoGigrInfo.materialNo != null and odsStoGigrInfo.materialNo != ''">
+	       and material_no = #{odsStoGigrInfo.materialNo}
+	    </if>
+	</update>
+
+	<update id="updateDnPostResult">
+        update ods_sto_gigr_info
+            set sap_flag = #{odsStoGigrInfo.sapFlag},
+				sap_msg = #{odsStoGigrInfo.sapMsg},
+				sap_doc_no = #{odsStoGigrInfo.sapDocNo},
+				modify_by = #{odsStoGigrInfo.modifyBy},
+				modify_date = #{odsStoGigrInfo.modifyDate}
+        where order_no = #{odsStoGigrInfo.orderNo}
+				and order_type = #{odsStoGigrInfo.orderType}
+	</update>
+
+	<!-- 根据orderNo修改 -->
+	<update id="updateByOrderNo">
+        update ods_sto_gigr_info
+           set VNPT_NO = #{vnptNo}
+         where STODN_NO = #{stodnNo}
+		   and MATERIAL_DESP = #{materialDesp}
+	</update>
+
+</mapper>

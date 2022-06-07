@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.basic.dao.MdDictionaryDAO">
+	<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllMdDictionaryColumns">
+		<![CDATA[
+		select
+			ID,
+			CODE,
+			NAME,
+			KIND_CODE,
+			KIND_DESCRIPTION,
+			SORT,
+			1
+		from 
+			MD_DICTIONARY md_dictionary_
+		]]>
+	</sql>
+
+	<resultMap id="mdDictionaryMap" type="mdDictionary">
+		<id property="id" column="ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="code" column="CODE"/>
+		<result property="name" column="NAME"/>
+		<result property="kindCode" column="KIND_CODE"/>
+		<result property="kindDescription" column="KIND_DESCRIPTION"/>
+		<result property="sort" column="SORT"/>
+	</resultMap>
+	<resultMap id="odscarlist" type="odscarlist">
+		<result property="transporterName" column="NAME" />
+		<result property="transporterCode" column="CODE" />
+	</resultMap>
+	
+    <select id="getAll" resultMap="mdDictionaryMap">
+		<include refid="selectAllMdDictionaryColumns"/>
+	</select>
+	<select id="get" resultMap="mdDictionaryMap" parameterType="long">
+		<include refid="selectAllMdDictionaryColumns"/>
+		<![CDATA[
+		where md_dictionary_.ID = #{rowId}
+		]]>	
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from MD_DICTIONARY where ID = #{rowId} 
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from MD_DICTIONARY where id in
+		]]>	
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</delete>
+    <insert id="save" parameterType="mdDictionary">
+    	<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_MD_DICTIONARY_ID.NEXTVAL AS MYID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into MD_DICTIONARY
+		  (
+		  		ID
+				,CODE
+				,NAME
+				,KIND_CODE
+				,KIND_DESCRIPTION
+				,SORT
+				,FLAG
+		   )
+		values
+		  (		#{id}
+		  		,#{code}
+				,#{name}
+				,#{kindCode}
+				,#{kindDescription}
+				,#{sort}
+				,#{flag}
+		   )
+	    ]]>	
+	</insert>
+	<update id="update" parameterType="mdDictionary">
+		<![CDATA[
+		update MD_DICTIONARY
+		   set CODE = #{code}
+				,NAME = #{name}
+				,KIND_CODE = #{kindCode}
+				,KIND_DESCRIPTION = #{kindDescription}
+				,SORT = #{sort}
+		 where ID = #{id}
+		]]>
+	</update>
+	<sql id="searchMdDictionary_fragement">
+		<include refid="selectAllMdDictionaryColumns" />
+			where 1=1 and flag='0'
+			<if test="mdDictionary.code != null and mdDictionary.code != ''">
+			and CODE like '%'||#{mdDictionary.code}||'%' 
+			</if>
+			<if test="mdDictionary.name != null and mdDictionary.name != ''">
+			and NAME like '%'||#{mdDictionary.name}||'%' 
+			</if>
+			<if test="mdDictionary.kindCode != null and mdDictionary.kindCode != ''">
+			and KIND_CODE like '%'||#{mdDictionary.kindCode}||'%' 
+			</if>
+			<if test="mdDictionary.kindDescription != null and mdDictionary.kindDescription != ''">
+			and KIND_DESCRIPTION like '%'||#{mdDictionary.kindDescription}||'%' 
+			</if>
+			<if test="mdDictionary.sort != null and mdDictionary.sort != ''">
+			and SORT like '%'||#{mdDictionary.sort}||'%' 
+			</if>
+			
+	</sql>
+	<select id="searchMdDictionarys" resultMap="mdDictionaryMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchMdDictionary_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchMdDictionarysCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="searchMdDictionary_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	<select id="findAll" resultMap="mdDictionaryMap" >
+		<include refid="selectAllMdDictionaryColumns"/>
+		<if test="type != null">
+		where upper(KIND_CODE) = upper(#{type})
+		</if>
+	</select>
+	<select id="findAllKind" resultMap="mdDictionaryMap">
+		<![CDATA[
+		select distinct t.kind_code,t.kind_description 
+		from MD_DICTIONARY t 
+		where  flag='0' 
+		group by t.kind_code,t.kind_description
+	    ]]>
+	</select>
+	<sql id="getDictionaryBy">
+		<include refid="selectAllMdDictionaryColumns" />
+		where (code=#{code} or name=#{name})
+	</sql>
+	<select id="getDictionaryByCodeOrName" resultMap="mdDictionaryMap">
+		<include refid="getDictionaryBy" />
+	</select>
+	
+	<select id="getIfCodeOrNameExist" resultMap="mdDictionaryMap">
+		<include refid="getDictionaryBy" />
+		<![CDATA[and id <> #{id}]]>
+	</select>
+	<select id="getTransporterOfSto" resultMap="odscarlist">
+		select t.CODE,t.NAME from md_dictionary t 
+		where t.KIND_CODE='Transporter' 
+		<if test="sapOrderNo != null and sapOrderNo != ''">
+			AND t.CODE in (
+				select DISTINCT ods.TRANSPORTER_CODE from ods_order_info ods
+				where ods.sap_order_no=#{sapOrderNo} )
+		</if>
+	</select>
+</mapper>

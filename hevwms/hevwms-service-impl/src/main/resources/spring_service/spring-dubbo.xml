@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+    <dubbo:application name="${app.name}" owner="hop" organization="haier"/>
+    <!-- <dubbo:monitor protocol="registry"></dubbo:monitor> -->
+    <!-- <dubbo:protocol name="dubbo" port="${dubbo.port}" /> -->
+    <!-- <dubbo:protocol name="rmi" port="1099" /> -->
+    <!-- <dubbo:protocol name="hessian" port="8089" /> -->
+    <dubbo:protocol name="webservice" port="9999" server="jetty"/> 
+    <!-- <dubbo:provider delay="-1" timeout="10000"               retries="3" >
+    	<dubbo:parameter key="almId" value="S00464"/>
+    	<dubbo:parameter key="package" value="OPENAPI"/>
+	</dubbo:provider> -->
+
+    <!-- 多注册中心配置 -->
+    <dubbo:registry id="qingdaoRegistry690" protocol="zookeeper" address="${dubbo.registry.address.690}" 
+    file="/root/HEVWMS/impl/dubbo/dubbo.cache" timeout="60000"/>
+    <dubbo:provider delay="-1" protocol="dubbo" timeout="10000" retries="0"></dubbo:provider>
+	
+	<!-- added by gll for HOP Monitor, 20170503 -->
+<!--     <dubbo:registry id="qingdaoRegistryHQ" protocol="zookeeper" address="${dubbo.registry.address.hq}" timeout="60000" /> -->
+    
+    <dubbo:protocol name="dubbo"  port="-1" ></dubbo:protocol>
+    <dubbo:protocol name="rest" port="8989" server="tomcat" contextpath="services" 
+    extension="com.haier.openplatform.dubbo.filter.CacheControlFilter,com.haier.openplatform.showcase.impl.filter.CustomExceptionMapper"></dubbo:protocol>
+    <!-- <dubbo:protocol name="dubbo"  port="-1" optimizer="com.haier.openplatform.showcase.util.SerializationOptimizerImpl"></dubbo:protocol>
+    <dubbo:protocol name="rest" port="8989" server="tomcat" contextpath="services" extension="com.haier.openplatform.dubbo.filter.CacheControlFilter,com.haier.openplatform.showcase.impl.filter.CustomExceptionMapper"></dubbo:protocol>
+	 -->
+	<!-- HOP4.0配置 -->
+	<bean id="agentImpl" class="io.terminus.pampas.client.AgentImpl" /> 
+ 	<dubbo:service filter="default" interface="io.terminus.pampas.client.Agent" 
+  		ref="agentImpl" version="otcwms" protocol="dubbo"  timeout="60000"/>
+		
+	<!-- 服务健康检查配置 -->
+	<!-- <bean id="serviceHealthCheckClient" class="com.haier.openplatform.console.util.ServiceHealthCheckClientImpl" />
+	<dubbo:service interface="com.haier.openplatform.console.util.ServiceHealthCheckClient" owner="hop" ref="serviceHealthCheckClient" version="1.0" protocol="rest" delay="-1" registry="qingdaoRegistry690"/>
+	 -->
+	<!-- 服务认证 -->
+	<!-- <dubbo:reference id="serviceInfoClient" registry="qingdaoRegistry690" owner="hop" interface="com.haier.openapi.client.api.ServiceInfoClient" version="1.0" protocol="dubbo" timeout="100000" init="true" />
+	<dubbo:reference id="serviceAuthorizeServiceClient" registry="qingdaoRegistry690" owner="hop" interface="com.haier.openapi.client.api.ServiceAuthorizeServiceClient" version="1.0" protocol="dubbo" timeout="100000" init="true" />
+	<dubbo:reference id="sendDubboMessageClient" registry="qingdaoRegistry690" owner="hop" interface="com.haier.openplatform.hmc.client.send.SendMessageClient" version="1.0" protocol="dubbo" timeout="100000" init="true" /> -->
+	<bean id="barcodeValidationService" class="com.haier.openplatform.bank.service.impl.BarcodeValidationService" />
+	<dubbo:service interface="com.haier.openflatform.wms.bank.service.BarcodeValidationServiceClient"
+		ref="barcodeValidationService" version="otcwms" protocol="webservice"  timeout="60000" registry="qingdaoRegistry690"/>
+<!-- 	<dubbo:reference id="sendDubboMessageClient" registry="qingdaoRegistryHQ" owner="hop" interface="com.haier.openplatform.hmc.client.send.SendMessageClient" version="1.0" protocol="dubbo" timeout="100000" init="true" />  -->
+<!-- 	<dubbo:reference id="sendMessageClient" registry="qingdaoRegistry690" interface="com.haier.openplatform.hmc.client.send.SendMessageClient" version="1.0" protocol="dubbo" timeout="100000" init="false" /> -->
+</beans>

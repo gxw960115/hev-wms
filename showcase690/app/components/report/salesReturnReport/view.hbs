@@ -1,0 +1,164 @@
+{{#component "salesReturnReport js-comp"}}
+    <div id="saleReDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDivlow" region="north">
+            <table id="searchTab" style="margin-top:15px">
+                <tr>
+                    <td class="rightCls">Location:&nbsp;&nbsp;</td><td class="leftCls"><input id="location" type="text" size="16" /></td>
+                    <td class="rightCls">Material No:&nbsp;&nbsp;</td><td class="leftCls"><input id="materialNo" type="text" /></td>
+                    <td class="rightCls">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="begin"  value="" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                        - <input id="end"  value="" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/><font color="red">*</font></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" id="exportBtn">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle printBtn" id="printBtn">Print</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="dataGrid" style="width:100%;">
+
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var totalWidth = $('#dataGrid').width(); 
+        // set width of column 
+        function fixWidth(percent) { 
+            return totalWidth * percent;   
+        }
+        $(function(){
+        $('#saleReDiv').height(suitHeight);
+            //初始化日期
+           var date=new Date();
+	    var m=date.getMonth()+1;
+	    var d=date.getDate();
+	    var begin=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+	    $('#begin').val(getLastRq(begin,-1));
+	    date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+	    $('#end').val(date);
+            var columns=[[{
+                field:'dnNo',title:'Billing No', align:'center',sortable:true, width: fixWidth(0.1)
+            },{
+                field:'materialNo',title:'Material No', align:'center',sortable:true, width: fixWidth(0.1)
+            },{
+                field:'customerModel', title:'Customer Model', align:'center',sortable:true, width: fixWidth(0.2)
+            },{
+                field:'materialDesp',title:'Material Desp',width:100,align:'center',sortable:true, hidden:true
+            },{
+                field:'location',title:'Location', align:'center',sortable:true, width: fixWidth(0.07)
+            },{
+                field:'barcode',title:'Barcode', align:'center',sortable:true, width: fixWidth(0.15)
+            },{
+                field:'responsibleDepartment',title:'Responsible Department', align:'center',sortable:true, width: fixWidth(0.17)
+            },{
+                field:'goodsClass',title:'Goods Class', align:'center',sortable:true, width: fixWidth(0.1)
+            },{
+                field:'crmComplainNo',title:'CRM Complain No', align:'center',sortable:true, width: fixWidth(0.16)
+            },{
+                field:'reason',title:'Reason', align:'center',sortable:true, width: fixWidth(0.1)
+            },{
+                field:'createDate',
+                title:'Create Date', 
+                align:'center',
+                sortable:true,
+                width: fixWidth(0.1),
+				formatter : formatY_M_D
+            },{
+                field:'createUser',title:'Create User', align:'center',sortable:true, width: fixWidth(0.1)
+            }]];
+            var grid = $('#dataGrid').datagrid({
+                rownumbers:true,
+                columns:columns,
+                pagination:true,
+                striped:true,
+                fit:true,
+                pageNumber : 1,
+                method:'post',
+                onLoadError:function(){
+                   $.messager.alert('System Information','Network Abnormal!','warning');
+                }
+            });
+            initPagination(grid);
+            gridScroll(grid);
+            $('#queryBtn').on('click',function(){
+                searchData();
+            })
+              
+            $('#exportBtn').on('click',function(){
+                exportData();
+            })
+            $('#printBtn').on('click',function(){
+              print();
+            })
+        });
+        /* 查询 */
+        function searchData(){
+           var grid= $('#dataGrid').datagrid({
+                url:'/report/searchSalesReturnReport',
+                queryParams: {
+                    location:$('#location').val(),
+                    materialNo: $('#materialNo').val(),
+                    begin: $('#begin').val(),
+                    end: $('#end').val()
+                },
+                onLoadSuccess : function(data) {
+	                if (data.total == 0 && data.rows.length == 0) {
+	                    $.messager.alert('System Information',
+	                            'No records found.',
+	                            'warning');
+	                    gridScroll(grid);
+	                }
+                }
+            });
+            initPagination(grid);
+            gridScroll(grid);
+        }
+        /* 导出 */
+        function exportData() {
+        	$.ajax({
+            	url:'/report/searchSalesReturnAmount',
+            	type:'post',
+            	dataType:'json',
+            	data:{
+            		location:$('#location').val(),
+            		materialNo:$('#materialNo').val(),
+            		begin:$('#begin').val(),
+            		end:$('#end').val()
+            	},
+            	success:function(data) {
+            		if (data == "success") {
+            			var url = "/report/exportSalesReturnReport?"
+                    		+ '&location=' + $('#location').val()
+                    		+ '&materialNo=' + $('#materialNo').val()
+                    		+ '&begin=' + $('#begin').val()
+                    		+ '&end=' + $('#end').val();
+                    window.location.href = url;
+            		}else {
+            			$.messager.alert('System Information',data,	'warning');
+            		}
+            	}
+            });
+        	
+        	/*var url = "/report/exportSalesReturnReport?"
+        		+ '&location=' + $('#location').val()
+        		+ '&materialNo=' + $('#materialNo').val()
+        		+ '&begin=' + $('#begin').val()
+        		+ '&end=' + $('#end').val();
+        window.location.href = url;*/
+        }
+        function print(){
+                
+                var url = '/sales/return/report?'
+                + '&location=' + $('#location').val()
+                + '&materialNo=' + $('#materialNo').val()
+                + '&begin=' + $('#begin').val()
+                + '&end=' + $('#end').val();
+                window.open(url);
+        }
+    </script>
+{{/component}}

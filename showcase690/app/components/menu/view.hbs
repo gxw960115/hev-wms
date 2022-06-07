@@ -1,0 +1,75 @@
+
+{{#component "header js-comp"}}
+    <style type="text/css">
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+
+        .sidebar-nav {
+            padding: 5px 0;
+        }
+
+        /*按钮变斜  开始*/
+        .title-block {
+            width: 120px;
+            /*height: 20px;*/
+            -webkit-transform: skew(-20deg);
+            -moz-transform: skew(-20deg);
+            -o-transform: skew(-20deg);
+            background: #51abdf;
+            margin-left: 30px;
+            content: "";
+            display: block;
+        }
+
+        .textbw {
+            text-align: center;
+            color: #FFFFFF;
+            line-height: 30px;
+        }
+
+        .title {
+            text-align: center;
+            list-style-type: none;
+        }
+        #menu ul, #menu ul * {
+            margin : 0px;
+            padding : 0px;
+            list-style-type : none;
+        }
+
+        #menu ul li {
+            float : right;
+            position : relative;
+        }
+        #menu ul a {
+            display : block;
+            position : relative;
+        }
+        #menu ul li:first-child a{
+            padding : 8px 19px 0;
+        }
+        #menu ul li a{
+            position : relative;
+            z-index : 999;
+            padding : 8px 18px 0;
+            color : #868686;
+            text-decoration : none;
+            white-space : nowrap;
+            height : 20px;
+        }
+    </style>
+    <div id="menu" style="background-color: #F6FBFF;height:50px;font-size: 15px;padding-top: 10px;">
+        <ul>
+            <li><div class="icons-title" style="position: absolute;right: 744px;color: white;font-weight: bold"><a style="color: white;left: 16px;" href="/search_hac_app1">应用管理</a></div></li>
+            <li><div class="icons-title" style="position: absolute;right: 620px;color: white;font-weight: bold"><a style="color: white;left: 16px;" href="/search_hac_resource">资源管理</a></div></li>
+            <li><div class="icons-title" style="position: absolute;right: 496px;color: white;font-weight: bold"><a style="color: white;left: 16px;" href="/search_hac_role">角色管理</a></div></li>
+            <li><div class="icons-title" style="position: absolute;right: 372px;color: white;font-weight: bold"><a style="color: white;left: 23px;" href="/search_hac_group">组&nbsp;管&nbsp;理</a></div></li>
+            <li><div class="icons-title" style="position: absolute;right: 248px;color: white;font-weight: bold"><a style="color: white;left: 16px;" href="/search_hac_user">用户管理</a></div></li>
+            <li><div class="icons-title" style="position: absolute;right: 124px;color: white;font-weight: bold"><a style="color: white;" href="/search_hac_privilege">数据维度管理</a></div></li>
+            <li><div class="icons-title" style="position: absolute;right: 0px;color: white;font-weight: bold"><a style="color: white;" href="/search_data_type">数据维度类型</a></div></li>
+        </ul>
+    </div>
+
+{{/component}}

@@ -1,0 +1,504 @@
+﻿{{#component "BillingDetail js-comp"}}
+	<style type="text/css">
+        #addPlanForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addPlanForm input{
+            height: 25px;
+            width: 155px;
+        }
+        #addPlanForm table tr{
+            height: 32px;;
+        }
+        #addPlanForm table select{
+            width: 160px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+        .fileUpload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            padding:2.5px;
+
+            height:25px;
+        }
+
+        .fileUpload input.upload {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
+        #updatePlanWin table tr{
+            height:32px;
+            line-height:32px;
+        }
+        #updatePlanWin table input{
+            height:30px;
+            width:155px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+    </style>
+    <div id="dndDiv" class="easyui-layout"  style="width:100%;margin-top:-20px">
+        <div class="searchDiv" region="north" style="height: 110px">
+            <table id="searchTab1" style="margin-left: -10px;">
+                <tr>
+                    <td style="text-align: right">Billing NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="sellNo" class="radiusCls" type="text" /></td>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="begin" class="radiusCls" style="width:190px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>&nbsp;&nbsp;
+                        - &nbsp;&nbsp;<input id="end" class="radiusCls" style="width:190px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <!-- <a href="javascript:void(0)" class="btnStyle importBtn" id="importBtn" onclick="importPlan()">Import</a>
+                    <a href="javascript:void(0)" class="btnStyle downloadGreyBtn" onclick="downTemplate()">Download Template</a> -->
+                    <!-- <a href="javascript:void(0)" class="btnStyle paymentReconciliationBtn" onclick="post()">Posting</a> -->
+                    <!-- <a href="javascript:void(0)" class="btnStyle exportBtn" id="exportBtn">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle downloadWhiteBtn" id="downloadBtn">Download From SAP</a> -->
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden; margin-top: -2px;">
+            <table id="stgDnDownGrid" style="width:120%;"></table>
+        </div>
+    </div>
+	<!--Excel导入begin-->
+    <div id="importExcel" icon="icon-save" style="width: 430px;top:180px;">
+        <h5 id="excel_message" style="color: red;"></h5>
+        <div class="ToolTip_Form" id="exceltable" style="display:none;">
+            <form method="post" id="importExcelForm"
+                  enctype="multipart/form-data" >
+                <table width="98%" height="98%">
+                    <tr>
+                        <td>
+                            <div style="background-color:#1caf9a; height:31px; width:100px; font-size:14px; color:white" class="fileUpload btn">
+                                <span>Browse Files</span>
+                                <input id="uploadBtn" name="importfile" type="file" class="upload" />
+                            </div>
+                            <input style="height:28px;" id="uploadFile" placeholder="  Choose File" disabled="disabled" />
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" class="btnStyle importBtn" style="height:30px;" id="importbtn" onclick="importForm();">Import</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <!--Excel导入end-->
+    <script type="text/javascript">
+    var totalWidth = $('#stgDnDownGrid').width(); 
+    $(function(){  
+    	$('#dndDiv').height(suitHeight);
+        $('#doFlagP').combobox({
+                data:[{"text":"ALL","value":"-1"},{"text":"UnDelivered","value":"0"},{"text":"Posting Success","value":"1"},{"text":"Posting Success Without Goods Delivery","value":"-2"}],
+                value:'-1'
+            });
+        //初始化日期
+        var date=new Date();
+        var m=date.getMonth()+1;
+        $('#begin').val(date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-01");
+        var d=date.getDate();
+        date=date.getFullYear()+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#end').val(date);
+        /**
+         * 表格头部
+         */
+        var columns = [ [ {
+            field : 'ck',
+            checkbox : true,
+            /* width : 80,*/
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'dnNo',
+            title : 'Billing No',
+            align : 'center',
+            width: fixWidth(0.078),
+            sortable : true
+        }, {
+            field : 'dnItemNo',
+            title : 'Billing Item',
+            align : 'center',
+            width: fixWidth(0.074),
+            sortable : true
+        },{
+            field : 'sellOrderType',
+            title : 'Sale Type',
+            align : 'center',
+            width: fixWidth(0.072),
+            sortable : true
+        }, {
+            field : 'qty',
+            title : 'Qty',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Finish Qty',
+            width: fixWidth(0.07),
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit ',
+            align : 'center',
+            width: fixWidth(0.05),
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.075),
+            sortable : true
+        }, {
+            field : 'customerModel',
+            title : 'Customer Model',
+            width: fixWidth(0.18),
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'center',
+            hidden: true,
+            sortable : true
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            align : 'center',
+            width: fixWidth(0.06),
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width: fixWidth(0.06),
+            sortable : true
+        }, {
+            field : 'customerNo',
+            title : 'Customer No',
+            align : 'center',
+            width: fixWidth(0.082),
+            sortable : true
+        }, {
+            field : 'customerName',
+            title : 'Customer Name',
+            width: fixWidth(0.18),
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'deliveryCode',
+            title : 'ShipTo Code',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'deliveryName',
+            title : 'ShipTo Name',
+            align : 'center',
+            width: fixWidth(0.18),
+            sortable : true
+        }, {
+            field : 'deliveryDate',
+            title : 'Planned GI',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'sapFlag',
+            title : 'sapFlag',
+            align : 'center',
+            sortable : true,
+            hidden:true
+        }, {
+            field : 'dnCreateBy',
+            title : 'Bill CreateBy',
+            align : 'center',
+            width: fixWidth(0.068),
+            sortable : true
+        }, {
+            field : 'dnDocDate',
+            title : 'Bill CreateDt',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }, {
+            field : 'dnLastModifyDate',
+            title : 'Bill ChangeDt',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        }
+        ] ];
+        var grid = $('#stgDnDownGrid').datagrid({
+            rownumbers:true,
+            columns:columns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+			fit:true,
+            url : '/order/searchBillingUnFinished',
+            queryParams : {
+                dnNo : $('#sellNo').val(),
+                /* materialNo : $('#materialNo').val(),
+                location: $('#locationP').val(), */
+                begin : $('#begin').val(),
+                end : $('#end').val()/* ,
+                finishFlag : $('#doFlagP').combobox("getValue") */
+            },
+            onLoadError:function(){
+                 $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+            onLoadSuccess:function(){
+                 $(this).datagrid("fixRownumber");
+            },
+            method:'post'
+        });
+        
+        initPagination(grid);
+        gridScroll(grid);
+        $('#queryBtn').on('click',function(){
+            queryData();
+        })
+        $('#downloadBtn').on('click',function(){
+            downloadData();
+        })
+        $('#exportBtn').on('click',function(){
+            exportData();
+        })
+    })
+    
+    // set width of column 
+    function fixWidth(percent) { 
+        return totalWidth * percent;   
+    }
+    
+    function queryData(){
+        var grid=$('#stgDnDownGrid').datagrid({
+            url : '/order/searchBillingUnFinished',
+            queryParams : {
+                dnNo : $('#sellNo').val(),
+                /* materialNo : $('#materialNo').val(),
+                location: $('#locationP').val(), */
+                begin : $('#begin').val(),
+                end : $('#end').val()/* ,
+                finishFlag : $('#doFlagP').combobox("getValue") */
+            },
+            onLoadSuccess : function(data) {
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information',
+                            'No records found.',
+                            'warning');
+                    gridScroll(grid);
+                }
+                $(this).datagrid("fixRownumber");
+            },
+            onLoadError:function(){
+                 $.messager.alert('System Information','Network Abnormal!','warning');
+            }
+        });
+        initPagination(grid);
+    }
+    function downloadData() {
+        if (!$('#sellNo').val().trim()) {
+            if (!$('#begin').val().trim()) {
+                $.messager.alert('System Information',
+                        'BeginDate The Data not null', 'warning');
+                return false;
+            }
+            if (!$('#end').val().trim()) {
+                $.messager.alert('System Information',
+                        'endDate The Data not null', 'warning');
+                return false;
+            }
+            var begin=$('#begin').val().trim().replace(/-/g, "/");
+            var end=$('#end').val().trim().replace(/-/g, "/");
+            var begin2=new Date(begin);
+            var end2=new Date(end);
+            if ((end2-begin2)>(7*24*60*60*1000)) {
+                $.messager.alert('System Information',
+                        'beginDate and endDate must be within 7 days!', 'warning');
+                return false;
+            }
+        }
+            $.maskLoading();
+        $.post(
+                "/order/downStgDnDown",
+                {
+                    type : 'dn',
+                    dnNo : $('#sellNo').val(),
+                    begin : $('#begin').val(),
+                    end : $('#end').val()
+                },
+                function(data) {
+                    if (data == 'S') {
+                    $.maskEnd();
+                        $.messager.alert('System Information',
+                                'Download success!', 'warning');
+                    } else {
+                        var result=data.substring(2,data.length);
+                        $.maskEnd();
+                        $.messager.alert('System Information',
+                                'Failed!'+(result==''?'Download Nothing':result), 'warning');
+                    }
+                    
+                    $('#stgDnDownGrid').datagrid('reload');
+                }).error(
+                function() {
+                $.maskEnd();
+                    $.messager.alert('System Information',
+                            'Network Abnormal!', 'warning');
+                });
+    }
+    function exportData(){
+
+        var url = "/order/exportStgDnDown?a=1"
+                + '&dnNo=' + $('#sellNo').val()
+                + '&materialNo=' + $('#materialNo').val()
+                + '&location=' + $('#locationP').val()
+                + '&begin=' + $('#begin').val() + '&end='
+                + $('#end').val() + '&finishFlag='
+                + $('#doFlagP').combobox("getValue");
+        window.location.href = url;
+    }
+    function post() {
+        var rows = $('#stgDnDownGrid').datagrid('getSelections');
+        if (rows.length != 1) {
+            $.messager.alert('System Information',
+                    'Please select one data!', 'warning');
+            return;
+        }
+        if (rows[0].sellOrderType != 'ZSO') {
+        	$.messager.alert('System Information',
+        			'Posting Success!', 'warning');
+            return;
+        }
+        if (rows[0].sapFlag == '1') {
+            $.messager.alert('System Information',
+                    'The order already post to SAP. Please select the order which has not post.', 'warning');
+            return;
+        }
+        
+      //loadMask($('#loading'), 'posting...');
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            url:'/order/postDn',
+            data:{
+                dnNo:rows[0].dnNo,
+                userName:$.session.get("userName")
+            },
+            success:function(data){
+                if (data.status == 'S') {
+                    $.messager
+                            .alert(
+                            'System Information',
+                            'Posting Success!',
+                            'warning');
+                } else {
+                    $.messager
+                            .alert(
+                            'System Information',
+                            'Failed Posting ! '+data.msg,
+                            'warning');
+                }
+                //unLoadMask($('#loading'));
+                $('#stgDnDownGrid')
+                        .datagrid('reload');
+            },
+            error: function() {
+                //unLoadMask($('#loading'));
+                $.messager
+                        .alert(
+                        'System Information',
+                        'Network Abnormal!',
+                        'warning');
+            }
+        });
+
+    }
+  //Excel导入 调用该方法
+    function importPlan() {
+        $('#importExcel').show();
+        $('#importExcel').dialog({
+            title : 'import',
+            modal : true, //模式窗口：窗口背景不可操作
+            collapsible : true, //可折叠，点击窗口右上角折叠图标将内容折叠起来
+            resizable : true
+            //可拖动边框大小
+        });
+        $('#exceltable').css({
+            display : "block"
+        });
+        $('#importExcel').dialog('open');
+    }
+    //Excel导入
+    document.getElementById("uploadBtn").onchange = function () {
+        document.getElementById("uploadFile").value = this.value;
+    };
+    var dataMsg='';
+    function importForm() {
+        $.maskLoading();
+        $('#importExcelForm').form(
+                'submit',
+                {
+                    url : '/order/dnDeliveryImport',
+                    success : function(data) {
+                        var data = eval('(' + data + ')');
+                        if(data.msg){
+                            dataMsg=data.msg;
+                            $('#importExcel').dialog('close');
+                            $.messager.alert('System Information',
+                                    data.result+"</br><a href='javascript:void(0)'  onclick='showDetail()'>Details</a>", 'info');
+                        }else {
+                            $('#importExcel').dialog('close');
+                            $.messager.alert('System Information',
+                                    data.result, 'info');
+                        }
+                        $.maskEnd();
+                    },
+                    onLoadError : function(){
+                        $.messager.alert('System Information',
+                                'Network Abnormal', 'info');
+                        $.maskEnd();
+                    }
+                });
+    }
+    function showDetail(){
+        $.messager.show({
+            title:'Fail Message Detail',
+            msg:dataMsg,
+            timeout:0,
+            width:600,
+            height:400,
+            showType:'show',
+            style:{
+                top:50,
+                left:($(window).width() - 600) * 0.5
+            }
+        });
+
+    }
+    function downTemplate(){
+        window.location.href="/order/downStoTemplate?filename=billing_import_template.xls";
+    }
+    </script>
+{{/component}}

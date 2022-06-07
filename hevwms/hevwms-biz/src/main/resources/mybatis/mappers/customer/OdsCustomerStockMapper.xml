@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haier.hevwms.customer.dao.OdsCustomerStockDAO">
+
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<resultMap id="odsCustomerStockMap" type="odsCustomerStock">
+		<result column="ROW_ID" property="rowId" />
+		<result column="PLANT" property="plant" />
+		<result column="CUSTOMER_MODEL" property="customerModel" />
+		<result column="LOCATION" property="location" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="UNIT" property="unit" />
+		<result column="BARCODE" property="barcode" />
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="ORDER_ITEM" property="orderItem" />
+		<result column="DOC_TPYE" property="docTpye" />
+		<result column="SAP_ORDER_NO" property="sapOrderNo" />
+		<result column="SAP_ORDER_ITEM" property="sapOrderItem" />
+		<result column="TOTAL_STOCK_DAYS" property="totalStockDays" />
+		<result column="CURRENT_STOCK_DAYS" property="currentStockDays" />
+		<result column="BATCH_NO" property="batchNo" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" property="modifyDate" />
+		<result column="FLAG" property="flag" />
+		<result column="VERSION" property="version" />
+		<result column="QTY" property="qty" />
+		<result column="USE_QTY" property="useQty" />
+		<result column="PALLET" property="pallet" />
+		<result column="SUB_LOCATION" property="subLocation" />
+		<result column="SUB_LOCATION_FLAG" property="subLocationFlag" />
+		<result column="BATCH_TIME" property="batchTime" />
+		<result column="FIRST_IN_DATE" property="firstInDate" />
+		<result column="REMARK" property="remark" />
+		<result column="LOCK_FLAG" property="lockFlag" />
+		<result column="BIN" property="bin" />
+	</resultMap>
+
+	<!-- 数据库中所有字段 -->
+	<sql id="Base_Column_List" >
+		ROW_ID,
+		PLANT,
+		CUSTOMER_MODEL,
+		LOCATION,
+		MATERIAL_NO,
+		MATERIAL_DESP,
+		UNIT,
+		BARCODE,
+		ORDER_NO,
+		ORDER_ITEM,
+		DOC_TPYE,
+		SAP_ORDER_NO,
+		SAP_ORDER_ITEM,
+		TOTAL_STOCK_DAYS,
+		CURRENT_STOCK_DAYS,
+		BATCH_NO,
+		CREATE_BY,
+		CREATE_DATE,
+		MODIFY_BY,
+		MODIFY_DATE,
+		FLAG,
+		VERSION,
+		QTY,
+		USE_QTY,
+		PALLET,
+		SUB_LOCATION,
+		SUB_LOCATION_FLAG,
+		BATCH_TIME,
+		FIRST_IN_DATE,
+		REMARK,
+		LOCK_FLAG,
+		BIN
+	</sql>
+	<sql id="selectAllOdsCustomerStockColumns">
+		<![CDATA[
+			SELECT
+				ROW_ID,
+				PLANT,
+				CUSTOMER_MODEL,
+				LOCATION,
+				MATERIAL_NO,
+				MATERIAL_DESP,
+				UNIT,
+				BARCODE,
+				ORDER_NO,
+				ORDER_ITEM,
+				DOC_TPYE,
+				SAP_ORDER_NO,
+				SAP_ORDER_ITEM,
+				TOTAL_STOCK_DAYS,
+				CURRENT_STOCK_DAYS,
+				BATCH_NO,
+				CREATE_BY,
+				CREATE_DATE,
+				MODIFY_BY,
+				MODIFY_DATE,
+				FLAG,
+				VERSION,
+				QTY,
+				USE_QTY,
+				PALLET,
+				SUB_LOCATION,
+				SUB_LOCATION_FLAG,
+				BATCH_TIME,
+				FIRST_IN_DATE,
+				REMARK,
+				LOCK_FLAG,
+				BIN
+			FROM ODS_CUSTOMER_STOCK ocs 
+		]]>
+	</sql>
+	<sql id="searchOdsCustomerStock_fragement">
+		<include refid="selectAllOdsCustomerStockColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsCustomerStock.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsCustomerStock.materialNo}||'%' 
+		</if>
+		<if test="odsCustomerStock.begin != null and odsCustomerStock.begin != ''">
+			<![CDATA[
+				and CREATE_DATE >= TO_DATE(concat(#{odsCustomerStock.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsCustomerStock.end != null and odsCustomerStock.end != ''">
+			<![CDATA[
+				and CREATE_DATE <= TO_DATE(concat(#{odsCustomerStock.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		order by ROW_ID DESC
+	</sql>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<insert id="save" parameterType="odsCustomerStock">
+        <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_CUSTOMER_STOCK_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+        <![CDATA[
+			insert into ODS_CUSTOMER_STOCK (
+				ROW_ID, PLANT, CUSTOMER_MODEL,LOCATION,MATERIAL_NO, MATERIAL_DESP,UNIT, BARCODE, 
+				ORDER_NO,ORDER_ITEM,DOC_TPYE, SAP_ORDER_NO, SAP_ORDER_ITEM,TOTAL_STOCK_DAYS,
+				CURRENT_STOCK_DAYS,BATCH_NO,CREATE_BY, CREATE_DATE, MODIFY_BY,MODIFY_DATE, FLAG, 
+				VERSION,QTY, USE_QTY, PALLET,SUB_LOCATION,SUB_LOCATION_FLAG, BATCH_TIME,FIRST_IN_DATE, 
+				REMARK, LOCK_FLAG,BIN
+			)
+			values (
+				#{rowId}, #{plant}, #{customerModel},#{location},#{materialNo}, #{materialDesp},#{unit}, #{barcode}, 
+				#{orderNo},#{orderItem},#{docTpye}, #{sapOrderNo}, #{sapOrderItem},#{totalStockDays}, 
+				#{currentStockDays},#{batchNo},#{createBy},#{createDate}, #{modifyBy},#{modifyDate}, #{flag}, 
+				#{version},#{qty},#{useQty}, #{pallet},#{subLocation}, #{subLocationFlag}, #{batchTime},#{firstInDate}, 
+				#{remark}, #{lockFlag},#{bin}
+			)
+		]]>
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_STOCK WHERE ROW_ID = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_STOCK WHERE ROW_ID IN
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateAll" parameterType="odsCustomerStock">
+		<![CDATA[
+			UPDATE ODS_CUSTOMER_STOCK
+		   	SET 
+				PLANT = #{plant},
+				CUSTOMER_MODEL = #{customerModel},
+				LOCATION = #{location},
+				MATERIAL_NO = #{materialNo},
+				MATERIAL_DESP = #{materialDesp},
+				UNIT = #{unit},
+				BARCODE = #{barcode},
+				ORDER_NO = #{orderNo},
+				ORDER_ITEM = #{orderItem},
+				DOC_TPYE = #{docTpye},
+				SAP_ORDER_NO = #{sapOrderNo},
+				SAP_ORDER_ITEM = #{sapOrderItem},
+				TOTAL_STOCK_DAYS = #{totalStockDays},
+				CURRENT_STOCK_DAYS = #{currentStockDays},
+				BATCH_NO = #{batchNo},
+				CREATE_BY = #{createBy},
+				CREATE_DATE = #{createDate},
+				MODIFY_BY = #{modifyBy},
+				MODIFY_DATE = #{modifyDate},
+				FLAG = #{flag},
+				VERSION = #{version},
+				QTY = #{qty},
+				USE_QTY = #{useQty},
+				PALLET = #{pallet},
+				SUB_LOCATION = #{subLocation},
+				SUB_LOCATION_FLAG = #{subLocationFlag},
+				BATCH_TIME = #{batchTime},
+				FIRST_IN_DATE = #{firstInDate},
+				REMARK = #{remark},
+				LOCK_FLAG = #{lockFlag},
+				BIN = #{bin}
+		 	WHERE ROW_ID = #{rowId}
+		]]>
+	</update>
+	
+	<select id="get" resultMap="odsCustomerStockMap" parameterType="long">
+		<include refid="selectAllOdsCustomerStockColumns" />
+		<![CDATA[
+			where ocs.row_id = #{rowId}
+		]]>
+	</select>
+	<select id="getAll" resultMap="odsCustomerStockMap">
+		<include refid="selectAllOdsCustomerStockColumns" />
+	</select>
+	<select id="searchOdsCustomerStocks" resultMap="odsCustomerStockMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsCustomerStock_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsCustomerStocksCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsCustomerStock_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+</mapper>

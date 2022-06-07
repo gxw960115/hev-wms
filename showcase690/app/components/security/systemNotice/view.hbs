@@ -1,0 +1,103 @@
+{{#component "createResource js-comp"}}
+
+<link rel="stylesheet" href="/assets/styles/kindeditor/themes/default/default.css"/>
+
+<link rel="stylesheet" href="/assets/styles/kindeditor/plugins/code/prettify.css"/>
+ <script src="/assets/scripts/kindeditor/kindeditor.js"></script>
+    <style type="text/css">
+        #searchTab{
+            display: inline-block;
+            margin-left: 8px;
+            margin-top: 10px; 
+        }
+        #searchTab1{
+            display: inline-block;
+            margin-left: 8px;
+            margin-top: 10px;
+            width: 98%;
+        }
+        #searchTab1 tr{
+            height: 35px;
+        }
+        #searchTab1 input{
+            height: 30px;
+            width: 155px;
+        } 
+    </style>
+    <script>
+            var editor;
+            KindEditor.ready(function(K) {
+                window.editor = K.create('#content');
+            });
+    </script>
+    <div class="easyui-layout"  style="width:100%;height:522px;">
+    <div class="addDiv" style="margin-left:20px; margin-top:20px;">
+        <table class="form_table" id="searchTab1">
+            <tr>
+                <td style="text-align: center">Title&nbsp;<span style="color:red">*</span>:&nbsp;</td>
+                <td  class="leftCls"><input style="width:300px;" type="text" class="radiusCls" id="title"></td>
+            </tr>
+            <tr>
+               <td style="text-align: center">Content:&nbsp;&nbsp;</td>
+                <td class="leftCls">
+                    <textarea name = "content" id = "content" style="width:670px;height:300px;"></textarea>
+                </td>
+            </tr>
+            <tr style="height:60px;">
+                <td colspan="2" align="right">
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" id="addBtn" onclick="savePd();">Publish</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" id="addBtn" onclick="resetPd();">reset</a>
+				</td>
+            </tr>
+        </table>
+        </div>
+    </div>
+    
+    <script type="text/javascript"> 
+    $(function(){
+ 			initNotice();
+        });
+    function initNotice(){
+    	$.ajax({
+    		url:'/portal/getNoticeData',
+    		type:'post',
+    		dataType:'json',
+    		success:function(data){
+    		      if(data&&data.length>0){
+                        $('#title').val(data[0]["title"]);
+                        editor.html(data[0]["content"]);
+                        //$('#content').val(data[0]["content"]);
+                  }
+    		}
+    	});
+    }
+    function resetPd(){
+    	
+    	$("#title").val("");
+    	$("#content").val("");
+    }
+    function savePd(){
+        
+        if (!$("#title").val()) {
+            $.messager.alert('System Information','Title The Data not null');
+            return false;
+        }
+        html=editor.html();
+       // html=document.getElementById('content').val;
+       // html=$('#content').val();
+        if (!html) {
+            $.messager.alert('System Information','Content The Data not null');
+            return false;
+        }
+        $.post("/security/notice/saveSystemNotice", {
+            'title' :     $("#title").val(),
+            'content' : html
+        }, function(data) {
+                $.messager.alert('System Information',data, 'warning');
+        }).error(
+                function() {
+                    $.messager.alert('System Information','Network Abnormal!','warning');
+                });
+    }
+    </script>
+{{/component}}

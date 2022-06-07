@@ -1,0 +1,65 @@
+
+{{#component "stocktaking js-comp"}}
+    <div class="easyui-layout"  style="width:100%;height:533px;">
+        <div region="north" style="padding-top:80px; color:#636E7B; font-size:14px; height:300px; border:0">
+            <table width="100%">
+                    <tr>
+                        <td width="110" align="right" valign="middle">Barcode:&nbsp;&nbsp;</td>
+                        <td><textarea id="barcodes" rows="3" cols="80" maxlength="1260"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><font size="3" color="red">Must Split Barcodes by Comma!</font></td> 
+                    </tr>
+
+            </table>
+            <div style="margin-left:700px; padding-top:20px;">
+                <div class="btn-group">
+                <a href="javascript:void(0)" class="btnStyle printBtn" id="printBtn" onclick="print()">Print</a>
+                </div>
+            </div>
+        </div>
+    </div> 
+        
+   
+
+    <script type="text/javascript">
+    //打印
+      function print() {
+        var codes=$("#barcodes").val();
+        if (codes=="") {
+            $.messager.alert('System Information','Please input atleast one Barcode!', 'warning');
+            return false;
+        }
+        var codeArr = codes.split(",");
+        var barcodeStatus = false;
+        for(var i=0;i<codeArr.length;i++){
+            if(codeArr[i].length > 20){
+                barcodeStatus = true;
+                break;
+            }
+        }
+        if(barcodeStatus) {
+            $.messager.alert('System Information','The length of each bar code must be less than 20!', 'warning');
+            return false;
+        }
+        
+        var url='/originalbarcode/print?barcodes='+codes;
+         window.open(url);
+    }
+
+//新增标签的功能
+function create(title,url){  
+    var jq = top.jQuery;
+    if (jq("#centerTab").tabs('exists', title)){    
+            jq("#centerTab").tabs('close', title);    
+    } 
+        var content = '<iframe scrolling="auto" frameborder="0"  src="'+url+'" style="width:800px;height:600px;"></iframe>';     
+            jq("#centerTab").tabs('add',{    
+                                title:title,    
+                                content:content,    
+                                closable:true    
+                            });    
+}
+
+    </script>
+{{/component}}

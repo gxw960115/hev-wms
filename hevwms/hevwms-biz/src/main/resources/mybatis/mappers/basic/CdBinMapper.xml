@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.basic.dao.CdBinDAO">
+	<!-- Oracle分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllCdBinColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			CODE,
+			CREATE_DATE,
+			UPDATE_DATE,
+			CASE WHEN flag = '1' THEN 'enable' ELSE 'invalid' END AS FLAG,
+			LOCATION
+		from 
+			CD_BIN_INFO CD_BIN_INFO_
+		]]>
+	</sql>
+
+	<resultMap id="cdBinMap" type="com.haier.hevwms.basic.domain.CdBin">
+		<id property="rowId" column="ROW_ID" javaType="String" jdbcType="VARCHAR" />
+		<result property="code" column="CODE"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="updateDate" column="UPDATE_DATE"/>
+		<result property="flag" column="FLAG"/>
+		<result property="location" column="LOCATION"/>
+	</resultMap>
+<!--	<resultMap id="odscarlist" type="odscarlist">-->
+<!--		<result property="transporterName" column="NAME" />-->
+<!--		<result property="transporterCode" column="CODE" />-->
+<!--	</resultMap>-->
+	
+    <select id="getAll" resultMap="cdBinMap">
+		<include refid="selectAllCdBinColumns"/>
+	</select>
+	<select id="get" resultMap="cdBinMap" parameterType="String">
+		<include refid="selectAllCdBinColumns"/>
+		<![CDATA[
+		where CD_BIN_INFO_.ROW_ID = #{rowId}
+		]]>	
+	</select>
+	<delete id="delete">
+		<![CDATA[
+		delete from CD_BIN_INFO where ROW_ID in
+		]]>	
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</delete>
+    <insert id="save" parameterType="com.haier.hevwms.basic.domain.CdBin">
+		<![CDATA[
+		insert into CD_BIN_INFO
+		  (ROW_ID,
+			CODE,
+			CREATE_DATE,
+			UPDATE_DATE,
+			FLAG,
+			LOCATION
+		   )
+		values
+		  (SUBSTR(lower(rawtohex(sys_guid())),1,20),
+		  #{code},
+		  sysdate,
+		  sysdate,
+		  #{flag},
+		  #{location}
+		   )
+	    ]]>	
+	</insert>
+	<update id="update" parameterType="com.haier.hevwms.basic.domain.CdBin">
+		<![CDATA[
+		update CD_BIN_INFO
+		   set CODE = #{code}
+				,FLAG = #{flag}
+				,UPDATE_DATE = sysdate
+				,LOCATION = #{location}
+		 where ROW_ID = #{rowId}
+		]]>
+	</update>
+	<sql id="getBins_fragement">
+		<include refid="selectAllCdBinColumns" />
+			where 1=1
+			<if test="cdbin.code != null and cdbin.code != ''">
+			and CODE like '%'||#{cdbin.code}||'%'
+			</if>
+			<if test="cdbin.location != null and cdbin.location != ''">
+			and LOCATION like '%'||#{cdbin.location}||'%'
+			</if>
+			<if test="cdbin.flag != null and cdbin.flag != ''">
+			and FLAG = #{cdbin.flag}
+			</if>
+	</sql>
+	<select id="getBins" resultMap="cdBinMap">
+		<include refid="pagination_Head"/>
+		<include refid="getBins_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="getBinsCount" resultType="long">
+		<include refid="count_Head"/>
+		<include refid="getBins_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+    <select id="getBinByLocation" resultType="com.haier.openplatform.wms.bin.dto.CdBinDTO">
+		<include refid="pagination_Head"/>
+		SELECT row_id, location,code FROM CD_BIN_INFO WHERE LOCATION = #{location}
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="getBinByLocationCount" resultType="long">
+		<include refid="count_Head"/>
+		SELECT row_id, location,code FROM CD_BIN_INFO WHERE LOCATION = #{location}
+		<include refid="count_Tail"/>
+	</select>
+	<select id="getBinByCode" resultType="com.haier.openplatform.wms.bin.dto.CdBinDTO">
+		<include refid="pagination_Head"/>
+		SELECT row_id, location,code FROM CD_BIN_INFO WHERE LOCATION = #{location} AND CODE like #{bin}||'%'
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="getBinByCodeCount" resultType="java.lang.Long">
+		<include refid="count_Head"/>
+		SELECT row_id, location,code FROM CD_BIN_INFO WHERE LOCATION = #{location} AND CODE like #{bin}||'%'
+		<include refid="count_Tail"/>
+	</select>
+	<!--	<select id="findAll" resultMap="cdBinMap" >-->
+<!--		<include refid="selectAllCdBinColumns"/>-->
+<!--		<if test="type != null">-->
+<!--		where upper(KIND_CODE) = upper(#{type})-->
+<!--		</if>-->
+<!--	</select>-->
+<!--	<select id="findAllKind" resultMap="cdBinMap">-->
+<!--		<![CDATA[-->
+<!--		select distinct t.kind_code,t.kind_description -->
+<!--		from CD_BIN_INFO t -->
+<!--		where  flag='0' -->
+<!--		group by t.kind_code,t.kind_description-->
+<!--	    ]]>-->
+<!--	</select>-->
+<!--	<sql id="getDictionaryBy">-->
+<!--		<include refid="selectAllCdBinColumns" />-->
+<!--		where (code=#{code} or name=#{name})-->
+<!--	</sql>-->
+<!--	<select id="getDictionaryByCodeOrName" resultMap="cdBinMap">-->
+<!--		<include refid="getDictionaryBy" />-->
+<!--	</select>-->
+<!--	-->
+<!--	<select id="getIfCodeOrNameExist" resultMap="cdBinMap">-->
+<!--		<include refid="getDictionaryBy" />-->
+<!--		<![CDATA[and id <> #{id}]]>-->
+<!--	</select>-->
+<!--	<select id="getTransporterOfSto" resultMap="odscarlist">-->
+<!--		select t.CODE,t.NAME from CD_BIN_INFO t -->
+<!--		where t.KIND_CODE='Transporter' -->
+<!--		<if test="sapOrderNo != null and sapOrderNo != ''">-->
+<!--			AND t.CODE in (-->
+<!--				select DISTINCT ods.TRANSPORTER_CODE from ods_order_info ods-->
+<!--				where ods.sap_order_no=#{sapOrderNo} )-->
+<!--		</if>-->
+<!--	</select>-->
+</mapper>

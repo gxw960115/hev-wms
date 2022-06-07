@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.inventory.dao.StgSapStockDAO">
+	<!-- =========================================================== -->
+    <!-- 一些公共变量设置                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<sql id="selectAllStgSapStockColumns">
+		<![CDATA[
+		    select
+		      stg_sap_stock_.PLANT, 
+		      stg_sap_stock_.LOCATION,
+		      stg_sap_stock_.SAP_DOWN_DATE,
+		      stg_sap_stock_.MATERIAL_NO,
+		      stg_sap_stock_.MATERIAL_DESP,
+		      stg_sap_stock_.SAP_QTY,
+		      stg_sap_stock_.WMS_QTY,
+		      stg_sap_stock_.UNIT,
+		      stg_sap_stock_.BATCH_NO,
+		      stg_sap_stock_.CREATE_DATE,
+		      stg_sap_stock_.MODIFY_DATE,
+		      stg_sap_stock_.VERSION,
+		      stg_sap_stock_.MRP_CONTROLLER,
+		      stg_sap_stock_.PRICE,
+		      stg_sap_stock_.TOTAL_VALUE
+		    from 
+		      (
+		          select
+		            s.PLANT PLANT, 
+		            s.LOCATION LOCATION,
+		            s.SAP_DOWN_DATE SAP_DOWN_DATE,
+		            s.MATERIAL_NO MATERIAL_NO,
+		            s.MATERIAL_DESP MATERIAL_DESP,
+		            nvl(s.QTY, 0) SAP_QTY,
+		            s.UNIT UNIT,
+		            NVL(i.QTY, 0) WMS_QTY,
+		            s.BATCH_NO,
+		            s.CREATE_DATE,
+		            s.MODIFY_DATE,
+		            s.VERSION,
+		            s.MRP_CONTROLLER,
+		            s.PRICE,
+		            s.TOTAL_VALUE
+		          from 
+		            STG_SAP_STOCK s
+		            LEFT JOIN v_inventory_info i
+		            ON i.plant = s.plant 
+		            AND i.location = s.location 
+		            AND i.material_no = s.material_no   
+		            
+		          UNION 
+		          
+		          select
+		            i.PLANT, 
+		            i.LOCATION,
+		            s.SAP_DOWN_DATE SAP_DOWN_DATE,
+		            i.MATERIAL_NO,
+		            i.MATERIAL_DESP,
+		            NVL(s.qty, 0) SAP_QTY,
+		            i.UNIT,
+		            NVL(i.qty, 0) wms_qty,
+		            s.BATCH_NO,
+		            s.CREATE_DATE,
+		            s.MODIFY_DATE,
+		            s.VERSION,
+		            s.MRP_CONTROLLER,
+		            s.PRICE,
+		            s.TOTAL_VALUE
+		          from 
+		            STG_SAP_STOCK s
+		            RIGHT JOIN v_inventory_info i
+		            ON i.plant = s.plant 
+		            AND i.location = s.location 
+		            AND i.material_no = s.material_no   
+		      ) stg_sap_stock_
+		]]>
+	</sql>
+	
+	<!-- =========================================================== -->
+    <!-- 定义resultMap                                                                                                                                                                             -->
+    <!-- =========================================================== -->
+	<resultMap id="stgSapStockMap" type="stgSapStock">
+        <result column="ROW_ID" property="rowId" />
+        <result column="LOCATION" property="location" />
+        <result column="SAP_DOWN_DATE" property="sapDownDate" />
+        <result column="MATERIAL_NO" property="materialNo" />
+        <result column="MATERIAL_DESP" property="materialDesp" />
+        <result column="QTY" property="qty" />
+        <result column="UNIT" property="unit" />
+        <result column="BATCH_NO" property="batchNo" />
+        <result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+        <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+        <result column="VERSION" property="version" />
+        <result column="PLANT" property="plant" />
+        <result column="CUSTOMER_MODEL" property="customerModel" />
+        <result column="FLAG" property="flag" />
+        <result column="MRP_CONTROLLER" property="mrpController" />
+        <result column="PRICE" property="price" />
+        <result column="TOTAL_VALUE" property="totalValue" />
+        <result column="SAP_QTY" property="sapQty" />
+        <result column="WMS_QTY" property="wmsQty" />
+	</resultMap>
+	<!-- =========================================================== -->
+    <!-- DAO方法中的基本增删改查方法                                                                                                                                                           -->
+    <!-- =========================================================== -->
+    <select id="getAll" resultMap="stgSapStockMap">
+		<include refid="selectAllStgSapStockColumns"/>
+	</select>
+	<select id="get" resultMap="stgSapStockMap" parameterType="long">
+		<include refid="selectAllStgSapStockColumns"/>
+		<![CDATA[
+		where stg_sap_stock_.row_id = #{rowId}
+		]]>	
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from STG_SAP_STOCK where row_id = #{rowId}
+		]]>	
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from STG_SAP_STOCK where row_id in
+		]]>	
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+	        #{item}
+	  	</foreach>
+	</delete>
+    <insert id="save" parameterType="stgSapStock">
+	    <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+            SELECT SEQ_SAP_STOCK_ID.NEXTVAL AS ID FROM DUAL
+        </selectKey>
+		<![CDATA[
+        insert into STG_SAP_STOCK 
+        (
+            ROW_ID, LOCATION, SAP_DOWN_DATE,
+            MATERIAL_NO, MATERIAL_DESP, QTY,
+            UNIT, BATCH_NO, CREATE_DATE,
+            MODIFY_DATE, VERSION, PLANT,
+            CUSTOMER_MODEL, FLAG , 
+            MRP_CONTROLLER, PRICE, TOTAL_VALUE
+        )
+        values 
+        (
+            #{rowId}, #{location},
+            #{sapDownDate},
+            #{materialNo}, #{materialDesp}, #{qty},
+            #{unit}, #{batchNo},
+            #{createDate,jdbcType=DATE},
+            #{modifyDate,jdbcType=DATE}, #{version}, #{plant},
+            #{customerModel}, #{flag}, 
+            #{mrpController}, #{price}, #{totalValue}
+        )
+	    ]]>	
+	</insert>
+	<update id="update" parameterType="stgSapStock">
+		<![CDATA[
+		update STG_SAP_STOCK
+		   set 
+				 LOCATION = #{location}
+				,SAP_DOWN_DATE = #{sapDownDate}
+				,MATERIAL_NO = #{materialNo}
+				,MATERIAL_DESP = #{materialDesp}
+				,QTY = #{qty}
+				,UNIT = #{unit}
+				,BATCH_NO = #{batchNo}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_DATE = #{modifyDate}
+				,VERSION = #{version}
+				,PLANT = #{plant}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MRP_CONTROLLER = #{mrpController}
+				,PRICE = #{price}
+				,TOTAL_VALUE = #{totalValue}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+
+	<update id="updateQty">
+		<![CDATA[
+		update STG_SAP_STOCK
+		   set QTY = QTY + #{temp.qty}
+		 where LOCATION = #{temp.location}
+		   and MATERIAL_NO = #{temp.materialNo}
+		   and PLANT = #{temp.plant}
+		]]>
+	</update>
+
+	<sql id="searchStgSapStock_fragement">
+		<include refid="selectAllStgSapStockColumns" />
+		where 1=1
+			<if test="stgSapStock.plant != null and  stgSapStock.plant != ''">
+			and stg_sap_stock_.PLANT like '%'||#{stgSapStock.plant}||'%' 
+			</if>
+			<if test="stgSapStock.location != null and  stgSapStock.location != ''">
+			and stg_sap_stock_.LOCATION like '%'||#{stgSapStock.location}||'%' 
+			</if>
+			<if test="stgSapStock.materialNo != null and stgSapStock.materialNo != ''">
+			and stg_sap_stock_.MATERIAL_NO like '%'||#{stgSapStock.materialNo}||'%' 
+			</if>
+			<if test="stgSapStock.userType != null and stgSapStock.userType != 1">
+			and stg_sap_stock_.plant in 
+			(
+				select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+				where w.row_id = u.wh_id and u.user_id= #{stgSapStock.userId})    
+				and stg_sap_stock_.location in 
+				(
+					select loc_code from cd_user_wh_loc where user_id = #{stgSapStock.userId}
+				)
+			</if>
+			<if test="stgSapStock.sapDownDate != null">
+			and stg_sap_stock_.SAP_DOWN_DATE like '%'||#{stgSapStock.sapDownDate}||'%' 
+			</if>
+			<if test="stgSapStock.materialDesp != null">
+			and stg_sap_stock_.MATERIAL_DESP like '%'||#{stgSapStock.materialDesp}||'%' 
+			</if>
+			<if test="stgSapStock.qty != null">
+			and stg_sap_stock_.QTY like '%'||#{stgSapStock.qty}||'%' 
+			</if>
+			<if test="stgSapStock.unit != null">
+			and stg_sap_stock_.UNIT like '%'||#{stgSapStock.unit}||'%' 
+			
+			</if>
+			<if test="stgSapStock.batchNo != null">
+			and stg_sap_stock_.BATCH_NO like '%'||#{stgSapStock.batchNo}||'%' 
+			</if>
+			<if test="stgSapStock.createDate != null">
+			and stg_sap_stock_.CREATE_DATE like '%'||#{stgSapStock.createDate}||'%' 
+	
+			</if>
+			<if test="stgSapStock.modifyDate != null">
+			and stg_sap_stock_.MODIFY_DATE like '%'||#{stgSapStock.modifyDate}||'%' 
+			
+			</if>
+			<if test="stgSapStock.version != null">
+			and stg_sap_stock_.VERSION like '%'||#{stgSapStock.version}||'%' 
+		
+			</if>
+			<if test="stgSapStock.begin != null and stgSapStock.begin != ''">
+			<![CDATA[
+				and stg_sap_stock_.create_date >= TO_DATE(CONCAT(#{stgSapStock.begin},' 00:00:00') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+			</if>
+			<if test="stgSapStock.end != null and stgSapStock.end != ''">
+			<![CDATA[
+				and stg_sap_stock_.create_date <= TO_DATE(CONCAT(#{stgSapStock.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+			</if>
+	</sql>
+	<select id="searchStgSapStocks" resultMap="stgSapStockMap">
+		<include refid="pagination_Head"/>
+		<include refid="searchStgSapStock_fragement"/>
+		<include refid="pagination_Tail"/>
+	</select>
+	<select id="searchStgSapStocksCount" resultType="long"> 
+		<include refid="count_Head"/>
+		<include refid="searchStgSapStock_fragement"/>
+		<include refid="count_Tail"/>
+	</select>
+	<delete id="deleteSapStock" parameterType="long">
+		<![CDATA[
+		delete from STG_SAP_STOCK 
+		]]>	
+	</delete>
+	<select id="getStgSapStockByParam" resultMap="stgSapStockMap">
+		<include refid="searchStgSapStock_fragement"/>
+	</select>
+	<delete id="deleteSapStockByPlant" parameterType="string">
+		<![CDATA[
+		delete from STG_SAP_STOCK where plant = #{plant}
+		]]>	
+	</delete>
+	<delete id="deleteSapStockByLocation">
+		delete from STG_SAP_STOCK stg_sap_stock_ where 1 = 1 
+		<if test="stgSapStock.plant != null and  stgSapStock.plant != ''">
+			and stg_sap_stock_.PLANT = #{stgSapStock.plant} 
+		</if>
+		<if test="stgSapStock.location != null and  stgSapStock.location != ''">
+			and stg_sap_stock_.LOCATION = #{stgSapStock.location}
+	    </if>
+	    <if test="stgSapStock.materialNo != null and stgSapStock.materialNo != ''">
+			and stg_sap_stock_.MATERIAL_NO = #{stgSapStock.materialNo}
+		</if>
+	</delete>
+	
+	<select id="physicalStockGap" statementType="CALLABLE" resultMap="stgSapStockMap">
+		<![CDATA[
+		  {call prc_actual_stock_gap(
+		    #{stgSapStock.plant,mode=IN,jdbcType=VARCHAR},
+ 		    #{stgSapStock.materialNo,mode=IN,jdbcType=VARCHAR},
+ 		    #{pager.firstResult,mode=IN,jdbcType=INTEGER},
+ 		    #{pager.pageSize,mode=IN,jdbcType=INTEGER},
+ 		    #{pager.totalRecords,mode=OUT,jdbcType=INTEGER,javaType=long}
+ 		  )}
+		]]>
+	</select>
+	<select id = 'getAvailableWhs' resultType = 'string'>
+	    select distinct w.code 
+	    from cd_user_wh_loc u, cd_wh_info w 
+		where w.row_id = u.wh_id and u.user_id= #{userId} ;
+	</select>
+
+	<select id="checkSapStock" resultType="java.lang.Integer">
+		select count(1) from STG_SAP_STOCK where LOCATION = #{temp.location} and PLANT = #{temp.plant} and MATERIAL_NO = #{temp.materialNo}
+	</select>
+</mapper>

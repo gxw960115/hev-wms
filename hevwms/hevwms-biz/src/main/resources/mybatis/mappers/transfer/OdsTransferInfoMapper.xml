@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haier.hevwms.transfer.dao.OdsTransferInfoDAO">
+	
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+	
+	<resultMap id="odsTransferInfoMap" type="odsTransferInfo">
+		<result column="ROW_ID" property="rowId" />
+		<result column="TRANS_NO" property="transNo" />
+		<result column="TRANS_ITEM_NO" property="transItemNo" />
+		<result column="QTY" property="qty" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="CUSTOMER_MODEL" property="customerModel" />
+		<result column="ITEM_DELETE" property="itemDelete" />
+		<result column="UNIT" property="unit" />
+		<result column="PLANT" property="plant" />
+		<result column="GI_LOCATION" property="giLocation" />
+		<result column="GR_LOCATION" property="grLocation" />
+		<result column="TRANS_CLOSE" property="transClose" />
+		<result column="FLAG" property="flag" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="MODIFY_DATE" property="modifyDate" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="GI_DATE" property="giDate" />
+		<result column="GI_FLAG" property="giFlag" />
+		<result column="VERSION" property="version" />
+		<result column="FINISH_QTY" property="finishQty" />
+		<result column="FINISH_FLAG" property="finishFlag" />
+		<result column="ORDER_STATUS" property="orderStatus" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="WAREHOUSE_CODE" property="warehouseCode" />
+		<result column="WAREHOUSE_NAME" property="warehouseName" />
+		<result column="BEGIN_DATE" property="beginDate" />
+		<result column="END_DATE" property="endDate" />
+		<result column="SAP_FLAG" property="sapFlag" />
+		<result column="SAP_MSG" property="sapMsg" />
+		<result column="SAP_DOC_NO" property="sapDocNo" />
+		<result column="REMARK" property="remark" />
+		<result column="PRESCAN_FLAG" property="prescanFlag" />
+		<result column="CHECK_FLAG" property="checkFlag" />
+		<result column="CHECK_BY" property="checkBy" />
+		<result column="POSTING_DATE" property="postingDate" />
+		<result column="DOC_NO" property="docNo" />
+		<result column="DOC_YEAR" property="docYear" />
+	</resultMap>
+
+	<!-- 数据库中所有字段 -->
+	<sql id="Base_Column_List" >
+		ROW_ID, TRANS_NO, TRANS_ITEM_NO,QTY, MATERIAL_NO, MATERIAL_DESP,CUSTOMER_MODEL, ITEM_DELETE, UNIT,
+		PLANT, GI_LOCATION, GR_LOCATION,TRANS_CLOSE, FLAG, CREATE_DATE,CREATE_BY, MODIFY_DATE, MODIFY_BY,
+		GI_DATE, GI_FLAG, VERSION,FINISH_QTY, FINISH_FLAG, ORDER_STATUS,ORDER_TYPE, WAREHOUSE_CODE, 
+		WAREHOUSE_NAME,BEGIN_DATE, END_DATE, SAP_FLAG,SAP_MSG, SAP_DOC_NO, REMARK,PRESCAN_FLAG, CHECK_FLAG, CHECK_BY,
+		POSTING_DATE, DOC_NO, DOC_YEAR
+	</sql>
+	<sql id="selectAllOdsTransferInfoColumns">
+		<![CDATA[
+			SELECT
+				ROW_ID,
+				TRANS_NO,
+				TRANS_ITEM_NO,
+				QTY,
+				MATERIAL_NO,
+				MATERIAL_DESP,
+				CUSTOMER_MODEL,
+				ITEM_DELETE,
+				UNIT,
+				PLANT,
+				GI_LOCATION,
+				GR_LOCATION,
+				TRANS_CLOSE,
+				FLAG,
+				CREATE_DATE,
+				CREATE_BY,
+				MODIFY_DATE,
+				MODIFY_BY,
+				GI_DATE,
+				GI_FLAG,
+				VERSION,
+				FINISH_QTY,
+				FINISH_FLAG,
+				ORDER_STATUS,
+				ORDER_TYPE,
+				WAREHOUSE_CODE,
+				WAREHOUSE_NAME,
+				BEGIN_DATE,
+				END_DATE,
+				SAP_FLAG,
+				SAP_MSG,
+				SAP_DOC_NO,
+				REMARK,
+				PRESCAN_FLAG,
+				CHECK_FLAG,
+				CHECK_BY,
+				POSTING_DATE, 
+				DOC_NO, 
+				DOC_YEAR
+			FROM ODS_TRANSFER_INFO oti 
+		]]>
+	</sql>
+	<sql id="searchOdsTransferInfo_fragement">
+		<include refid="selectAllOdsTransferInfoColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsTransferInfo.transNo != null">
+			and TRANS_NO like '%'||#{odsTransferInfo.transNo}||'%' 
+		</if>
+		<if test="odsTransferInfo.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsTransferInfo.materialNo}||'%' 
+		</if>
+		<if test="odsTransferInfo.warehouseCode != null">
+			and WAREHOUSE_CODE like '%'||#{odsTransferInfo.warehouseCode}||'%' 
+		</if>
+		<if test="odsTransferInfo.warehouseName != null">
+			and WAREHOUSE_NAME like '%'||#{odsTransferInfo.warehouseName}||'%' 
+		</if>
+		<if test="odsTransferInfo.giLocation != null and odsTransferInfo.giLocation != ''">
+			and GI_LOCATION IN (${odsTransferInfo.giLocation})
+		</if>
+		<if test="odsTransferInfo.grLocation != null and odsTransferInfo.grLocation != ''">
+			and GR_LOCATION IN (${odsTransferInfo.grLocation})
+		</if>
+		<if test="odsTransferInfo.sapFlag != null and odsTransferInfo.sapFlag != '' and odsTransferInfo.sapFlag != '-1'">
+			and SAP_FLAG = #{odsTransferInfo.sapFlag} 
+		</if>
+		<if test="odsTransferInfo.finishFlag != null and odsTransferInfo.finishFlag != '' and odsTransferInfo.finishFlag != '-1'">
+			and FINISH_FLAG = #{odsTransferInfo.finishFlag} 
+		</if>
+		<if test="odsTransferInfo.begin != null and odsTransferInfo.begin != ''">
+			<![CDATA[
+				and CREATE_DATE >= TO_DATE(concat(#{odsTransferInfo.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsTransferInfo.end != null and odsTransferInfo.end != ''">
+			<![CDATA[
+				and CREATE_DATE <= TO_DATE(concat(#{odsTransferInfo.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		ORDER BY CREATE_DATE DESC, TRANS_NO, TRANS_ITEM_NO
+	</sql>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<insert id="save" parameterType="odsTransferInfo">
+        <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_TRANSFER_INFO_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+        <![CDATA[
+			insert into ODS_TRANSFER_INFO (
+				ROW_ID, TRANS_NO, TRANS_ITEM_NO,
+				QTY, MATERIAL_NO, MATERIAL_DESP,
+				CUSTOMER_MODEL, ITEM_DELETE, UNIT,
+				PLANT, GI_LOCATION, GR_LOCATION,
+				TRANS_CLOSE, FLAG, CREATE_DATE,
+				CREATE_BY, MODIFY_DATE, MODIFY_BY,
+				GI_DATE, GI_FLAG, VERSION,
+				FINISH_QTY, FINISH_FLAG, ORDER_STATUS,
+				ORDER_TYPE, WAREHOUSE_CODE, WAREHOUSE_NAME,
+				BEGIN_DATE, END_DATE, SAP_FLAG,
+				SAP_MSG, SAP_DOC_NO, REMARK,
+				PRESCAN_FLAG, CHECK_FLAG, CHECK_BY, 
+				POSTING_DATE, DOC_NO, DOC_YEAR
+			)
+			values (
+				#{rowId}, #{transNo}, #{transItemNo},
+				#{qty}, #{materialNo}, #{materialDesp},
+				#{customerModel}, #{itemDelete}, #{unit},
+				#{plant}, #{giLocation}, #{grLocation},
+				#{transClose}, #{flag}, #{createDate},
+				#{createBy}, #{modifyDate}, #{modifyBy},
+				#{giDate}, #{giFlag}, #{version},
+				#{finishQty}, #{finishFlag}, #{orderStatus},
+				#{orderType}, #{warehouseCode}, #{warehouseName},
+				#{beginDate}, #{endDate}, #{sapFlag},
+				#{sapMsg}, #{sapDocNo}, #{remark},
+				#{prescanFlag}, #{checkFlag}, #{checkBy},
+				#{postingDate}, #{docNo}, #{docYear}
+			)
+		]]>
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+			DELETE FROM ODS_TRANSFER_INFO WHERE ROW_ID = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteTransferInfoByTransNo" parameterType="String">
+		<![CDATA[
+			DELETE FROM ODS_TRANSFER_INFO WHERE TRANS_NO = #{transNo}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+			DELETE FROM ODS_TRANSFER_INFO WHERE ROW_ID IN
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateAll" parameterType="odsTransferInfo">
+		<![CDATA[
+			UPDATE ODS_TRANSFER_INFO
+		   	SET 
+				TRANS_NO = #{transNo},
+				TRANS_ITEM_NO = #{transItemNo},
+				QTY = #{qty},
+				MATERIAL_NO = #{materialNo},
+				MATERIAL_DESP = #{materialDesp},
+				CUSTOMER_MODEL = #{customerModel},
+				ITEM_DELETE = #{itemDelete},
+				UNIT = #{unit},
+				PLANT = #{plant},
+				GI_LOCATION = #{giLocation},
+				GR_LOCATION = #{grLocation},
+				TRANS_CLOSE = #{transClose},
+				FLAG = #{flag},
+				CREATE_DATE = #{createDate},
+				CREATE_BY = #{createBy},
+				MODIFY_DATE = #{modifyDate},
+				MODIFY_BY = #{modifyBy},
+				GI_DATE = #{giDate},
+				GI_FLAG = #{giFlag},
+				VERSION = #{version},
+				FINISH_QTY = #{finishQty},
+				FINISH_FLAG = #{finishFlag},
+				ORDER_STATUS = #{orderStatus},
+				ORDER_TYPE = #{orderType},
+				WAREHOUSE_CODE = #{warehouseCode},
+				WAREHOUSE_NAME = #{warehouseName},
+				BEGIN_DATE = #{beginDate},
+				END_DATE = #{endDate},
+				SAP_FLAG = #{sapFlag},
+				SAP_MSG = #{sapMsg},
+				SAP_DOC_NO = #{sapDocNo},
+				REMARK = #{remark},
+				PRESCAN_FLAG = #{prescanFlag},
+				CHECK_FLAG = #{checkFlag},
+				CHECK_BY = #{checkBy},
+				POSTING_DATE = #{postingDate},
+				DOC_NO = #{docNo},
+				DOC_YEAR = #{docYear}
+		 	WHERE ROW_ID = #{rowId}
+		]]>
+	</update>
+	<update id="transferApprove" parameterType="odsTransferInfo">
+		<![CDATA[
+			UPDATE ODS_TRANSFER_INFO
+		   	SET CHECK_FLAG = '1',
+		   		MODIFY_BY = #{modifyBy},
+		   		MODIFY_DATE = SYSDATE
+		 	WHERE TRANS_NO = #{transNo}
+		]]>
+	</update>
+	
+	<select id="get" resultMap="odsTransferInfoMap" parameterType="long">
+		<include refid="selectAllOdsTransferInfoColumns" />
+		<![CDATA[
+			where oti.row_id = #{rowId}
+		]]>
+	</select>
+	<select id="getAll" resultMap="odsTransferInfoMap">
+		<include refid="selectAllOdsTransferInfoColumns" />
+	</select>
+	<select id="selectOdsTransferInfoNo" resultType="string" >
+		<![CDATA[
+			SELECT SUBSTR(TO_CHAR(SEQ_TRANSFER_ORDER_NO.NEXTVAL,'FM0000000000'),8) FROM DUAL
+		]]>
+	</select>
+	<select id="searchOdsTransferInfos" resultMap="odsTransferInfoMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsTransferInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsTransferInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsTransferInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="searchOdsTransferInfoList" resultMap="odsTransferInfoMap">
+		<include refid="searchOdsTransferInfo_fragement" />
+	</select>
+	
+	<select id="checkTransferOrderExist" resultType="string">
+		<![CDATA[
+			SELECT CHECK_FLAG
+			FROM (SELECT T.CHECK_FLAG FROM ODS_TRANSFER_INFO T WHERE T.TRANS_NO = #{inpara.orno} ORDER BY T.CHECK_FLAG)
+			WHERE ROWNUM < 2
+		]]>
+	</select>
+	<select id="checkTransferLoc" resultType="string">
+		<![CDATA[
+	        select case when count(0)>0 then 'Y' else 'N' end 
+			from ODS_TRANSFER_INFO t 
+			where t.TRANS_NO = #{inpara.orno} 
+			and t.CHECK_FLAG = '1'
+			and t.plant in (select distinct w.code from
+			cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and 
+			u.user_id=#{userId})
+			and (t.gi_location in (select loc_code from
+			cd_user_wh_loc where user_id=#{userId}) 
+			or t.gr_location in (select loc_code from
+			cd_user_wh_loc where user_id=#{userId}) 
+			)
+ 		]]>
+	</select>
+	
+	<update id="updatePostResult" parameterType="odsTransferInfo">
+		<![CDATA[
+			UPDATE ODS_TRANSFER_INFO
+		   	SET doc_no = #{odsTransferInfo.docNo},
+		   		doc_year = #{odsTransferInfo.docYear},
+		   		sap_flag = #{odsTransferInfo.sapFlag},
+		   		sap_msg = #{odsTransferInfo.sapMsg},
+		   		MODIFY_BY = #{odsTransferInfo.modifyBy},
+		   		MODIFY_DATE = #{odsTransferInfo.modifyDate}
+		 	WHERE ROW_ID = #{odsTransferInfo.rowId}
+		]]>
+	</update>
+	
+	<select id="scanStatus" resultMap="odsTransferInfoMap">
+    	<![CDATA[
+    		SELECT GR_LOCATION, GI_LOCATION, SAP_FLAG,FINISH_FLAG
+    		FROM ODS_TRANSFER_INFO S
+    		WHERE S.TRANS_NO = #{orderNo}
+    	]]>
+    </select>
+    
+</mapper>

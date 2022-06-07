@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+        
+	<bean id="odsStoGigrInfoServiceClient" class="com.haier.openplatform.wms.sto.impl.OdsStoGigrInfoServiceClientImpl">
+		<property name="odsStoGigrInfoService" ref="odsStoGigrInfoService"></property>
+		<property name="printInvoiceService" ref="printInvoiceService"></property>
+	</bean>
+	<bean id="printInvoiceService" class="com.haier.hevwms.sto.service.vnpt.PrintInvoiceService"></bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.sto.service.OdsStoGigrInfoServiceClient" version="5.0"
+		owner="Hevwms" ref="odsStoGigrInfoServiceClient" protocol="dubbo" delay="-1"
+		registry="qingdaoRegistry690" />
+
+</beans>

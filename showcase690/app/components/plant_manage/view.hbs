@@ -1,0 +1,173 @@
+{{#component "plantList js-comp"}}
+<div class="easyui-layout" style="width:800px;height:400px;">
+        <div data-options="region:'north'" style="height:70px">
+            <h2>Query Condition</h2>
+            <div class="fitem">
+            <form id="query_fm" method="post" novalidate>
+                <label>Plant Code:</label>
+                <input name="plantCode" id="plantCode" class="easyui-textbox" >
+                <label>Plant Name:</label>
+                <input name="plantName" id="plantName"class="easyui-textbox" >
+            </form>
+            </div>
+        </div>
+        <div data-options="region:'center',split:true" style="height:370px;">
+            <table id="dg" title="" class="easyui-datagrid" style="height:100%"
+           
+            toolbar="#toolbar" pagination="true"
+            rownumbers="true" fitColumns="true" singleSelect="true">
+                <thead>
+                    <tr>
+                        <th field="plantCode" width="50">Plant Code</th>
+                        <th field="plantName" width="50">Plant Name</th>
+                        <th field="purCode" width="50">PurCode</th>
+                        <th field="purName" width="50">PurName</th>
+                        <th field="salesCode" width="50">Sales Code</th>
+                        <th field="salesName" width="50">Sales Name</th>
+                        <th field="modifyBy" width="50">Modify By</th>
+                        <th field="modifyDate" width="50">Modify Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        
+                        {{#each _DATA_.data}}
+                            <tr>
+                                <td>{{code}}</td>
+                                <td>{{name}}</td>
+                                <td>{{purCode}}</td>
+                                <td>{{purName}}</td>
+                                <td>{{salesCode}}</td>
+                                <td>{{salesName}}</td>
+                                <td>{{modifyBy}}</td>
+                                <td>{{modifyDate}}</td>
+                            </tr>
+                        {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="toolbar">
+            <a id="search-btn" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="queryPlant()">Search</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newPlant()">Add</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editPlant()">Edit</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyPlant()">Remove</a>
+    </div>
+    <div id="dlg" class="easyui-dialog" style="width:660px;height:230px;padding:10px 20px"
+            closed="true" buttons="#dlg-buttons">
+        <div class="ftitle">Plant Information</div>
+        <form id="fm" method="post" novalidate>
+            <div class="fitem">
+                <label>Plant Name:</label>
+                <input name="plantName" class="easyui-textbox" required="true">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>Plant Code:</label>
+                <input name="plantCode" class="easyui-textbox" required="true">
+            </div>
+            <div class="fitem">
+                <label>PurName:</label>
+                <input name="purName" class="easyui-textbox" required="true">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>PurCode:</label>
+                <input name="purCode" class="easyui-textbox" required="true">
+            </div>
+            <div class="fitem">
+                <label>Sales Name:</label>
+                <input name="salesName" class="easyui-textbox" required="true">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>Sales Code:</label>
+                <input name="salesCode" class="easyui-textbox" required="true">
+            </div>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+    </div>
+    
+    <script type="text/javascript">    
+        var url;
+        
+        function queryPlant(){
+            window.location.href = "http://www.haier.cn/plant_manage?plantCode="+$("#plantCode").val()+"&plantName="+$("#plantName").val(); 
+
+        }
+
+        function newPlant(){
+            $('#dlg').dialog('open').dialog('center').dialog('setTitle','New Plant');
+            $('#fm').form('clear');
+            url = '/plant/add';
+        }
+        function editPlant(){
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                $('#dlg').dialog('open').dialog('center').dialog('setTitle','Edit Plant');
+                $('#fm').form('load',row);
+                url = 'update_user.php?id='+row.id;
+            }
+        }
+        function savePlant(){
+            $('#fm').form('submit',{
+                url: url,
+                onSubmit: function(){
+                    return $(this).form('validate');
+                },
+                success: function(result){
+                    var result = eval('('+result+')');
+                    if (result.errorMsg){
+                        $.messager.show({
+                            title: 'Error',
+                            msg: result.errorMsg
+                        });
+                    } else {
+                        $('#dlg').dialog('close');        // close the dialog
+                        $('#dg').datagrid('reload');    // reload the user data
+                    }
+                }
+            });
+        }
+        function destroyPlant(){
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                $.messager.confirm('Confirm','Are you sure you want to destroy this user?',function(r){
+                    if (r){
+                        $.post('/plant/delete',{id:row.id},function(result){
+                            if (result.success){
+                                $('#dg').datagrid('reload');    // reload the user data
+                            } else {
+                                $.messager.show({    // show error message
+                                    title: 'Error',
+                                    msg: result.errorMsg
+                                });
+                            }
+                        },'json');
+                    }
+                });
+            }
+        }
+    </script>
+    <style type="text/css">
+        #fm{
+            margin:0;
+            padding:10px 30px;
+        }
+        .ftitle{
+            font-size:14px;
+            font-weight:bold;
+            padding:5px 0;
+            margin-bottom:10px;
+            border-bottom:1px solid #ccc;
+        }
+        .fitem{
+            margin-bottom:5px;
+        }
+        .fitem label{
+            display:inline-block;
+            width:80px;
+        }
+        .fitem input{
+            width:155px;
+        }
+    </style>
+
+{{/component}}

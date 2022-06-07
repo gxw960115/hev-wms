@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.takestock.dao.OdsPdDiffDtlDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllOdsPdDiffDtlColumns">
+		<![CDATA[
+		select
+			ROW_ID,
+			ORDER_NO,
+			PLANT,
+			CUSTOMER_MODEL,
+			LOCATION,
+			MATERIAL_NO,
+			MATERIAL_DESP,
+			DIFF_TYPE,
+			UNIT,
+			BARCODE,
+			INOUT_DATE,
+			CREATE_BY,
+			CREATE_DATE,
+			MODIFY_BY,
+			MODIFY_DATE,
+			FLAG,
+			VERSION,
+			SUB_LOCATION,
+			QTY,
+			INVE_SUB_LOCATION,
+			PROCESS_FLAG,
+			1
+		from 
+			ODS_PD_DIFF_DTL ods_pd_diff_dtl_
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="odsPdDiffDtlMap" type="odsPdDiffDtl">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="orderNo" column="ORDER_NO" />
+		<result property="plant" column="PLANT" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="location" column="LOCATION" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="diffType" column="DIFF_TYPE" />
+		<result property="unit" column="UNIT" />
+		<result property="barcode" column="BARCODE" />
+		<result property="inoutDate" column="INOUT_DATE" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="flag" column="FLAG" />
+		<result property="version" column="VERSION" />
+		<result property="subLocation" column="SUB_LOCATION" />
+		<result property="qty" column="QTY" />
+		<result property="inveSubLocation" column="INVE_SUB_LOCATION" />
+		<result property="processFlag" column="PROCESS_FLAG"/>
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="odsPdDiffDtlMap">
+		<include refid="selectAllOdsPdDiffDtlColumns" />
+	</select>
+	<select id="get" resultMap="odsPdDiffDtlMap" parameterType="long">
+		<include refid="selectAllOdsPdDiffDtlColumns" />
+		<![CDATA[
+		where ods_pd_diff_dtl_.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from ODS_PD_DIFF_DTL where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteByPdNo" parameterType="string">
+		<![CDATA[
+		delete from ODS_PD_DIFF_DTL where order_no = #{pdNo}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from ODS_PD_DIFF_DTL where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="odsPdDiffDtl">
+		<selectKey keyProperty="id" order="BEFORE" resultType="long">
+			SELECT SEQ_PD_DIFF_DTL_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into ODS_PD_DIFF_DTL
+		  (ROW_ID,
+		  		ORDER_NO
+				,PLANT
+				,CUSTOMER_MODEL
+				,LOCATION
+				,MATERIAL_NO
+				,MATERIAL_DESP
+				,DIFF_TYPE
+				,UNIT
+				,BARCODE
+				,INOUT_DATE
+				,CREATE_BY
+				,CREATE_DATE
+				,MODIFY_BY
+				,MODIFY_DATE
+				,FLAG
+				,VERSION
+				,SUB_LOCATION
+				,QTY
+				,INVE_SUB_LOCATION
+				,PROCESS_FLAG
+				,PROCESS_REASON
+		   )
+		values
+		  (#{id},
+		  		#{orderNo}
+				,#{plant}
+				,#{customerModel}
+				,#{location}
+				,#{materialNo}
+				,#{materialDesp}
+				,#{diffType}
+				,#{unit}
+				,#{barcode}
+				,#{inoutDate}
+				,#{createBy}
+				,#{createDate} 
+				,#{modifyBy} 
+				,#{modifyDate} 
+				,#{flag} 
+				,#{version} 
+				,#{subLocation}
+				,#{qty}
+				,#{inveSubLocation}
+				,#{processFlag}
+				,#{processReason}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="odsPdDiffDtl">
+		<![CDATA[
+		update ODS_PD_DIFF_DTL
+		   set   ORDER_NO = #{orderNo}
+				,PLANT = #{plant}
+				,CUSTOMER_MODEL = #{customerModel}
+				,LOCATION = #{location}
+				,MATERIAL_NO = #{materialNo}
+				,MATERIAL_DESP = #{materialDesp}
+				,DIFF_TYPE = #{diffType}
+				,UNIT = #{unit}
+				,BARCODE = #{barcode}
+				,INOUT_DATE = #{inoutDate}
+				,MODIFY_BY = #{modifyBy}
+				,MODIFY_DATE = #{modifyDate}
+				,FLAG = #{flag}
+				,VERSION = #{version}
+				,SUB_LOCATION = #{subLocation}
+				,QTY = #{qty}
+				,PROCESS_FLAG=#{processFlag}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchOdsPdDiffDtl_fragement">
+		<include refid="selectAllOdsPdDiffDtlColumns" />
+		where 1=1
+		<if test="odsPdDiffDtl.orderNo != null and odsPdDiffDtl.orderNo !=''">
+			and ORDER_NO like '%'||#{odsPdDiffDtl.orderNo}||'%' 
+		</if>
+		<if test="odsPdDiffDtl.plant != null and odsPdDiffDtl.plant !=''">
+			and PLANT like '%'||#{odsPdDiffDtl.plant}||'%'
+		</if>
+		<if test="odsPdDiffDtl.location != null and odsPdDiffDtl.location != ''">
+			and LOCATION IN (${odsPdDiffDtl.location})
+		</if>
+		<if test="odsPdDiffDtl.materialNo != null and odsPdDiffDtl.materialNo != ''">
+			and MATERIAL_NO like '%'||#{odsPdDiffDtl.materialNo}||'%' 
+		</if>
+		<if test="odsPdDiffDtl.barcode != null and odsPdDiffDtl.barcode !=''">
+			and BARCODE like '%'||#{odsPdDiffDtl.barcode}||'%' 
+		</if>
+		<if test="odsPdDiffDtl.userType != null and odsPdDiffDtl.userType != 1">
+		    and plant in (select distinct w.code from cd_user_wh_loc u, cd_wh_info w 
+			where w.row_id = u.wh_id and u.user_id= #{odsPdDiffDtl.userId})
+			and LOCATION in (select loc_code from
+			cd_user_wh_loc where user_id=#{odsPdDiffDtl.userId})
+		</if>
+		<if test="odsPdDiffDtl.processFlag != null and odsPdDiffDtl.processFlag != '' and odsPdDiffDtl.processFlag != '-1'">
+			and PROCESS_FLAG = #{odsPdDiffDtl.processFlag}
+		</if>
+		<if test="odsPdDiffDtl.diffType != null and odsPdDiffDtl.diffType != '' and odsPdDiffDtl.diffType != '-1'">
+			and DIFF_TYPE = #{odsPdDiffDtl.diffType}
+		</if>
+		<if test="odsPdDiffDtl.begin != null and odsPdDiffDtl.begin != ''">
+			<![CDATA[
+				and create_date >= TO_DATE(concat(#{odsPdDiffDtl.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsPdDiffDtl.end != null and odsPdDiffDtl.end != ''">
+			<![CDATA[
+				and create_date <= TO_DATE(concat(#{odsPdDiffDtl.end},' 23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+	</sql>
+	<select id="searchOdsPdDiffDtls" resultMap="odsPdDiffDtlMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsPdDiffDtl_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsPdDiffDtlsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsPdDiffDtl_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getOdsPdDiffDtl" resultMap="odsPdDiffDtlMap">
+		<include refid="searchOdsPdDiffDtl_fragement" />
+	</select>
+	<update id="updateProcessReason" parameterType="odsPdDiffDtl">
+		update ODS_PD_DIFF_DTL
+		   set   process_reason=#{odsPdDiffDtl.processReason}
+		 where row_id = #{odsPdDiffDtl.rowId}
+	</update>
+
+	<update id="updateProcessFlag" parameterType="string">
+		update ODS_PD_DIFF_DTL
+			set PROCESS_FLAG = #{processFlag}
+		where ROW_ID = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,391 @@
+{{#component "mb52 js-comp"}}
+<style type="text/css">
+	#addScrapForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+    #addScrapForm input{
+            height: 28px;
+            width: 140px;
+        }
+    #addScrapForm table tr{
+            height: 32px;;
+        }
+</style>
+<script type="text/javascript">
+	var treeData=[];
+
+	$(function(){
+	  	$('#mb52Div').height(suitHeight);
+	  	var templateColumns = [ [ {
+			field : 'ck',
+			checkbox : true,
+			width : 80,
+			align : 'center'
+		},{
+			field : 'plant',
+			title : 'Plant',
+			align : 'center',
+			width : 100,
+			sortable : true
+		}, {
+			field : 'location',
+			title : 'Location',
+			align : 'center',
+			width : 100,
+			sortable : true
+		}, {
+			field : 'sapQty',
+			title : 'SAP Qty',
+			align : 'center',
+			width : 80,
+			sortable : true
+		}, {
+			field : 'wmsQty',
+			title : 'WMS Qty',
+			align : 'center',
+			width : 80,
+			sortable : true
+		}, {
+			field : 'gap',
+			title : 'GAP',
+			align : 'center',
+			sortable : true,
+			formatter : function(val, row){
+				var gap = row.wmsQty - row.sapQty;
+				if (gap > 0){
+					return "<font color='blue'>"+gap+"</font>";
+				}else if(gap < 0) {
+					return "<font color='red'>"+gap+"</font>";
+				}else {
+					return gap;
+				}
+			}
+		}, {
+			field : 'unit',
+			title : 'Unit',
+			align : 'center',
+			width : 80,
+			sortable : true
+		}, {
+			field : 'materialNo',
+			title : 'Material No',
+			align : 'center',
+			width : 120,
+			sortable : true
+		}, {
+			field : 'materialDesp',
+			title : 'Material Description',
+			align : 'center',
+			width : 150,
+			sortable : true
+		}, {
+			field : 'mrpController',
+			title : 'MRP Controller',
+			align : 'center',
+			width : 80,
+			sortable : true
+		}, {
+			field : 'price',
+			title : 'Price',
+			width : 100,
+			align : 'center',
+			sortable : true
+		}, {
+			field : 'totalValue',
+			title : 'Total Value',
+			align : 'center',
+			width : 100,
+			sortable : true
+		}, {
+			field : 'sapDownDate',
+			title : 'CreateDate',
+			align : 'center',
+			width : 120,
+			sortable : true
+		} ] ];
+        
+	    var grid = $('#dataGrid').datagrid({
+	        rownumbers:true,
+	        columns:templateColumns,
+	        pagination:true,
+	        striped:true,
+	        pageNumber : 1,
+	     	fit:true,
+	        method:'post',
+	     	onLoadError:function(){
+	        	$.messager.alert('System Information','Network Abnormal!','warning');
+	     	}
+	    });
+	    initPagination(grid);
+	    gridScroll(grid);
+
+        // 查询
+	    $('#queryBtn').on('click',function(){
+	        queryData();
+	    })
+        // 导出
+	    $('#exportBtn').on('click',function(){
+	        exportData();
+	    })
+        // 下载
+        $('#downLoad').on('click',function(){
+	       down();
+	    })
+	    initLocation();
+	})
+
+
+    function initLocation(){
+        $('#warehouseCode').combobox({
+	        url : '/plant/list/select',
+	        panelWidth:180,
+	        onSelect : function(record) {
+	            $.ajax({
+	                url: '/loc/select/treeWithType',
+	                type: 'post',
+	                dataType: 'json',
+	                data: {
+	                   rowId: record.rowId,
+	                   locationType: 0,
+	                   parentId: record.rowId
+	                },
+	                success: function (data) {
+	                    $("#location").combobox({
+	                    	data:data
+	                    });
+	                }
+	            })
+	        }
+	    });
+	}
+
+    // 查询
+    function queryData(){
+    	var grid= $('#dataGrid').datagrid({
+        	url:'/sapInfo/search',
+            queryParams: {
+            	'materialNo' : $('#materialNo').val(),
+                'plant' :$('#warehouseCode').combobox('getValue'),
+				'location' : $('#location').combobox('getValue')
+            },
+            onLoadSuccess : function(data) {
+            	if (data.total == 0 && data.rows.length == 0) {
+                	$.messager.alert('System Information',
+                         'No records found.','warning');
+                    gridScroll(grid);
+	            }
+	        }
+	    });
+	    initPagination(grid);
+	}
+
+    // 导出
+    function exportData(){
+    	$.ajax({
+        	url:'/sapInfo/searchMb52Amount',
+        	type:'post',
+        	dataType:'json',
+        	data:{
+        		location:$('#location').combobox('getValue'),
+        		plant:$('#warehouseCode').combobox('getValue'),
+        		materialNo:$('#materialNo').val()
+        	},
+        	success:function(data) {
+        		if (data == "success") {
+        			var url = "/sapInfo/export?"
+        				+'&location='+$('#location').combobox('getValue')
+        				+'&plant='+$('#warehouseCode').combobox('getValue')
+        				+'&materialNo='+$('#materialNo').val();
+        	        window.location.href = url;
+        		}else {
+        			$.messager.alert('System Information',data,	'warning');
+        		}
+        	}
+        });    	
+    }
+
+    // 下载
+    function downInventoryFromSap() {
+		if($('#plant').combobox('getValue')=='' ||$('#plant').combobox('getValue')==null){
+			$.messager.alert('System Information','Please select Plant', 'info');
+			return ;
+		}
+        var locations = "";
+		var nodes = $('#locTree').tree('getChecked');
+        for (var i = 0; i < nodes.length; i++) {
+            if (i == nodes.length - 1) {
+                locations += nodes[i].id;
+            } else {
+                locations += nodes[i].id + ",";
+            }
+        }
+		$.maskLoading();
+		$.post(
+			"/inventory/downInventoryFromSapController", 
+			{
+				'plant' : $('#plant').combobox('getValue'),
+				'locations' : locations
+			},
+			function(data) {
+				$('#selectPlantWin').window('close');
+				var jsonObj = JSON.parse(data);
+				if (data.status == 'S') {
+					$.messager.alert('System Infomation', jsonObj.msg, 'info');
+					$('#dataGrid').datagrid('reload');
+				} else {
+					$.messager.alert('System Infomation', jsonObj.msg, 'info');
+				}
+				$.maskEnd();
+			}
+		).error(
+        	function() {
+            	$.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                $.maskEnd();
+			}
+        );
+        $("#locTree").tree('loadData', []);
+	}
+    
+    // 打开下载窗口
+	function down() {
+	    $('#selectPlantWin').show();
+		$('#selectPlantWin').window();
+		$('#selectPlantWin').window('open');
+
+		$('#virtualWh').html('');
+		$('#plant').combobox('setValue',"");
+
+        $.ajax({
+            url:'/plant/list/select',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                var dataRes = [];
+                if(data!=''||data!=null||data!=undefined){
+                   for(var i=0;i<data.length;i++){
+                       dataRes.push({ "text": data[i]['name'], "value": data[i]['code'], "rowId": data[i]['rowId']});
+                    }
+                }
+                $('#plantP').combobox({
+                    data:dataRes
+                })
+                $('#plant').combobox({
+                    data:dataRes
+                })
+            }
+        });
+
+        $('#plant').combobox({
+            onSelect:function(record){
+                $.ajax({
+                    url:'/loc/select/tree',
+                    type:'post',
+                    dataType:'json',
+                    data:{
+                        rowId:record.rowId, 
+                        locType:0
+                    },
+                    success:function(data){
+                        $('#locTree').tree({
+                            checkbox:true,
+                            data:data,
+                            onCheck:function(node, checked){
+                                if(checked){
+                                  //便于辨别正选中的location
+                                   $('#locs').val(node.id);
+                                }
+                            }
+                        });
+                    }
+                });
+
+            }
+        });
+
+	}
+
+    function closeSelectPlantWin(){
+        $("#locTree").tree('loadData', []);
+        $('#selectPlantWin').window('close');
+    }
+
+    </script>
+    <div id="mb52Div" class="easyui-layout"  style="width:101%;">
+        <div class="searchDiv" style="height:125px" region="north">
+            <table id="searchTab">
+                <tr> 	
+                    <td align="right" valign="middle">Plant:&nbsp;&nbsp;</td>
+                    <td class="leftCls">
+                        <input id="warehouseCode" type="text" class="easyui-combobox" 
+                            data-options="width:155,height:30,editable:false,required:false,valueField:'code',textField:'name'" />
+                    </td>
+                    <td align="right" valign="middle">Location:&nbsp;&nbsp;</td>
+                    <td class="leftCls">
+                        <input id="location" type="text" name="location" class="easyui-combobox"
+                            data-options="width:155,height:30,editable:false,required:false,
+                                                       valueField:'id',textField:'id'" />
+                    </td>
+                        
+					<td class="rightCls">MaterialNo:&nbsp;&nbsp;</td>
+					<td><input type="text" id="materialNo" value="" /></td>
+                </tr>
+             
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                   	<a href="javascript:void(0)" class="btnStyle downloadWhiteBtn" id="downLoad">Download From SAP</a>	
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" id="exportBtn">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+          
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden;  margin-top: -2px;">
+            <table id="dataGrid">
+
+            </table>
+        </div>
+    </div>
+
+    <!-- 添加窗口 -->
+    <div id="selectPlantWin" title="DownloadFromSap" 
+        data-options="modal:true,closed:true,iconCls:'icon-add', top:0, left:($(window).width() - 635) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+        style="width: 635px; height: 400px; display:none">
+        <div class="easyui-layout" fit="true">
+            <div region="north" style=" height: 230px; border:0">
+                <form id="addScrapForm" method="post">
+                    <table cellpadding="0" cellspacing="0" >
+                        <tr>
+                            <td align="right" valign="middle">Plant:&nbsp;&nbsp;</td>
+                            <td width="190">
+                                <input type="text" id="plant" class="easyui-combobox" data-options="width:140,height:30,editable:true,panelWidth:180">
+                            <td align="left" valign="middle">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        </tr>
+                        <tr>
+                            
+                        </tr>
+                        <tr class="locTr">
+                            <td align="right" id="locationDn" valign="middle">Location:&nbsp;&nbsp;</td>
+                            <td  colspan="3" >
+                                <div style="height: 150px; border: 1px #ccc solid; width: 100%; overflow-y: scroll; overflow-x: auto;">
+                                    <ul id="locTree" class="easyui-tree"></ul>
+                                </div> 
+                                <input id="locs" type="hidden" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div id="addDictionaryWinBtns" data-options="region:'south',border:false" style="text-align: right; padding: 1px; height: 37px">
+                <a href="javascript:void(0)" class="btnStyle saveBtn" onclick="downInventoryFromSap()">Download</a>
+                <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetWinData(this)">Reset</a>
+                <a href="javascript:void(0)" class="btnStyle closeBtn" onclick="closeSelectPlantWin()">Cancel</a>
+            </div>
+        </div>
+    </div>
+{{/component}}

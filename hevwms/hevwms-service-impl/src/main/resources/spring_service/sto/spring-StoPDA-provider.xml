@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 使用dubbo协议暴露服务 -->
+	
+	<bean id="stoPDAServiceClient" class="com.haier.openplatform.wms.sto.impl.StoPDAServiceClientImpl">
+		<property name="stoPDAService" ref="stoPDAService"></property>
+		<property name="stgStoDownService" ref="stgStoDownService"></property>
+		<property name="stgStodnDownService" ref="stgStodnDownService"></property>
+	</bean>
+	
+	<dubbo:service interface="com.haier.openplatform.wms.sto.service.StoPDAServiceClient"
+		owner="Hevwms" ref="stoPDAServiceClient" version="5.0"
+		protocol="dubbo" delay="-1" registry="qingdaoRegistry690">
+	</dubbo:service>
+</beans>

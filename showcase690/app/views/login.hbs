@@ -1,0 +1,130 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/png">
+    <title>WMS</title>
+    <link href="/assets/styles/style.default.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/gray/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/assets/styles/easyui/themes/icon.css">
+    <!--    
+    <script type="text/javascript">
+		document.write("<scr"+"ipt src=\"/assets/scripts/jquery-1.10.2.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/jquery-1.10.2.min.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/handlebars-v3.0.3.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/jquery.ajaxform.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/jquery.gridly.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/easyui/jquery.min.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/easyui/jquery.easyui.min.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/easyui/easyloader.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/easyui/extends/jquery.easyui.function.extends.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/jquery.cookie.js\"></sc"+"ript>");
+		document.write("<scr"+"ipt src=\"/assets/scripts/jquery.session.js\"></sc"+"ript>");
+     </script>
+      -->
+  <!-- begin code -->
+  <script type="text/javascript">
+    var _paq = _paq || [];
+    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u="//sa.haier.net/piwik/";
+      _paq.push(['setTrackerUrl', u+'piwik.php']);
+      _paq.push(['setSiteId', 'asvwms']);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js';
+      s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <!-- end code -->
+</head>
+<body class="signin">
+<div class="signup-top">
+  <span>
+  	Convenient Link:&nbsp;&nbsp;       
+	<a href="http://www.haierchina.ethicspoint.com/" target="view_window">Haier Compliance Hotline</a>
+	&nbsp;&nbsp;<a href="mailto:jubao@haier.com">Haier Compliance Email</a>&nbsp;&nbsp;&nbsp;&nbsp; 
+    <img src="/assets/images/loging-logo.png"/>
+  </span>
+</div>
+<div class="signinpanel">
+    <form id="logInfo">
+    <span class="signin-logo"><img src="/assets/images/logo.png"></span>
+    <div class="row">
+        <div class="col-md-12">
+                <h4 class="nomargin">Sign In</h4>
+                <p class="mt5 mb20">Login to access your account.</p>
+                <input id="login-username" type="text" class="form-control uname" placeholder="Username" />
+                <input id="login-password" type="password" class="form-control pword" placeholder="Password" />
+                <!-- <a href=""><small>Forgot Your Password?</small></a> -->
+                <input type="button" id="submitLoginBtn" class="btn btn-success btn-block" value="Sign In" />
+        </div>
+    </div>
+	</form>
+</div>
+<div class="signup-footer">
+    <span>Copyright©2015 Haier Group</span>
+</div>
+<!--     <script src="/assets/scripts/jquery-1.10.2.js" ></script> -->
+	<script src="/assets/scripts/jquery-1.10.2.min.js"></script>
+	<script src="/assets/scripts/handlebars-v3.0.3.js"></script>
+	<script src="/assets/scripts/jquery.ajaxform.js"></script>
+	<script src="/assets/scripts/jquery.gridly.js"></script>
+	<script src="/assets/scripts/easyui/jquery.min.js"></script>
+	<script src="/assets/scripts/easyui/jquery.easyui.min.js"></script>
+	<script src="/assets/scripts/easyui/easyloader.js"></script>
+	<script src="/assets/scripts/easyui/extends/jquery.easyui.function.extends.js"></script>
+	<script src="/assets/scripts/jquery.cookie.js"></script>
+	<script src="/assets/scripts/jquery.session.js"></script>
+<script>
+    $(function() {
+        $('#submitLoginBtn').on('click',function(){
+            loginFunc();
+        });
+        $('#login-password').bind('keypress',function(event){
+            if(event.keyCode == "13"){
+                $("#submitLoginBtn").click();
+            }
+        });
+        function loginFunc(){
+            var username = $("#login-username").val();
+            var pwd = $("#login-password").val();
+            if(username==""){
+				$.messager.alert("Info", "Please enter your username","error");
+                return false;
+            }
+            if(pwd==""){
+				$.messager.alert("Info", "Please enter your password","error");
+                return false;
+            }
+            $.ajax({
+                url:'/user/userlogin',
+                async:false,
+                type:'post',
+                dataType:"json",
+                data:{
+                    name:username,
+                    password:pwd
+                },
+                success:function(data){
+                    if(data.result=='true'){
+                        $.session.set("userId",data.userId);
+                        $.session.set("userName",username);
+                        $.session.set("userNickname",data.userNickName);
+						$.session.set("user_duty_type",data.userType)
+                        window.location.href=data.targetUrl;
+                    }else{
+						$.messager.alert("Info", data.msg,"error");
+                    }
+                },
+                error:function() {
+                    $.messager.alert('System Information','Network Abnormal!','warning');
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

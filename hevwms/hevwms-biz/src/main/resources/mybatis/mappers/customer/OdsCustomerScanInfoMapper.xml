@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haier.hevwms.customer.dao.OdsCustomerScanInfoDAO">
+
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<resultMap id="odsCustomerScanInfoMap" type="odsCustomerScanInfo">
+		<result column="ROW_ID" property="rowId" />
+		<result column="ORDER_TYPE" property="orderType" />
+		<result column="BIN" property="bin" />
+		<result column="CTR_ORDER_NO" property="ctrOrderNo" />
+		<result column="CTR_ITEM_NO" property="ctrItemNo" />
+		<result column="BATCH_NO" property="batchNo" />
+		<result column="PLANT" property="plant" />
+		<result column="CUSTOMER_MODEL" property="customerModel" />
+		<result column="LOCATION" property="location" />
+		<result column="MATERIAL_NO" property="materialNo" />
+		<result column="MATERIAL_DESP" property="materialDesp" />
+		<result column="UNIT" property="unit" />
+		<result column="BARCODE" property="barcode" />
+		<result column="VENDOR_CODE" property="vendorCode" />
+		<result column="VENDOR_NAME" property="vendorName" />
+		<result column="DELIVERY_CODE" property="deliveryCode" />
+		<result column="DELIVERY_NAME" property="deliveryName" />
+		<result column="SCANNED_BY" property="scannedBy" />
+		<result column="SCANNED_DATE" property="scannedDate" />
+		<result column="DELIVERY_DATE" property="deliveryDate" />
+		<result column="ORDER_ID" property="orderId" />
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="CAR_NO" property="carNo" />
+		<result column="CREATE_BY" property="createBy" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="MODIFY_BY" property="modifyBy" />
+		<result column="MODIFY_DATE" property="modifyDate" />
+		<result column="FLAG" property="flag" />
+		<result column="VERSION" property="version" />
+		<result column="QTY" property="qty" />
+		<result column="ORDER_ITEM" property="orderItem" />
+		<result column="SERIAL_NO" property="serialNo" />
+		<result column="FINISH_FLAG" property="finishFlag" />
+		<result column="IN_OUT_FLAG" property="inOutFlag" />
+		<result column="IN_OUT_MSG" property="inOutMsg" />
+		<result column="USED_FLAG" property="usedFlag" />
+		<result column="SUB_LOCATION" property="subLocation" />
+		<result column="REMARK" property="remark" />
+	</resultMap>
+
+	<!-- 数据库中所有字段 -->
+	<sql id="Base_Column_List" >
+		ROW_ID,
+		ORDER_TYPE,
+		BIN,
+		CTR_ORDER_NO,
+		CTR_ITEM_NO,
+		BATCH_NO,
+		PLANT,
+		CUSTOMER_MODEL,
+		LOCATION,
+		MATERIAL_NO,
+		MATERIAL_DESP,
+		UNIT,
+		BARCODE,
+		VENDOR_CODE,
+		VENDOR_NAME,
+		DELIVERY_CODE,
+		DELIVERY_NAME,
+		SCANNED_BY,
+		SCANNED_DATE,
+		DELIVERY_DATE,
+		ORDER_ID,
+		ORDER_NO,
+		CAR_NO,
+		CREATE_BY,
+		CREATE_DATE,
+		MODIFY_BY,
+		MODIFY_DATE,
+		FLAG,
+		VERSION,
+		QTY,
+		ORDER_ITEM,
+		SERIAL_NO,
+		FINISH_FLAG,
+		IN_OUT_FLAG,
+		IN_OUT_MSG,
+		USED_FLAG,
+		SUB_LOCATION,
+		REMARK
+	</sql>
+	<sql id="selectAllOdsCustomerScanInfoColumns">
+		<![CDATA[
+			SELECT
+				ROW_ID,
+				ORDER_TYPE,
+				BIN,
+				CTR_ORDER_NO,
+				CTR_ITEM_NO,
+				BATCH_NO,
+				PLANT,
+				CUSTOMER_MODEL,
+				LOCATION,
+				MATERIAL_NO,
+				MATERIAL_DESP,
+				UNIT,
+				BARCODE,
+				VENDOR_CODE,
+				VENDOR_NAME,
+				DELIVERY_CODE,
+				DELIVERY_NAME,
+				SCANNED_BY,
+				SCANNED_DATE,
+				DELIVERY_DATE,
+				ORDER_ID,
+				ORDER_NO,
+				CAR_NO,
+				CREATE_BY,
+				CREATE_DATE,
+				MODIFY_BY,
+				MODIFY_DATE,
+				FLAG,
+				VERSION,
+				QTY,
+				ORDER_ITEM,
+				SERIAL_NO,
+				FINISH_FLAG,
+				IN_OUT_FLAG,
+				IN_OUT_MSG,
+				USED_FLAG,
+				SUB_LOCATION,
+				REMARK
+			FROM ODS_CUSTOMER_SCAN_INFO ocsi 
+		]]>
+	</sql>
+	<sql id="searchOdsCustomerScanInfo_fragement">
+		<include refid="selectAllOdsCustomerScanInfoColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsCustomerScanInfo.ctrOrderNo != null">
+			and CTR_ORDER_NO like '%'||#{odsCustomerScanInfo.ctrOrderNo}||'%' 
+		</if>
+		<if test="odsCustomerScanInfo.materialNo != null">
+			and MATERIAL_NO like '%'||#{odsCustomerScanInfo.materialNo}||'%' 
+		</if>
+		<if test="odsCustomerScanInfo.barcode != null">
+			and BARCODE like '%'||#{odsCustomerScanInfo.barcode}||'%' 
+		</if>
+		<if test="odsCustomerScanInfo.batchNo != null">
+			and BATCH_NO like '%'||#{odsCustomerScanInfo.batchNo}||'%' 
+		</if>
+		<if test="odsCustomerScanInfo.location != null and odsCustomerScanInfo.location != ''">
+			and LOCATION IN (${odsCustomerScanInfo.location})
+		</if>
+		<if test="odsCustomerScanInfo.plant != null">
+			and PLANT like '%'||#{odsCustomerScanInfo.plant}||'%' 
+		</if>
+		<if test="odsCustomerScanInfo.begin != null and odsCustomerScanInfo.begin != ''">
+			<![CDATA[
+				and CREATE_DATE >= TO_DATE(concat(#{odsCustomerScanInfo.begin},'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="odsCustomerScanInfo.end != null and odsCustomerScanInfo.end != ''">
+			<![CDATA[
+				and CREATE_DATE <= TO_DATE(concat(#{odsCustomerScanInfo.end},'23:59:59') ,'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		order by CTR_ORDER_NO DESC
+	</sql>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<insert id="save" parameterType="odsCustomerScanInfo">
+        <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_CUSTOMER_SCAN_INFO_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+        <![CDATA[
+			insert into ODS_CUSTOMER_SCAN_INFO (
+				ROW_ID,ORDER_TYPE, BIN,CTR_ORDER_NO,CTR_ITEM_NO, BATCH_NO,PLANT,CUSTOMER_MODEL, LOCATION,
+				MATERIAL_NO,MATERIAL_DESP, UNIT,BARCODE,VENDOR_CODE, VENDOR_NAME,DELIVERY_CODE,DELIVERY_NAME, 
+				SCANNED_BY,SCANNED_DATE, DELIVERY_DATE, ORDER_ID,ORDER_NO, CAR_NO, CREATE_BY,CREATE_DATE, 
+				MODIFY_BY, MODIFY_DATE,FLAG,VERSION, QTY, ORDER_ITEM,SERIAL_NO, FINISH_FLAG, IN_OUT_FLAG,
+				IN_OUT_MSG, USED_FLAG,SUB_LOCATION,REMARK
+			)
+			values (
+				#{rowId},#{orderType}, #{bin},#{ctrOrderNo}, #{ctrItemNo}, #{batchNo},#{plant}, #{customerModel},#{location},
+				#{materialNo}, #{materialDesp},#{unit},#{barcode},#{vendorCode}, #{vendorName},#{deliveryCode},#{deliveryName},
+				#{scannedBy},#{scannedDate}, #{deliveryDate},#{orderId},#{orderNo},#{carNo}, #{createBy},#{createDate},
+				#{modifyBy}, #{modifyDate},#{flag}, #{version}, #{qty}, #{orderItem},#{serialNo}, #{finishFlag},#{inOutFlag},
+				#{inOutMsg}, #{usedFlag},#{subLocation},#{remark}
+			)
+		]]>
+	</insert>
+	
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_SCAN_INFO WHERE ROW_ID = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteCustomerScanInfoByCusNo" parameterType="String">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_SCAN_INFO WHERE CTR_ORDER_NO = #{ctrOrderNo}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+			DELETE FROM ODS_CUSTOMER_SCAN_INFO WHERE ROW_ID IN
+		]]>
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateAll" parameterType="odsCustomerScanInfo">
+		<![CDATA[
+			UPDATE ODS_CUSTOMER_SCAN_INFO
+		   	SET 
+				ORDER_TYPE = #{orderType},
+				BIN = #{bin},
+				CTR_ORDER_NO = #{ctrOrderNo},
+				CTR_ITEM_NO = #{ctrItemNo},
+				BATCH_NO = #{batchNo},
+				PLANT = #{plant},
+				CUSTOMER_MODEL = #{customerModel},
+				LOCATION = #{location},
+				MATERIAL_NO = #{materialNo},
+				MATERIAL_DESP = #{materialDesp},
+				UNIT = #{unit},
+				BARCODE = #{barcode},
+				VENDOR_CODE = #{vendorCode},
+				VENDOR_NAME = #{vendorName},
+				DELIVERY_CODE = #{deliveryCode},
+				DELIVERY_NAME = #{deliveryName},
+				SCANNED_BY = #{scannedBy},
+				SCANNED_DATE = #{scannedDate},
+				DELIVERY_DATE = #{deliveryDate},
+				ORDER_ID = #{orderId},
+				ORDER_NO = #{orderNo},
+				CAR_NO = #{carNo},
+				CREATE_BY = #{createBy},
+				CREATE_DATE = #{createDate},
+				MODIFY_BY = #{modifyBy},
+				MODIFY_DATE = #{modifyDate},
+				FLAG = #{flag},
+				VERSION = #{version},
+				QTY = #{qty},
+				ORDER_ITEM = #{orderItem},
+				SERIAL_NO = #{serialNo},
+				FINISH_FLAG = #{finishFlag},
+				IN_OUT_FLAG = #{inOutFlag},
+				IN_OUT_MSG = #{inOutMsg},
+				USED_FLAG = #{usedFlag},
+				SUB_LOCATION = #{subLocation},
+				REMARK = #{remark}
+		 	WHERE ROW_ID = #{rowId}
+		]]>
+	</update>
+	
+	<select id="get" resultMap="odsCustomerScanInfoMap" parameterType="long">
+		<include refid="selectAllOdsCustomerScanInfoColumns" />
+		<![CDATA[
+			where ocsi.row_id = #{rowId}
+		]]>
+	</select>
+	<select id="getAll" resultMap="odsCustomerScanInfoMap">
+		<include refid="selectAllOdsCustomerScanInfoColumns" />
+	</select>
+	<select id="getListByParams" resultMap="odsCustomerScanInfoMap">
+		<include refid="selectAllOdsCustomerScanInfoColumns" />
+		<![CDATA[
+			where 1 = 1
+		]]>
+		<if test="odsCustomerScanInfo.ctrOrderNo != null and odsCustomerScanInfo.ctrOrderNo != ''">
+			and CTR_ORDER_NO = #{odsCustomerScanInfo.ctrOrderNo} 
+		</if>
+		<if test="odsCustomerScanInfo.barcode != null and odsCustomerScanInfo.barcode != ''">
+			and BARCODE like '%'||#{odsCustomerScanInfo.barcode}||'%' 
+		</if>
+		<if test="odsCustomerScanInfo.location != null and odsCustomerScanInfo.location != ''">
+			and LOCATION = #{odsCustomerScanInfo.location} 
+		</if>
+		<if test="odsCustomerScanInfo.createBy != null and odsCustomerScanInfo.createBy != ''">
+			and CREATE_BY = #{odsCustomerScanInfo.createBy} 
+		</if>
+		<if test="odsCustomerScanInfo.inOutFlag != null and odsCustomerScanInfo.inOutFlag != ''">
+			and IN_OUT_FLAG = #{odsCustomerScanInfo.inOutFlag}
+		</if>
+
+		ORDER BY CREATE_DATE DESC
+	</select>
+	<select id="searchOdsCustomerScanInfos" resultMap="odsCustomerScanInfoMap">
+		<include refid="pagination_Head" />
+		<include refid="searchOdsCustomerScanInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsCustomerScanInfosCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchOdsCustomerScanInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+	<select id="scanCustomer" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_customer_check(
+		  #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.user,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.version,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{result.status,mode=OUT,jdbcType=VARCHAR},
+		  #{result.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{result.location,mode=OUT,jdbcType=VARCHAR},
+		  #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+	      #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	
+	<select id="deleteScanInfoByBarcode" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_customer_delete(
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{out.location,mode=OUT,jdbcType=VARCHAR},
+		  #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+	      #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	
+	<select id="orderOgp" statementType="CALLABLE">
+		<![CDATA[
+		  {call PRC_GOODS_CUSTOMER_DELIVERY(
+		  #{in.user,mode=IN,jdbcType=VARCHAR},
+		  #{in.docType,mode=IN,jdbcType=VARCHAR},
+		  #{in.orderType,mode=IN,jdbcType=VARCHAR},
+		  #{in.orno,mode=IN,jdbcType=VARCHAR},
+		  #{in.location,mode=IN,jdbcType=VARCHAR},
+		  #{in.version,mode=IN,jdbcType=VARCHAR},
+		  #{out.status,mode=OUT,jdbcType=VARCHAR},
+		  #{out.msg,mode=OUT,jdbcType=VARCHAR}
+		  )}
+		]]>
+	</select>
+	
+</mapper>

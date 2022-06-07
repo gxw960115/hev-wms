@@ -1,0 +1,170 @@
+{{#component "search_hac_app2 js-comp"}}
+    <style>
+        .centerTr th{
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table tr td{
+            text-align: center;
+            vertical-align: middle;
+        }
+        .nav-group dl dd {
+            margin: 0 10px 0 5px;
+        }
+    </style>
+    <div id="breadcrumbs" style="background-color:#F6FBFF">
+        <div class="row-fluid">
+            <div class="span12" style="height: 60px;">
+                <h1><div class="icons-search">
+                        <span style="color: #ffffff;font-weight:bold;font-size:15px;position: relative;left:21px;top:-6px">搜索条件</span>
+                </div></h1>
+                <div >
+                    <p>
+                    <div  class="nav-group" style="font-size:15px;position:relative;float:left;left:10%;z-index: 9">
+                        {{#if _DATA_.hacApplicationSearchDTO.version}}
+                            {{else}}
+                            <dl >
+                                <dt style="white-space: nowrap;">版本情况:</dt>
+                                {{#each _DATA_.hacApplicationDTOs}}
+                                <dd><a onclick="changeFrequency('{{version}}')">{{version}}</a></dd>
+                                {{/each}}
+                            </dl>
+                        {{/if}}
+                    </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="littleDiv" style="position: relative;height: 30px;width: 87%;font-size: 15px;float: left;left: 13%;background-color:#F6FBFF">
+        {{#if _DATA_.hacApplicationSearchDTO.version}}<!--此处来判断条件参数中是否包含这个属性-->
+            <div style="height: 23px;width: 100px;border: 1px solid #98D6DD;" onclick="delVersion()">{{_DATA_.hacApplicationSearchDTO.version}}<button class="btn btn-mini" style="float: right;
+height: 22px;">&times;</button></div>
+        {{/if}}
+    </div>
+    <!--手动填写的div-->
+    <div id="breadcrumbs" style="background-color:#F6FBFF">
+        <div class="row-fluid">
+            <div class="span12">
+                <h1><div class="icons-search" >
+                    <span style="color: #ffffff;font-weight:bold;font-size:15px;position: relative;left:37px;top:-6px">搜索</span>
+            </div></h1>
+                <form namespace="/demo" method="get" id="demo">
+                    <table style="position:relative;float:left;left:12%">
+                        <tr>
+                            <th><input name="userId" value="8" type="hidden"/><input name="name" id="name" style="height: 32px;margin-bottom:0px;" type="text" placeholder="应用名称">
+                                <input style="display: none" name="version" id="version" val="{{_DATA_.hacApplicationSearchDTO.version}}"/>
+                                &nbsp;&nbsp;
+
+                                <button type="submit" class="btn btn-primary" style="height:40px;width:60px;background-color: #59B4E9;color: white;border: 0;" id="submitIt">
+                                    <span>查询</span>
+                                </button>
+                                &nbsp;
+                                <button  class="btn btn-primary"
+                                         type="button" style="height:40px;width:60px;background-color: #59B4E9;color: white;border: 0;"  onclick="creatHacApp();">
+                                    <span>新建</span>
+                                </button>
+                            </th>
+
+                        </tr>
+
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="breadcrumbs" style="background-color:#F6FBFF;min-height:300px;padding-top: 12px;">
+        <div class="row-fluid">
+            <div class="span12" >
+
+                <div>
+                    <div>
+                        <table class="table table-bordered table-hover table-condensed">
+                            <thead>
+                            <tr class="centerTr" style="background-color: #59B4E9;color: #000000;font-weight:bold">
+                                <th style="vertical-align: middle;">应用名称</th>
+                                <th style="vertical-align: middle;">描述</th>
+                                <th style="vertical-align: middle;">标识码</th>
+                                <th style="vertical-align: middle;">版本</th>
+                                <th width="40" style="vertical-align: middle;">状态</th>
+                                <th width="80" style="vertical-align: middle;">访问链接</th>
+                                <th style="vertical-align: middle;">配置项</th>
+                                <th style="vertical-align: middle;">应用Md5</th>
+                                <th style="vertical-align: middle;" width="80">创建时间</th>
+                                <th style="vertical-align: middle;" width="80">修改时间</th>
+                                <th style="vertical-align: middle;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each _DATA_.pager.records}}
+                                <tr>
+                                    <td><a  href='/update_hac_app?hacAppId={{id}}&userId=8'>
+                                        {{name}}
+                                    </a></td>
+                                    <td>{{description}}</td>
+                                    <td>{{code}}</td>
+                                    <td>{{version}}</td>
+                                    <td>
+                                        {{#equals status 1}}
+                                            有效
+                                        {{/equals}}
+                                        {{#equals status 0}}
+                                            无效
+                                        {{/equals}}
+                                    </td>
+                                    <td>{{baseUrl}}</td>
+                                    <td>{{baseUrl}}</td>
+                                    <td>{{appMd5}}</td>
+                                    <td class="dateFormat">
+                                        {{gmtCreate}}
+                                    </td>
+                                    <td class="dateFormat">{{ gmtModified }}</td>
+                                    <td>
+                                        <div class="icons-rubish" onclick="del({{id}})"></div>
+                                    </td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+
+                        </table>
+                        <div class="pagination"></div>
+                    </div>
+                    <div class="item-size" style="display: none">20</div>
+                    <div class="item-total" style="display: none">{{_DATA_.totalRecords}}</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        function creatHacApp(){
+            window.location.href = "/create_hac_app?userId=8";
+        }
+
+        //查询点击条件刷新页面
+        function changeFrequency(param){
+            $('#version').val(param);
+            $('#demo').submit();
+        }
+        function delVersion(){
+            $('#version').empty();
+            $('#demo').submit();
+        }
+        //删除
+        function del(id) {
+            if (!confirm("确定要删除吗？")) {
+                return;
+            }
+            //window.location.href = "${dynamicURL}/hac/deleteHacApp.action?hacAppId="+ id;
+
+            $.get("api/deleteHacApp?userId=8&hacAppId="+id ,function(data){
+                if(data.success){
+                    window.location.reload(true);
+                }else{
+                    alert(data.errorMessages);
+                }
+            });
+        }
+    </script>
+{{/component}}

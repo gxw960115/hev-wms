@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- -->
+<mapper namespace="com.haier.hevwms.po.dao.StgPoDownDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllStgPoDownColumns">
+		<![CDATA[
+		select
+			po.ROW_ID,
+			PO_NO,
+			PO_ITEM_NO,
+			PO_TYPE,
+			po.PLANT,
+			PO_DOC_DATE,
+			PO_LAST_MODIFY_DATE,
+			PO_CREATE_BY,
+			po.MATERIAL_NO,
+			po.MATERIAL_DESP,
+			po.CUSTOMER_MODEL,
+			po.QTY,
+			po.PO_LOCATION,
+			po.ITEM_DELTET,
+			po.PO_CLOSE,
+			po.CREATE_DATE,
+			po.UNIT,
+			po.MODIFY_DATE,
+			po.MODIFY_BY,
+			po.VERSION,
+			po.CREATE_BY,
+			po.FINISH_QTY,
+			po.FINISH_FlAG,
+			po.ORDER_UNIT,
+			po.VENDOR_CODE,
+			po.VENDOR_NAME
+		from 
+			STG_PO_DOWN po 
+		]]>
+	</sql>
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="stgPoDownMap" type="stgPoDown">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="poNo" column="PO_NO" />
+		<result property="poItemNo" column="PO_ITEM_NO" />
+		<result property="poType" column="PO_TYPE" />
+		<result property="inboundFlag" column="INBOUND_FLAG" />
+		<result property="plant" column="PLANT" />
+		<result property="poDocDate" column="PO_DOC_DATE" />
+		<result property="poLastModifyDate" column="PO_LAST_MODIFY_DATE" />
+		<result property="poCreateBy" column="PO_CREATE_BY" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="qty" column="QTY" />
+		<result property="poLocation" column="PO_LOCATION" />
+		<result property="itemDeltet" column="ITEM_DELTET" />
+		<result property="poClose" column="PO_CLOSE" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="version" column="VERSION" />
+		<result property="finishQty" column="FINISH_QTY" />
+		<result property="unit" column="UNIT" />
+		<result property="orderUnit" column="ORDER_UNIT" />
+		<result property="vendorCode" column="VENDOR_CODE" />
+		<result property="vendorName" column="VENDOR_NAME" />
+		<result property="deliverDate" column="DELIVER_DATE" />
+		<result property="flag" column="FLAG" />
+		
+		<result property="modifyBy" column="MODIFY_BY" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="finishFlag" column="FINISH_FLAG" />
+	</resultMap>
+	<resultMap id="matListMap" type="wlList">
+		<result property="mat" column="mat"/>
+		<result property="matdesc" column="matDesc"/>
+		<result property="qty" column="qty"/>
+		<result property="scanqty" column="scanqty"/>
+		<result property="location" column="location"/>
+		<result property="custModel" column="custModel"/>
+	</resultMap>
+	
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="stgPoDownMap">
+		<include refid="selectAllStgPoDownColumns" />
+	</select>
+	<select id="get" resultMap="stgPoDownMap" parameterType="long">
+		<include refid="selectAllStgPoDownColumns" />
+		<![CDATA[
+		where po.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from STG_PO_DOWN where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from STG_PO_DOWN where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="stgPoDown">
+	    <selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_PO_DOWN_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[
+		insert into STG_PO_DOWN
+		  (ROW_ID, PO_NO
+				,PO_ITEM_NO
+				,PO_TYPE
+				,PLANT
+				,PO_DOC_DATE
+				,PO_LAST_MODIFY_DATE
+				,PO_CREATE_BY
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,FINISH_QTY
+				,FINISH_FLAG
+				,PO_LOCATION
+				,ITEM_DELTET
+				,PO_CLOSE
+				,CREATE_DATE
+				,MODIFY_DATE
+				,UNIT
+				,CREATE_BY
+				,ORDER_UNIT
+				,VENDOR_CODE
+				,VENDOR_NAME
+		   )
+		values
+		  (#{rowId}, #{poNo}
+				,#{poItemNo}
+				,#{poType}
+				,#{plant}
+				,#{poDocDate}
+				,#{poLastModifyDate}
+				,#{poCreateBy}
+				,#{materialNo}
+				,#{customerModel}
+				,#{materialDesp}
+				,#{qty}
+				,#{finishQty}
+				,#{finishFlag}
+				,#{poLocation}
+				,#{itemDeltet}
+				,#{poClose}
+				,#{createDate}
+				,#{modifyDate}
+				,#{unit}
+				,#{createBy}
+				,#{orderUnit}
+				,#{vendorCode}
+				,#{vendorName}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="stgPoDown">
+		<![CDATA[
+		update STG_PO_DOWN
+		   set 
+		   		 PO_NO = #{poNo}
+				,PO_ITEM_NO = #{poItemNo}
+				,PO_TYPE = #{poType}
+				,PLANT = #{plant}
+				,PO_DOC_DATE = #{poDocDate}
+				,PO_LAST_MODIFY_DATE = #{poLastModifyDate}
+				,PO_CREATE_BY = #{poCreateBy}
+				,MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,QTY = #{qty}
+				,PO_LOCATION = #{poLocation}
+				,ITEM_DELTET = #{itemDeltet}
+				,PO_CLOSE = #{poClose}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_DATE = #{modifyDate}
+				,VERSION = #{version}
+				,FINISH_QTY= #{finishQty}]]>
+		<if test="finishFlag !=null and finishFlag!=''">
+			,FINISH_FLAG=#{finishFlag}
+		</if>
+			<![CDATA[	,UNIT=#{unit}
+				,MODIFY_BY=#{modifyBy}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	
+	<sql id="searchStgPoDown_fragement">
+		<include refid="selectAllStgPoDownColumns" />
+		where 1=1  
+		and po.ITEM_DELTET= '0'
+		<if test="stgPoDown.finishFlag == 1 ">
+			and s.sap_flag='1'
+		</if>
+		<if test="stgPoDown.finishFlag == 0 ">
+		<![CDATA[	and po.finish_qty = 0	]]>
+		</if>
+
+		<if test="stgPoDown.poNo != null and stgPoDown.poNo != '' ">
+			<![CDATA[
+				and po.PO_NO like ('%'||#{stgPoDown.poNo}||'%')
+			]]>
+		</if>
+		<if test="stgPoDown.poType == '-1' ">
+			<![CDATA[
+				and po.PO_TYPE != 'VGIF'
+			]]>
+		</if>
+		<if test="stgPoDown.poType != null and stgPoDown.poType !='' and stgPoDown.poType !='-1' ">
+			<![CDATA[
+				and po.PO_TYPE = #{stgPoDown.poType}
+			]]>
+		</if>
+		<if test="stgPoDown.plant != null and stgPoDown.plant != '' ">
+			<![CDATA[
+				and po.PLANT like ('%'||#{stgPoDown.plant}||'%')
+			]]>
+		</if>
+		<if test="stgPoDown.poDocDate != null and stgPoDown.poDocDate != '' ">
+			<![CDATA[
+				and po.PO_DOC_DATE like ('%'||#{stgPoDown.poDocDate}||'%')
+			]]>
+		</if>
+		<if test="stgPoDown.poLastModifyDate != null and stgPoDown.poLastModifyDate != '' ">
+			<![CDATA[
+				and po.PO_LAST_MODIFY_DATE like ('%'||#{stgPoDown.poLastModifyDate}||'%')
+			]]>
+		</if>
+		<if test="stgPoDown.materialNo != null and stgPoDown.materialNo != '' ">
+			<![CDATA[
+				and po.MATERIAL_NO like ('%'||#{stgPoDown.materialNo}||'%')
+			]]>
+		</if>
+		<if test="stgPoDown.poClose != null and stgPoDown.poClose !='-1' and stgPoDown.poClose !=''">
+			and po.PO_CLOSE = #{stgPoDown.poClose}
+		</if>
+		<if test="stgPoDown.begin != null and stgPoDown.begin != ''">
+			<![CDATA[
+				and po.CREATE_DATE >= TO_DATE((#{stgPoDown.begin}||'00:00:00'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="stgPoDown.end != null and stgPoDown.end != ''">
+			<![CDATA[
+				and po.create_date <= TO_DATE((#{stgPoDown.end}||'23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+			]]>
+		</if>
+		<if test="stgPoDown.poLocation != null and stgPoDown.poLocation != ''">
+			<![CDATA[
+				and po.PO_LOCATION IN (${stgPoDown.poLocation})
+			]]>
+		</if>
+		ORDER BY po.CREATE_DATE DESC, po.PO_NO, po.PO_ITEM_NO
+	</sql>
+	
+	<!-- /order/searchPo -->
+	<select id="searchStgPoDowns" resultMap="stgPoDownMap">
+		<include refid="pagination_Head" />
+		<include refid="searchStgPoDown_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchStgPoDownsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchStgPoDown_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getStgPoDownByParam" resultMap="stgPoDownMap">
+		<include refid="selectAllStgPoDownColumns" />
+		where 1=1
+		<if test="stgPoDown.poNo != null">
+			and PO_NO like ('%'||#{stgPoDown.poNo}||'%')
+		</if>
+		<if test="stgPoDown.poItemNo != null">
+			and PO_ITEM_NO like ('%'||#{stgPoDown.poItemNo}||'%')
+		</if>
+	</select>
+	<select id="getAllStgByInbound" resultMap="stgPoDownMap">
+		<include refid="selectAllStgPoDownColumns" />
+		where 1=1
+		<![CDATA[
+			and INBOUND_FLAG = '0001'
+			and FINISH_FLAG = '0'
+			and PO_CLOSE = '0'
+			and (ITEM_DELTET= '' or ITEM_DELTET is null )
+			]]>
+	</select>
+	<select id="getPoItemByPoNo" resultMap="stgPoDownMap">
+		<include refid="selectAllStgPoDownColumns" />
+		where 1=1
+		<![CDATA[
+			and INBOUND_FLAG = '0001'
+			and FINISH_FLAG = '0'
+			and (ITEM_DELTET= '' or ITEM_DELTET is null )
+			and PO_NO=#{poNo}
+			]]>
+	</select>
+	<select id="getStgPoDownsByParam" resultMap="stgPoDownMap">
+		<include refid="searchStgPoDown_fragement" />
+	</select>
+	<!-- portal获得todo、posting Success柱状图 -->
+	<select id="getToDoChartsData" resultMap="stgPoDownMap">
+	  select 'a_po' materialDesp,  IFNULL(sum(t.finish_qty), 0) qty
+	  from stg_po_down t
+	  where t.create_date >= to_char(sysdate, 'yyyy-MM-dd') 
+	  union
+	  select 'b_in' materialDesp,IFNULL(sum(t.finish_qty),0) qty
+	  from stg_inbound_down t where t.create_date >=to_char(sysdate, 'yyyy-MM-dd')
+	  union
+	  select 'c_sto' materialdesp, count(*) qty  from stg_sto_down t where t.create_date >=to_char(sysdate, 'yyyy-MM-dd')  and t.gi_finish_qty>0
+	  union
+	  select 'd_dn' materialdesp, count(*) qty  from stg_dn_down t where t.create_date >=to_char(sysdate, 'yyyy-MM-dd')  and t.finish_qty>0
+	  union
+	  select 'e_po' materialdesp, IFNULL(sum(d.qty), 0) qty
+	  from stg_po_down d, ods_order_info i
+	  where d.po_no = i.sap_order_no
+	  and d.po_item_no = i.sap_order_item
+	  and i.sap_flag = '1'
+	  and d.create_date >= to_char(sysdate, 'yyyy-MM-dd') 
+	  union
+	  select 'f_in' materialdesp,IFNULL(sum(d.qty),0) qty from stg_inbound_down d,ods_order_info i
+	  where d.inbound_delivery_no = i.sap_order_no
+	  and d.inbound_item_no = i.sap_order_item
+	  and i.sap_flag = '1'
+	  and d.create_date >=to_char(sysdate, 'yyyy-MM-dd')
+	  union
+	  select 'g_sto' materialdesp,count(*) qty  from stg_sto_down d,ods_order_info i
+	  where d.sto_no = i.sap_order_no
+	  and d.sto_item_no = i.sap_order_item
+	  and i.sap_flag = '1'
+	  AND D.CREATE_DATE >=to_char(sysdate, 'yyyy-MM-dd')
+	  union
+	  select 'h_dn' materialdesp,count(*) qty  from stg_dn_down d,ods_order_info i
+	  where d.dn_no = i.sap_order_no
+	  and d.dn_item_no = i.sap_order_item
+	  and i.sap_flag = '1'
+	  and d.create_date >=to_char(sysdate, 'yyyy-MM-dd')
+	</select>
+	
+	<select id="checkPoExist" resultType="string">
+		<![CDATA[
+	 	  select case when t.po_close = 'X' then 'Close' 
+	      	WHEN t.po_type = 'VREP' THEN '2'
+	      	else '1' end 
+	       	from STG_PO_DOWN t 
+	       	where t.po_no = #{inpara.orno} AND  rownum=1 
+		]]>
+	</select>
+	
+	<select id="checkGiftPoExist" resultType="string">
+		<![CDATA[
+	 	  select case when t.po_close = 'X' then 'Close' 
+	      	WHEN t.po_type = 'VGIF' THEN '1'
+	      	else '2' end 
+	       	from STG_PO_DOWN t 
+	       	where t.po_no = #{inpara.orno} AND  rownum=1 
+		]]>
+	</select>
+	
+	<select id="checkPoLoc" resultType="string">
+		<![CDATA[
+		SELECT CASE 
+		        WHEN COUNT(0) > 0 THEN 'Y'
+		        ELSE 'N'
+		    END
+		FROM STG_PO_DOWN t
+		WHERE t.po_no = #{inpara.orno}
+			AND T.PO_CLOSE = '0' 
+		    AND t.plant IN (
+		        SELECT DISTINCT w.code
+		        FROM cd_user_wh_loc u, cd_wh_info w
+		        WHERE w.row_id = u.wh_id
+		            AND u.user_id = #{userId}
+		    )
+		    AND t.PO_LOCATION IN (
+		        SELECT loc_code
+		        FROM CD_USER_WH_LOC
+		        WHERE user_id = #{userId}
+		    )
+ 		]]>
+	</select>
+	
+	<select id="getPoItemsByPoNo" resultType="string">
+		select distinct po.po_item_no from stg_po_down po
+		where po.po_no = #{stgPoDown.poNo}
+	</select>
+	<select id="ifScanningStart" resultType="long">
+	    select count(0) from stg_po_down po 
+	    where po.finish_qty > 0
+	    and po.po_no = #{stgPoDown.poNo}
+	    and po.po_item_no = #{stgPoDown.poItemNo}
+	</select>
+	
+	<insert id="bankupDeletedItems" parameterType="stgPoDown">
+		<![CDATA[
+		insert into STG_PO_DOWN_DELETE
+		  (ROW_ID, PO_NO
+				,PO_ITEM_NO
+				,PO_TYPE
+				,PLANT
+				,PO_DOC_DATE
+				,PO_LAST_MODIFY_DATE
+				,PO_CREATE_BY
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,FINISH_QTY
+				,FINISH_FLAG
+				,PO_LOCATION
+				,ITEM_DELTET
+				,PO_CLOSE
+				,CREATE_DATE
+				,MODIFY_DATE
+				,UNIT
+				,CREATE_BY
+				,ORDER_UNIT
+				,VENDOR_CODE
+				,VENDOR_NAME
+		   )
+		   SELECT ROW_ID, PO_NO
+				,PO_ITEM_NO
+				,PO_TYPE
+				,PLANT
+				,PO_DOC_DATE
+				,PO_LAST_MODIFY_DATE
+				,PO_CREATE_BY
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,FINISH_QTY
+				,FINISH_FLAG
+				,PO_LOCATION
+				,ITEM_DELTET
+				,PO_CLOSE
+				,CREATE_DATE
+				,MODIFY_DATE
+				,UNIT
+				,CREATE_BY
+				,ORDER_UNIT
+				,VENDOR_CODE
+				,VENDOR_NAME 
+				FROM STG_PO_DOWN
+				WHERE PO_NO = #{stgPoDown.poNo}
+				AND PO_ITEM_NO = #{stgPoDown.poItemNo}
+	    ]]>
+	</insert>
+	<delete id="deleteByPoItems" parameterType="stgPoDown">
+	    DELETE FROM STG_PO_DOWN 
+	    	WHERE PO_NO = #{stgPoDown.poNo}
+			AND PO_ITEM_NO = #{stgPoDown.poItemNo}
+	</delete>
+	<select id="getExistingPoItem" resultMap="stgPoDownMap">
+		<include refid="selectAllStgPoDownColumns" />
+			WHERE PO_NO = #{stgPoDown.poNo}
+			AND PO_ITEM_NO = #{stgPoDown.poItemNo} 
+	</select>
+	
+	<update id="updateByPoItem" parameterType="stgPoDown">
+		<![CDATA[
+		update STG_PO_DOWN
+		   set PO_NO = #{stgPoDown.poNo}
+				,PO_ITEM_NO = #{stgPoDown.poItemNo}
+				,PO_TYPE = #{stgPoDown.poType}
+				,PLANT = #{stgPoDown.plant}
+				,PO_LAST_MODIFY_DATE = #{stgPoDown.poLastModifyDate}
+				,PO_CREATE_BY = #{stgPoDown.poCreateBy}
+				,MATERIAL_NO = #{stgPoDown.materialNo}
+				,CUSTOMER_MODEL = #{stgPoDown.customerModel}
+				,MATERIAL_DESP = #{stgPoDown.materialDesp}
+				,QTY = #{stgPoDown.qty}
+				,PO_LOCATION = #{stgPoDown.poLocation}
+				,ITEM_DELTET = #{stgPoDown.itemDeltet}
+				,PO_CLOSE = #{stgPoDown.poClose}
+				,MODIFY_DATE = #{stgPoDown.modifyDate}
+				,MODIFY_BY=#{stgPoDown.modifyBy}
+		 where PO_NO = #{stgPoDown.poNo}
+			AND PO_ITEM_NO = #{stgPoDown.poItemNo} 
+		]]>
+	</update>
+	<select id="getPoMaterialList" resultMap="matListMap">
+	    SELECT T.MATERIAL_NO MAT,
+		       (NVL(SUM(T.QTY), 0) || ',' || NVL(SUM(T.FINISH_QTY), 0) || ',' ||
+		       T.CUSTOMER_MODEL || ',' || T.PO_LOCATION || ',' || T.MATERIAL_NO) MATDESC,
+		       NVL(SUM(T.QTY), 0) QTY,
+		       NVL(SUM(T.FINISH_QTY), 0) SCANQTY,
+		       T.CUSTOMER_MODEL CUSTMODEL,
+		       T.PO_LOCATION LOCATION
+		  FROM STG_PO_DOWN T
+		 WHERE T.PO_NO = #{orderNo}
+		 GROUP BY T.MATERIAL_NO, T.CUSTOMER_MODEL, T.PO_LOCATION
+	</select>
+	
+	<select id="scanPoCheck" statementType="CALLABLE">
+		<![CDATA[
+		  {call prc_barcode_po_check(
+		  #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.user,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.bin,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.qty,mode=IN,jdbcType=INTEGER},
+		  #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+		  #{inpara.version,mode=IN,jdbcType=VARCHAR},
+		  #{result.status,mode=OUT,jdbcType=VARCHAR},
+		  #{result.msg,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matno,mode=OUT,jdbcType=VARCHAR},
+		  #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+		  #{result.location,mode=OUT,jdbcType=VARCHAR},
+		  #{result.scanqty,mode=OUT,jdbcType=INTEGER},
+	      #{result.poqty,mode=OUT,jdbcType=INTEGER}
+		  )}
+		]]>
+	</select>
+</mapper>

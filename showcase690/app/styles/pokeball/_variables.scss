@@ -1,0 +1,191 @@
+//
+// Colors
+// ----------------------------------------------------------------------------------
+
+// link colors
+$default-link-color: #4287c8;
+$default-hover-color: #f7ab00;
+
+// focus colors
+$default-focus-color: #129fea;
+
+// grayscale colors
+$default-body-color: #717171;
+$default-overlay-color: #999999;
+$default-note-color: #cccccc;
+$default-background-color: #f4f4f4;
+$default-border-color: #e1e1e1;
+$default-darken-border-color: #dddddd;
+
+// various colors
+$default-danger-color: #0082f0;
+$default-primary-color: #0082f0;
+$default-warning-color: #fdab39;
+$default-success-color: #729755;
+$default-info-color: #273485;
+
+//
+// Typography
+// ----------------------------------------------------------------------------------
+$default-font-family-sans-serif: tahoma, arial, "Hiragino Sans GB W3", \5b8b\4f53, sans-serif;
+$default-font-family-monospace: Monaco, Menlo, Consolas, "Courier New", monospace;
+$default-font-family: $default-font-family-sans-serif;
+
+$default-header-font-family: "Microsoft YaHei", "Hiragino Sans GB W3", "WenQuanYi Micro Hei", sans-serif;
+
+$default-font-size: 14px;
+$default-line-height: 16px;
+
+// border radius
+$default-border-radius: 2px;
+
+// caret size
+$caret-size: 5px;
+
+//
+// Buttons
+// ----------------------------------------------------------------------------------
+$btn-color: #717171;
+$btn-border: #ddd;
+$btn-background-color: #f4f4f4;
+
+$btn-primary-color: #fff;
+$btn-primary-border: #0082f0;
+$btn-primary-background-color: #0082f0;
+
+$btn-success-color: #0082f0;
+$btn-success-border: #0082f0;
+$btn-success-background-color: #d6e6ff;
+
+$btn-info-color: #717171;
+$btn-info-border: #ddd;
+$btn-info-background-color: #fff;
+
+$btn-danger-color: #fff;
+$btn-danger-border: #0082f0;
+$btn-danger-background-color: #0082f0;
+
+$btn-disabled-color: #999;
+$btn-disabled-border: #ddd;
+$btn-disabled-background-color: #ddd;
+
+$btn-font-size: 14px;
+$btn-padding: 8px 10px;
+
+$btn-small-font-size: 12px;
+$btn-small-padding: 6px 10px;
+
+$btn-medium-font-size: 16px;
+$btn-medium-padding: 10px 20px;
+
+$btn-large-font-size: 18px;
+$btn-large-padding: 15px 56px;
+
+$btn-mini-font-size: 14px;
+$btn-mini-padding: 3px 4px;
+
+//
+// Buttons
+// ----------------------------------------------------------------------------------
+$input-search-color: $default-danger-color;
+$input-search-input-border-width: 3px;
+$input-search-input-font-size: 14px;
+$input-search-input-line-height: 16px;
+
+//
+// Forms
+// ----------------------------------------------------------------------------------
+$form-aligned-label-width: 140px;
+$form-aligned-label-right: 15px;
+$form-aligned-controls-left: 158px;
+
+$input-large-width: 462px;
+$input-medium-width: 232px;
+$input-small-width: 70px;
+
+//
+// Tabs
+// ----------------------------------------------------------------------------------
+$tab-li-color: $default-danger-color;
+
+//
+// Navbars
+// ----------------------------------------------------------------------------------
+$navbar-width: 80px;
+$navbar-height: 40px;
+$navbar-padding: 10px;
+$navbar-collapse-width: 1200px;
+
+$navbar-condensed-font-size: 14px !default;
+$navbar-condensed-line-height: 40px !default;
+$navbar-condensed-padding: 0 18px !default;
+$navbar-condensed-collapse-width: 1200px;
+
+
+$navbar-top-width: auto;
+$navbar-top-height: 12px;
+$navbar-top-line-height: 30px;
+$navbar-top-padding: 9px 10px 9px 15px;
+$navbar-color: $default-danger-color;
+$navbar-primary-color: $default-primary-color;
+
+//
+// Carousels
+// ----------------------------------------------------------------------------------
+$carousel-indicator-size: 12px;
+$carousel-rounded-indicator-size: 25px;
+$carousel-squared-indicator-size: 25px;
+$carousel-indicator-color: $default-danger-color;
+
+//
+// Progresses
+// ----------------------------------------------------------------------------------
+$progress-step-height: 36px;
+$progress-bar-width: 240px;
+$progress-bar-height: 10px;
+$progress-step-active-color: $default-danger-color;
+$progress-step-color: $default-note-color;
+$progress-step-into-width: 128px;
+
+//
+// Paginations
+// ----------------------------------------------------------------------------------
+$pagination-current-color: $default-hover-color;
+$pagination-border-color: $default-border-color;
+$pagination-hover-color: $default-note-color;
+$pagination-danger-current-color: $default-primary-color;
+$pagination-unbordered-current-color: $default-hover-color;
+
+//
+// Modals
+// ----------------------------------------------------------------------------------
+$modal-header-color: $default-danger-color;
+$modal-image-list-border-color: #5f85ba;
+
+//
+// Menus
+// ----------------------------------------------------------------------------------
+$menu-list-padding: 9px;
+
+//
+// Lists
+// ----------------------------------------------------------------------------------
+$list-border-color: $default-danger-color;
+
+//
+// Misc
+// ----------------------------------------------------------------------------------
+$span1-width: 120px;
+$span2-width: 195px;
+$span3-width: 250px;
+$span-padding: 0 8px;
+$badge-color: #fff;
+$badge-background-color: $default-danger-color;
+$badge-primary-color: #fff;
+$badge-primary-background-color: $default-primary-color;
+$block-color: $default-body-color;
+$block-background-color: $default-background-color;
+$block-primary-color: $default-body-color;
+$block-primary-background-color: #f1f5fe;
+$heading-title-color: $default-danger-color;
+$suggestion-li-color: $default-danger-color;

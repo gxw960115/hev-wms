@@ -1,0 +1,89 @@
+{{#component "groupManagement js-comp"}}
+    <style type="text/css">
+        #searchTab {
+            margin-left:20px;
+            margin-top:20px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #searchTab tr td{
+            padding-top:26px;
+        }
+    </style>
+    <div class="easyui-layout"  style="width:100%;height:600px;">
+        <table id="searchTab" >
+                <tr>
+                    <td class="rightCls">Current User:&nbsp;&nbsp;</td>
+                    <td class="leftCls" id="currentUser"></td>
+                </tr>
+                <tr>
+                    <td class="rightCls" > Old Pwd:&nbsp;&nbsp;</td> 
+                    <td class="leftCls" ><input id="oldPwd" type="password" /></td>
+                </tr>
+                <tr>
+                    <td class="rightCls">New Pwd:&nbsp;&nbsp;</td>
+                    <td class="leftCls" ><input id="newPwd" type="password" /></td>
+                </tr>
+                    <td class="rightCls">Confirm Pwd:&nbsp;&nbsp;</td>
+                    <td class="leftCls" ><input id="confirmPwd" type="password" /></td>
+                </tr>
+                <tr>
+                    <td colspan=2 align="center">
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" id="saveBtn">Save</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" id="resetBtn">Reset</a>
+                    </td>
+                </tr>
+            </table>
+    </div>
+
+    <script type="text/javascript">
+        $(function(){
+        	$('#currentUser').html($.session.get('userNickname'));
+            $('#saveBtn').on('click',function(){
+                saveData();
+            })
+            $('#resetBtn').on('click',function(){   	
+            	resetBtn();
+            })  
+        })
+        
+        //更改密码保存
+        function saveData(){
+        	if (!$("#oldPwd").val()) {
+                $.messager.alert('System Information','Old Password The Data not null');
+                return false;
+            }
+        	if (!$("#newPwd").val()) {
+                $.messager.alert('System Information','New Password Data not null');
+                return false;
+            }
+        	if (!$("#confirmPwd").val()) {
+                $.messager.alert('System Information','Confirm Password Data not null');
+                return false;
+            }
+        	
+            $.post("/security/user/updatePassword", {
+                'oldPwd' : $('#oldPwd').val(),
+                'newPwd' : $('#newPwd').val(),
+                'confirmPwd' : $('#confirmPwd').val()
+            }, function(data) {
+                    $.messager.alert('System Information',
+                            data, 'warning');
+            }).error(
+                    function() {
+                        $.messager
+                                .alert(
+                                        'System Information',
+                                        'Network Abnormal!',
+                                        'warning');
+                    });
+        }
+        
+        function resetBtn(){
+            $("#oldPwd").val("");
+            $("#newPwd").val("");
+            $("#confirmPwd").val("");
+        	
+        }
+</script>
+{{/component}}

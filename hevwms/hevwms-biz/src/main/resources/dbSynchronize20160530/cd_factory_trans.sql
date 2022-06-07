@@ -1,0 +1,26 @@
+SELECT
+	ROW_ID,
+	CODE,
+	NAME,
+	DEPT_CODE,
+	DEPT_NAME,
+	PUR_CODE,
+	PUR_NAME,
+	CREATED_BY,
+	DATE_FORMAT(
+		CREATED_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) CREATED_DATE,
+	MODIFY_BY,
+	DATE_FORMAT(
+		MODIFY_DATE,
+		'%Y-%m-%d %H:%i:%s'
+	) MODIFY_DATE,
+	VERSION,
+	SALES_CODE,
+	SALES_NAME,
+	COUNTRY_CODE
+FROM
+	cd_factory
+WHERE
+	country_code='6600'

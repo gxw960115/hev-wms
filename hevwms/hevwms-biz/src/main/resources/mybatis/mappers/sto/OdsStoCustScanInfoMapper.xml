@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haier.hevwms.sto.dao.OdsStoCustScanInfoDAO" >
+	<!-- oracle 分页头 -->
+	<sql id="pagination_Head">
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	<!-- oracle 分页尾 -->
+	<sql id="pagination_Tail">
+	  <![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+  
+	<resultMap id="BaseResultMap" type="odsStoCustScanInfo" >
+	    <result column="ROW_ID" property="rowId" />
+	    <result column="ORDER_TYPE" property="orderType" />
+	    <result column="BIN" property="bin" />
+	    <result column="STO_NO" property="stoNo" />
+	    <result column="STO_ITEM_NO" property="stoItemNo" />
+	    <result column="STODN_NO" property="stodnNo" />
+	    <result column="STODN_ITEM_NO" property="stodnItemNo" />
+	    <result column="BATCH_NO" property="batchNo" />
+	    <result column="PLANT" property="plant" />
+	    <result column="CUSTOMER_MODEL" property="customerModel" />
+	    <result column="LOCATION" property="location" />
+	    <result column="MATERIAL_NO" property="materialNo" />
+	    <result column="MATERIAL_DESP" property="materialDesp" />
+	    <result column="UNIT" property="unit" />
+	    <result column="BARCODE" property="barcode" />
+	    <result column="VENDOR_CODE" property="vendorCode" />
+	    <result column="VENDOR_NAME" property="vendorName" />
+	    <result column="DELIVERY_CODE" property="deliveryCode" />
+	    <result column="DELIVERY_NAME" property="deliveryName" />
+	    <result column="SCANNED_BY" property="scannedBy" />
+	    <result column="SCANNED_DATE" property="scannedDate" jdbcType="DATE" />
+	    <result column="DELIVERY_DATE" property="deliveryDate" jdbcType="DATE" />
+	    <result column="ORDER_ID" property="orderId" />
+	    <result column="ORDER_NO" property="orderNo" />
+	    <result column="CAR_NO" property="carNo" />
+	    <result column="CREATE_BY" property="createBy" />
+	    <result column="CREATE_DATE" property="createDate" jdbcType="DATE" />
+	    <result column="MODIFY_BY" property="modifyBy" />
+	    <result column="MODIFY_DATE" property="modifyDate" jdbcType="DATE" />
+	    <result column="FLAG" property="flag" />
+	    <result column="VERSION" property="version" />
+	    <result column="QTY" property="qty" />
+	    <result column="ORDER_ITEM" property="orderItem" />
+	    <result column="SERIAL_NO" property="serialNo" />
+	    <result column="FINISH_FLAG" property="finishFlag" />
+	    <result column="IN_OUT_FLAG" property="inOutFlag" />
+	    <result column="IN_OUT_MSG" property="inOutMsg" />
+	    <result column="USED_FLAG" property="usedFlag" />
+	    <result column="SUB_LOCATION" property="subLocation" />
+	    <result column="REMARK" property="remark" />
+	</resultMap>
+  
+	<sql id="Base_Column_List" >
+	  ROW_ID, ORDER_TYPE, BIN, STO_NO, STO_ITEM_NO, STODN_NO, STODN_ITEM_NO, BATCH_NO, 
+	  PLANT, CUSTOMER_MODEL, LOCATION, MATERIAL_NO, MATERIAL_DESP, UNIT, BARCODE, VENDOR_CODE, 
+	  VENDOR_NAME, DELIVERY_CODE, DELIVERY_NAME, SCANNED_BY, SCANNED_DATE, DELIVERY_DATE, 
+	  ORDER_ID, ORDER_NO, CAR_NO, CREATE_BY, CREATE_DATE, MODIFY_BY, MODIFY_DATE, FLAG, 
+	  VERSION, QTY, ORDER_ITEM, SERIAL_NO, FINISH_FLAG, IN_OUT_FLAG, IN_OUT_MSG, USED_FLAG, 
+	  SUB_LOCATION, REMARK
+	</sql>
+	
+	<!-- 无条件查询数据库所有字段 -->
+	<sql id="selectAllOdsStoCustScanInfoColumns">
+		select 
+		<include refid="Base_Column_List" /> 
+		from ODS_STO_CUST_SCAN_INFO
+	</sql>
+	
+	<sql id="searchOdsStoCustScanInfo_fragement">
+		where 1=1 
+		<if test="odsStoCustScanInfo.rowId != null" >
+	      and ROW_ID = #{odsStoCustScanInfo.rowId},
+	    </if>
+	    <if test="odsStoCustScanInfo.orderType != null and odsStoCustScanInfo.orderType != ''" >
+	      and ORDER_TYPE = #{odsStoCustScanInfo.orderType}
+	    </if>
+	    <if test="odsStoCustScanInfo.bin != null and odsStoCustScanInfo.bin != ''" >
+	      and BIN like '%'||#{odsStoCustScanInfo.bin}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.stoNo != null and odsStoCustScanInfo.stoNo != ''" >
+	      and STO_NO like '%'||#{odsStoCustScanInfo.stoNo}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.stodnNo != null and odsStoCustScanInfo.stodnNo != ''" >
+	      and STODN_NO like '%'||#{odsStoCustScanInfo.stodnNo}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.stoItemNo != null and odsStoCustScanInfo.stoItemNo != ''" >
+	      and STO_ITEM_NO like '%'||#{odsStoCustScanInfo.stoItemNo}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.plant != null and odsStoCustScanInfo.plant != ''" >
+	      and PLANT like '%'||#{odsStoCustScanInfo.plant}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.customerModel != null and odsStoCustScanInfo.customerModel != ''" >
+	      and CUSTOMER_MODEL like '%'||#{odsStoCustScanInfo.customerModel}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.location != null and odsStoCustScanInfo.location != ''" >
+	      and LOCATION IN (${odsStoCustScanInfo.location})
+	    </if>
+	    <if test="odsStoCustScanInfo.materialNo != null and odsStoCustScanInfo.materialNo != ''" >
+	      and MATERIAL_NO like '%'||#{odsStoCustScanInfo.materialNo}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.barcode != null and odsStoCustScanInfo.barcode != ''" >
+	      and BARCODE like '%'||#{odsStoCustScanInfo.barcode}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.orderNo != null and odsStoCustScanInfo.orderNo != ''" >
+	      and ORDER_NO like '%'||#{odsStoCustScanInfo.orderNo}||'%'
+	    </if>
+	    <if test="odsStoCustScanInfo.flag != null" >
+	      and FLAG = #{odsStoCustScanInfo.flag}
+	    </if>
+	    <if test="odsStoCustScanInfo.finishFlag != null and odsStoCustScanInfo.finishFlag != ''" >
+	      and FINISH_FLAG = #{odsStoCustScanInfo.finishFlag}
+	    </if>
+	    <if test="odsStoCustScanInfo.inOutFlag != null and odsStoCustScanInfo.inOutFlag != ''" >
+	      and IN_OUT_FLAG = #{odsStoCustScanInfo.inOutFlag}
+	    </if>
+	    <if test="odsStoCustScanInfo.begin != null and odsStoCustScanInfo.begin != ''" >
+	      	<![CDATA[
+				and CREATE_DATE >= TO_DATE(#{odsStoCustScanInfo.begin}||' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+	    <if test="odsStoCustScanInfo.end != null and odsStoCustScanInfo.end != ''" >
+	      	<![CDATA[
+				and CREATE_DATE <= TO_DATE(#{odsStoCustScanInfo.end}||' 23:59:59', 'yyyy-mm-dd hh24:mi:ss')
+			]]>
+	    </if>
+	</sql>
+	
+	<select id="get" resultMap="BaseResultMap" parameterType="long">
+		<include refid="selectAllOdsStoCustScanInfoColumns" />
+		where ROW_ID = #{rowId}
+	</select>
+	
+	<select id="getAll" resultMap="BaseResultMap">
+		<include refid="selectAllOdsStoCustScanInfoColumns" />
+	</select>
+	
+	<delete id="delete" parameterType="odsStoCustScanInfo" >
+	  delete from ODS_STO_CUST_SCAN_INFO where ROW_ID = #{rowId}
+	</delete>
+  
+  	<!-- 分页查询 -->
+	<select id="searchOdsStoCustScanInfoByPage" resultMap="BaseResultMap">
+		<include refid="pagination_Head" />
+		<include refid="selectAllOdsStoCustScanInfoColumns" />
+		<include refid="searchOdsStoCustScanInfo_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchOdsStoCustScanInfoCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="selectAllOdsStoCustScanInfoColumns" />
+		<include refid="searchOdsStoCustScanInfo_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	
+	<!-- 条件查询列表 -->
+	<select id="getListByParam" resultMap="BaseResultMap">
+		<include refid="selectAllOdsStoCustScanInfoColumns" />
+		<include refid="searchOdsStoCustScanInfo_fragement" />
+	</select>
+
+	<insert id="save" parameterType="odsStoCustScanInfo">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_STO_CUST_SCAN_INFO_ID.NEXTVAL AS id FROM DUAL
+		</selectKey>
+		<![CDATA[
+		   INSERT INTO ODS_STO_CUST_SCAN_INFO(
+			   ROW_ID,
+			   ORDER_TYPE,
+			   BIN,
+			   STO_NO,
+			   STO_ITEM_NO,
+			   STODN_NO,
+			   STODN_ITEM_NO,
+			   BATCH_NO,
+			   PLANT,
+			   CUSTOMER_MODEL,
+			   LOCATION,
+			   MATERIAL_NO,
+			   MATERIAL_DESP,
+			   UNIT,
+			   BARCODE,
+			   VENDOR_CODE,
+			   VENDOR_NAME,
+			   DELIVERY_CODE,
+			   DELIVERY_NAME,
+			   SCANNED_BY,
+			   SCANNED_DATE,
+			   DELIVERY_DATE,
+			   ORDER_ID,
+			   ORDER_NO,
+			   CAR_NO,
+			   CREATE_BY,
+			   CREATE_DATE,
+			   MODIFY_BY,
+			   MODIFY_DATE,
+			   FLAG,
+			   VERSION,
+			   QTY,
+			   ORDER_ITEM,
+			   SERIAL_NO,
+			   FINISH_FLAG,
+			   IN_OUT_FLAG,
+			   IN_OUT_MSG,
+			   USED_FLAG,
+			   SUB_LOCATION,
+			   REMARK,
+			   FIRST_IN_DATE
+		   )
+		   VALUES(
+			   #{rowId},
+			   #{orderType},
+			   #{bin},
+			   #{stoNo},
+			   #{stoItemNo},
+			   #{stodnNo},
+			   #{stodnItemNo},
+			   #{batchNo},
+			   #{plant},
+			   #{customerModel},
+			   #{location},
+			   #{materialNo},
+			   #{materialDesp},
+			   #{unit},
+			   #{barcode},
+			   #{vendorCode},
+			   #{vendorName},
+			   #{deliveryCode},
+			   #{deliveryName},
+			   #{scannedBy},
+			   #{scannedDate},
+			   #{deliveryDate},
+			   #{orderId},
+			   #{orderNo},
+			   #{carNo},
+			   #{createBy},
+			   #{createDate},
+			   #{modifyBy},
+			   #{modifyDate},
+			   #{flag},
+			   #{version},
+			   #{qty},
+			   #{orderItem},
+			   #{serialNo},
+			   #{finishFlag},
+			   #{inOutFlag},
+			   #{inOutMsg},
+			   #{usedFlag},
+			   #{subLocation},
+			   #{remark},
+			   #{firstInDate}
+		   )
+		  ]]>
+	</insert>
+
+	<select id="deleteScanInfoByBarcode" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_STOCUST_DELETE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.barcode,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.doctype,mode=IN,jdbcType=VARCHAR},
+          #{in.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR},
+          #{out.matno,mode=OUT,jdbcType=VARCHAR},
+          #{out.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{out.location,mode=OUT,jdbcType=VARCHAR},
+          #{out.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{out.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+
+	<select id="orderScanIn" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_STOCUST_IN_CHECK(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.bin,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.version,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+	<select id="orderScanOut" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_BARCODE_STOCUST_OUT_CHECK(
+          #{inpara.orno,mode=IN,jdbcType=VARCHAR},
+          #{inpara.barcode,mode=IN,jdbcType=VARCHAR},
+          #{inpara.user,mode=IN,jdbcType=VARCHAR},
+          #{inpara.doctype,mode=IN,jdbcType=VARCHAR},
+          #{inpara.version,mode=IN,jdbcType=VARCHAR},
+          #{inpara.qty,mode=IN,jdbcType=VARCHAR},
+          #{inpara.remark,mode=IN,jdbcType=VARCHAR},
+          #{inpara.ordertype,mode=IN,jdbcType=VARCHAR},
+          #{result.status,mode=OUT,jdbcType=VARCHAR},
+          #{result.msg,mode=OUT,jdbcType=VARCHAR},
+          #{result.matno,mode=OUT,jdbcType=VARCHAR},
+          #{result.matdesc,mode=OUT,jdbcType=VARCHAR},
+          #{result.location,mode=OUT,jdbcType=VARCHAR},
+          #{result.scanqty,mode=OUT,jdbcType=VARCHAR},
+          #{result.orderqty,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+
+	<select id="stoCustDelivery" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_STOCUST_DELIVERY(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+	<select id="stoCustReceive" statementType="CALLABLE">
+        <![CDATA[
+          {call PRC_GOODS_STOCUST_RECEIVE(
+          #{in.orno,mode=IN,jdbcType=VARCHAR},
+          #{in.user,mode=IN,jdbcType=VARCHAR},
+          #{in.docType,mode=IN,jdbcType=VARCHAR},
+          #{in.orderType,mode=IN,jdbcType=VARCHAR},
+          #{in.version,mode=IN,jdbcType=VARCHAR},
+          #{out.status,mode=OUT,jdbcType=VARCHAR},
+          #{out.msg,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+    </select>
+</mapper>

@@ -1,0 +1,111 @@
+{{#component "poInfo js-comp"}}
+    <script src="/assets/scripts/upload/ajaxfileupload.js"></script>
+
+    <div id="podDiv" class="easyui-layout"  style="width:100%;padding: 20px;">
+        <div style="margin-bottom: 20px">
+            <p style="margin-bottom: 10px">Po Receipt</p>
+            <input style="margin-bottom: 10px" name="file" id="poIn" type="file" value="Please select file upload"/>
+            <a href="/export/poReceipt" class="btnStyle downloadWhiteBtn">Download Template Po Receipt</a>
+        </div>
+
+        <div style="margin-bottom: 20px">
+            <p style="margin-bottom: 10px">So Delivery</p>
+            <input style="margin-bottom: 10px" name="file" id="poOut" type="file" value="Please select file upload"/>
+            <a href="/export/sODelivery" class="btnStyle downloadWhiteBtn">Download So Delivery Template</a>
+        </div>
+
+        <div style="margin-bottom: 20px">
+            <p style="margin-bottom: 10px">Sto Receipt</p>
+            <input style="margin-bottom: 10px" name="file" id="stoIn" type="file" value="Please select file upload"/>
+            <a href="/export/stoReceipt" class="btnStyle downloadWhiteBtn">Download Template Sto Receipt</a>
+        </div>
+
+        <div style="margin-bottom: 20px">
+            <p style="margin-bottom: 10px">Sto Delivery</p>
+            <input style="margin-bottom: 10px" name="file" id="stoOut" type="file" value="Please select file upload"/>
+            <a href="/export/stoDelivery" class="btnStyle downloadWhiteBtn">Download Sto Delivery Template</a>
+        </div>
+
+
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $('#poIn').on('change', function() {
+                $.ajaxFileUpload({
+                    url: '/pdaPo/importPoReceiptExcel',
+                    secureuri: false,
+                    fileElementId: 'poIn',
+                    dataType: 'jsonp',
+                    success: function (data, status){
+                        $('#fileInput').val("");
+                        $.messager.alert('System Information',data,'info');
+                        $('#dataGrid').datagrid('reload');
+                    },
+                    error:function (data, status, e){
+                        $.messager.alert('System Information','File upload error, please contact with system administrator.','error');
+
+                    }
+                });
+                return;
+            });
+
+            $('#poOut').on('change', function() {
+                $.ajaxFileUpload({
+                    url: '/pdaSo/importSODeliveryExcel',
+                    secureuri: false,
+                    fileElementId: 'poOut',
+                    dataType: 'jsonp',
+                    success: function (data, status){
+                        $('#fileInput').val("");
+                        $.messager.alert('System Information',data,'info');
+                        $('#dataGrid').datagrid('reload');
+                    },
+                    error:function (data, status, e){
+                        $.messager.alert('System Information','File upload error, please contact with system administrator.','error');
+
+                    }
+                });
+                return;
+            });
+
+            $('#stoIn').on('change', function() {
+                $.ajaxFileUpload({
+                    url: '/pdaSto/importSTOReceiptExcel',
+                    secureuri: false,
+                    fileElementId: 'stoIn',
+                    dataType: 'jsonp',
+                    success: function (data, status){
+                        $('#fileInput').val("");
+                        $.messager.alert('System Information',data,'info');
+                        $('#dataGrid').datagrid('reload');
+                    },
+                    error:function (data, status, e){
+                        $.messager.alert('System Information','File upload error, please contact with system administrator.','error');
+
+                    }
+                });
+                return;
+            });
+
+            $('#stoOut').on('change', function() {
+                $.ajaxFileUpload({
+                    url: '/pdaSto/importSTODeliveryExcel',
+                    secureuri: false,
+                    fileElementId: 'stoOut',
+                    dataType: 'jsonp',
+                    success: function (data, status){
+                        $('#fileInput').val("");
+                        $.messager.alert('System Information',data,'info');
+                        $('#dataGrid').datagrid('reload');
+                    },
+                    error:function (data, status, e){
+                        $.messager.alert('System Information','File upload error, please contact with system administrator.','error');
+
+                    }
+                });
+                return;
+            });
+        })
+
+    </script>
+{{/component}}

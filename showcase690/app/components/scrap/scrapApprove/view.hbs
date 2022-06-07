@@ -1,0 +1,234 @@
+{{#component "scrapApproveOrder js-comp"}}
+    <div id="scrapAppDiv" class="easyui-layout"  style="width:101%;">
+        <div class="searchDivlow" region="north" style="border: 0 ">
+            <table id="searchTab" style="margin-left: 10px">
+                <tr>
+                    <td style="text-align: right">Scrap No:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="orderNoP" type="text" /></td>
+                    <td class="rightCls">Material NO:&nbsp;&nbsp;</td>
+                    <td class="leftCls"><input id="materialNoP" type="text" /></td>
+                    <td class="rightCls">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="begin" style="width:155px"  onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>&nbsp;&nbsp;
+                        - &nbsp;&nbsp;<input id="end" style="width:155px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" onclick="searchOdsScrapOrder()">Query</a>
+                    
+                    <a href="javascript:void(0)" class="btnStyle saveBtn" onclick="confirmOrder()">Confirm</a>
+              	    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px; overflow-y: hidden;">
+            <table id="odsScrapOrderGrid">
+
+            </table>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var matColumns="";
+    $(function(){
+    	$('#scrapAppDiv').height(suitHeight);
+    	var selectedFlag = false;
+        var curRowIndex=-1;
+        
+      	//初始化日期
+        var date=new Date();
+        var y=date.getFullYear();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(date,-7));
+        $('#end').val(date);
+        
+        var columns=[[{
+            field : 'ck1',
+            checkbox : true,
+            width : 60,
+            align : 'center'
+        },{
+            field : 'scrapNo',
+            title : 'Order No',
+            width:100,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'checkFlag',
+            title : 'Check Flag',
+            align : 'center',
+            width : 100,
+            sortable : true,
+            formatter : function(val) {
+                if(val == 0){
+                	return "<font color='red'>Not Confirmed</font>";
+                } else if (val == 1){
+                	return "<font color='green'>Confirmed</font>";
+                }
+            }
+        }, {
+            field : 'plant',
+            title : 'Plant',
+            width:55,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width:80,
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width:100,
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            width : 220,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'requireQty',
+            title : 'Require Qty',
+            width:95,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'finishQty',
+            title : 'Scanned Qty',
+            align : 'center',
+            width:95,
+            sortable : true
+        }, {
+            field : 'unit',
+            title : 'Unit',
+            width:50,
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'flag',
+            title : 'Delete Flag',
+            width:90,
+            align : 'center',
+            formatter : function(val) {
+                if (val == '0') {
+                    return 'Not Delete';
+                } else if (val == '1') {
+                    return 'Delete';
+                }
+                return val;
+            }
+        }]];
+
+        var grid = $('#odsScrapOrderGrid').datagrid({
+            rownumbers : true,
+            columns : columns,
+            pagination : true,
+            striped : true,
+            pageNumber : 1,
+            fit : true,
+            singleSelect : false,
+            url: '',
+            method:'post',
+            onLoadSuccess : function(data) {
+                if (data.mess != null) {
+                    $.messager.alert('System Information', data.mess, 'warning');
+                    return;
+                }
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information>','No records found.','warning');
+                }
+                $(this).datagrid("fixRownumber");
+            },
+            onLoadError:function(){
+                $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+            onClickRow:function(rowIndex, rowData){
+            	if (!selectedFlag){
+                	grid.datagrid('selectRow', rowIndex);
+                	selectedFlag = true;
+                	curRowIndex = rowIndex;
+            	}else{
+            		if (curRowIndex == rowIndex){
+//             			grid.datagrid('unselectRow', rowIndex);
+            			grid.datagrid('clearSelections');
+            			selectedFlag = false;
+            		}else{
+            			grid.datagrid('clearSelections');
+                    	grid.datagrid('selectRow', rowIndex);
+                    	selectedFlag = true;
+                    	curRowIndex = rowIndex;
+            		}
+            	}
+            }
+        });
+        initPagination(grid);
+        gridScroll(grid);
+    })
+
+    // 查询
+    function searchOdsScrapOrder(){
+        var grid=$('#odsScrapOrderGrid').datagrid({
+            url:'/scrap/searchOdsScrapOrder',
+            queryParams: {
+                'flag' : '0',
+                'checkFlag' : '0',
+                'scrapNo' : $('#orderNoP').val(),
+                'materialNo' : $('#materialNoP').val(),
+                'begin' : $('#begin').val(),
+                'end' : $('#end').val(),
+                'location':$('#locationP').val()
+            },
+            onLoadSuccess : function(data) {
+                if (data.total == 0 && data.rows.length == 0) {
+                    $.messager.alert('System Information', 'No records found.','warning');
+                    gridScroll(grid);
+                }
+                $(this).datagrid("fixRownumber");
+            }
+        });
+        initPagination(grid);
+    }
+
+    // 确认
+    function confirmOrder() {
+        var row = $('#odsScrapOrderGrid').datagrid('getChecked');
+        if (row.length < 1) {
+            $.messager.alert('System Information', 'Please select one data!', 'warning');
+            return;
+        }
+
+        $.messager.confirm("System Information", "Are You Sure Confirm Data?", function (data) {
+            if (data) {
+                var codes = new Array();
+                for ( var i = 0; i < row.length; i++) {
+                    codes.push(row[i].rowId);
+                }
+                $.post(
+                    "/scrap/approveScrapOrder",
+                    {'rowIds' : codes.join()},
+                    function(data) {
+                        if (data == 'approveSuccess') {
+                            $.messager.alert('System Information','Approve Success!','warning');
+                            searchOdsScrapOrder();
+                        } else {
+                            $.messager.alert('System Information','Approve Failure!,' + data, 'warning');
+                        }
+                    }
+                ).error(
+                    function() {
+                        $.messager.alert('System Information', 'Network Abnormal!', 'warning');
+                        searchOdsScrapOrder();
+                    }
+                );
+            }
+        });
+    }
+
+    </script>
+{{/component}}

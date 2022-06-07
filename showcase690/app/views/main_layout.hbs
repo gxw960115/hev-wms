@@ -1,0 +1,45 @@
+{{#partial "title"}}{{{block "realTitle"}}}{{/partial}}
+{{#partial "body"}}
+<!--[if lt IE 7]>
+    <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+<![endif]-->
+
+{{inject "main-header"}}
+{{{block "realtopmenu"}}}
+
+<div class="central">
+    <div class="central-left">
+        {{{block "realmenu"}}}
+    </div>
+    <div class="central-right">
+        {{{block "realBody"}}}
+    </div>
+</div>
+{{inject "footer"}}
+{{/partial}}
+{{#partial "script"}}
+    {{{block "mainScript"}}}
+    <script id='ewizardx-srcipt' type='text/javascript' src='http://s.haier.com/haierproject/fankui-new/fankui/static/js/haier-ewizardx-0.0.1.js?taskid=286&types=fankui&isnew=1'></script>
+    <script type='text/javascript'>
+        var ewizard = new Ewizard (
+            {name:'ewizard',home:false,
+                feedback:true,survey:false,
+                top:true,assess:false,
+                dcode:false,
+                surveyurl:'',
+                dcodeType:'0',
+                dcodePath:'',
+                dcodeURL:'2',
+                dcodeContent:'',
+                estyle:{bgcolor:'2',
+                        position:'right',
+                        size:'50*50',
+                        feedbackText:'意见反馈',
+                        assessText:'随时点评体验',
+                        customColor:'#f01d28'
+                        }
+            });
+        ewizard.start();
+    </script>
+{{/partial}}
+{{> layout}}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- Customer Scan Info 管理 -->
+	<bean id="odsCustomerScanInfoServiceClient"
+		class="com.haier.openplatform.wms.customer.impl.OdsCustomerScanInfoServiceClientImpl">
+		<property name="odsCustomerScanInfoService" ref="odsCustomerScanInfoService"></property>
+		<property name="rfWsService" ref="rfWsService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.customer.service.OdsCustomerScanInfoServiceClient"
+		owner="Hevwms" ref="odsCustomerScanInfoServiceClient" version="5.0" protocol="dubbo"
+		delay="-1" registry="qingdaoRegistry690" />
+
+</beans>

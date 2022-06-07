@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 使用dubbo协议暴露服务 -->
+		
+	<!-- PSI Report，add by yanfengdan@20151201 -->
+	<bean id="psiReportServiceClient"
+		class="com.haier.openplatform.wms.report.service.impl.PsiReportServiceClientImpl">
+		<property name="psiReportService" ref="psiReportService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.report.service.PsiReportServiceClient"
+		owner="Hevwms" ref="psiReportServiceClient" protocol="dubbo" version="5.0"
+		delay="-1" registry="qingdaoRegistry690" />	
+		
+	<!-- Sales Return Report，add by yanfengdan@20151201 -->
+	<bean id="salesReturnReportServiceClient"
+		class="com.haier.openplatform.wms.report.service.impl.SalesReturnReportServiceClientImpl">
+		<property name="salesReturnReportService" ref="salesReturnReportService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.report.service.SalesReturnReportServiceClient"
+		owner="Hevwms" ref="salesReturnReportServiceClient" protocol="dubbo" version="5.0"
+		delay="-1" registry="qingdaoRegistry690" />	
+		
+	<!-- STO Intransit Report，add by yanfengdan@20151201 -->
+	<bean id="stoIntransitReportServiceClient"
+		class="com.haier.openplatform.wms.report.service.impl.StoIntransitReportServiceClientImpl">
+		<property name="stoIntransitReportService" ref="stoIntransitReportService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.report.service.StoIntransitReportServiceClient"
+		owner="Hevwms" ref="stoIntransitReportServiceClient" protocol="dubbo" version="5.0"
+		delay="-1" registry="qingdaoRegistry690" />
+			
+	<!-- Consignment Report，add by yanfengdan@20151201 -->
+	<bean id="consignmentReportServiceClient"
+		class="com.haier.openplatform.wms.report.service.impl.ConsignmentReportServiceClientImpl">
+		<property name="consignmentReportService" ref="consignmentReportService"></property>
+	</bean>
+	<dubbo:service
+		interface="com.haier.openplatform.wms.report.service.ConsignmentReportServiceClient"
+		owner="Hevwms" ref="consignmentReportServiceClient" protocol="dubbo" version="5.0"
+		delay="-1" registry="qingdaoRegistry690" />	
+
+</beans>

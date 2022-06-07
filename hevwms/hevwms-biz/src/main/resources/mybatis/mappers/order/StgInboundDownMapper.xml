@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haier.hevwms.order.dao.StgInboundDownDAO">
+	<!-- =========================================================== -->
+	<!-- 一些公共变量设置 -->
+	<!-- =========================================================== -->
+	<!-- Oracle 分页头 -->
+	<sql id="pagination_Head" >
+		<![CDATA[select * from ( select row_.*, rownum rownum_ from ( ]]>
+	</sql>
+	 <!-- Oracle 分页尾 -->
+	<sql id="pagination_Tail">
+		<![CDATA[) row_ where rownum <= #{pager.pageSize} * #{pager.currentPage} ) where rownum_ >= #{pager.firstResult} + 1]]>
+	</sql>
+	<!-- count * from -->
+	<sql id="count_Head">
+		<![CDATA[select count(*) from ( ]]>
+	</sql>
+	<sql id="count_Tail">
+		<![CDATA[)]]>
+	</sql>
+
+	<sql id="selectAllStgInboundDownColumns">
+		<![CDATA[
+		select
+			stg_inbound_down_.ROW_ID,
+			stg_inbound_down_.PO_NO,
+			stg_inbound_down_.PO_ITEM_NO,
+			stg_inbound_down_.INBOUND_DELIVERY_NO,
+			stg_inbound_down_.IND_CREATE_DATE,
+			stg_inbound_down_.IND_LAST_MODIFY_DATE,
+			stg_inbound_down_.INBOUND_ITEM_NO,
+			stg_inbound_down_.MATERIAL_NO,
+			CASE WHEN 
+				(
+					stg_inbound_down_.CUSTOMER_MODEL is null or stg_inbound_down_.CUSTOMER_MODEL = ''
+				) 
+				THEN md_mat_info.customer_model 
+            	ELSE stg_inbound_down_.CUSTOMER_MODEL 
+            	END AS CUSTOMER_MODEL,
+			stg_inbound_down_.MATERIAL_DESP,
+			stg_inbound_down_.QTY,
+			stg_inbound_down_.UNIT,
+			stg_inbound_down_.FINISH_QTY,
+			stg_inbound_down_.INBOUND_LOCATION,
+			stg_inbound_down_.CREATE_DATE,
+			stg_inbound_down_.MODIFY_DATE,
+			stg_inbound_down_.VERSION,
+			s.sap_flag,
+			1
+		from 
+			STG_INBOUND_DOWN stg_inbound_down_
+			left join md_mat_info on stg_inbound_down_.MATERIAL_NO = md_mat_info.MATERIAL_NO
+			left join 
+			(
+				select t.sap_order_no,t.sap_order_item,max(t.sap_flag) as sap_flag 
+				from ods_order_info t
+				WHERE t.doc_tpye = 'INBOUND'
+				group by t.sap_order_no,t.sap_order_item 
+			) s 
+			on (
+				s.sap_order_no=stg_inbound_down_.INBOUND_DELIVERY_NO 
+				and s.sap_order_item=stg_inbound_down_.INBOUND_ITEM_NO
+				)
+			left join stg_po_down po 
+			on po.po_no = stg_inbound_down_.po_no 
+			and po.po_item_no = stg_inbound_down_.po_item_no
+		]]>
+	</sql>
+	
+	<!-- =========================================================== -->
+	<!-- 定义resultMap -->
+	<!-- =========================================================== -->
+	<resultMap id="stgInboundDownMap" type="stgInboundDown">
+		<id property="rowId" column="row_ID" javaType="long" jdbcType="NUMERIC" />
+		<result property="poNo" column="PO_NO" />
+		<result property="poItemNo" column="PO_ITEM_NO" />
+		<result property="inboundDeliveryNo" column="INBOUND_DELIVERY_NO" />
+		<result property="indCreateDate" column="IND_CREATE_DATE" />
+		<result property="indLastModifyDate" column="IND_LAST_MODIFY_DATE" />
+		<result property="inboundItemNo" column="INBOUND_ITEM_NO" />
+		<result property="materialNo" column="MATERIAL_NO" />
+		<result property="customerModel" column="CUSTOMER_MODEL" />
+		<result property="materialDesp" column="MATERIAL_DESP" />
+		<result property="qty" column="QTY" />
+		<result property="inboundLocation" column="INBOUND_LOCATION" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+		<result property="version" column="VERSION" />
+		<result property="unit" column="UNIT" />
+		<result property="finishQty" column="FINISH_QTY" />
+		<result property="sapFlag" column="SAP_FLAG" />
+	</resultMap>
+	<!-- =========================================================== -->
+	<!-- DAO方法中的基本增删改查方法 -->
+	<!-- =========================================================== -->
+	<select id="getAll" resultMap="stgInboundDownMap">
+		<include refid="selectAllStgInboundDownColumns" />
+	</select>
+	<select id="get" resultMap="stgInboundDownMap" parameterType="long">
+		<include refid="selectAllStgInboundDownColumns" />
+		<![CDATA[
+		where stg_inbound_down_.row_id = #{rowId}
+		]]>
+	</select>
+	<delete id="delete" parameterType="long">
+		<![CDATA[
+		delete from STG_INBOUND_DOWN where row_id = #{rowId}
+		]]>
+	</delete>
+	<delete id="deleteAll">
+		<![CDATA[
+		delete from STG_INBOUND_DOWN where row_id in
+		]]>
+		<foreach collection="idList" item="item" index="index" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<insert id="save" parameterType="stgInboundDown">
+		<selectKey keyProperty="rowId" order="BEFORE" resultType="long">
+			SELECT SEQ_STG_INBOUND_DOWN_ID.NEXTVAL AS ID FROM DUAL
+		</selectKey>	
+		<![CDATA[
+		insert into STG_INBOUND_DOWN
+		  (
+		  		PO_NO
+				,PO_ITEM_NO
+				,INBOUND_DELIVERY_NO
+				,IND_CREATE_DATE
+				,IND_LAST_MODIFY_DATE
+				,INBOUND_ITEM_NO
+				,MATERIAL_NO
+				,CUSTOMER_MODEL
+				,MATERIAL_DESP
+				,QTY
+				,INBOUND_LOCATION
+				,CREATE_DATE
+				,MODIFY_DATE
+		   )
+		values
+		  (
+		  		#{poNo}
+				,#{poItemNo}
+				,#{inboundDeliveryNo}
+				,#{indCreateDate}
+				,#{indLastModifyDate}
+				,#{inboundItemNo}
+				,#{materialNo}
+				,#{customerModel}
+				,#{materialDesp}
+				,#{qty}
+				,#{inboundLocation}
+				,#{createDate}
+				,#{modifyDate}
+		   )
+	    ]]>
+	</insert>
+	<update id="update" parameterType="stgInboundDown">
+		<![CDATA[
+		update STG_INBOUND_DOWN
+		   set 1=1
+				,PO_NO = #{poNo}
+				,PO_ITEM_NO = #{poItemNo}
+				,INBOUND_DELIVERY_NO = #{inboundDeliveryNo}
+				,IND_CREATE_DATE = #{indCreateDate}
+				,IND_LAST_MODIFY_DATE = #{indLastModifyDate}
+				,INBOUND_ITEM_NO = #{inboundItemNo}
+				,MATERIAL_NO = #{materialNo}
+				,CUSTOMER_MODEL = #{customerModel}
+				,MATERIAL_DESP = #{materialDesp}
+				,QTY = #{qty}
+				,INBOUND_LOCATION = #{inboundLocation}
+				,CREATE_DATE = #{createDate}
+				,MODIFY_DATE = #{modifyDate}
+				,VERSION = #{version}
+		 where row_id = #{rowId}
+		]]>
+	</update>
+	<sql id="searchStgInboundDown_fragement">
+		<include refid="selectAllStgInboundDownColumns" />
+		where 1=1
+		<if test="stgInboundDown.finishFlag == 1 ">
+			and s.sap_flag='1'
+		</if>
+		<if test="stgInboundDown.finishFlag == 0 ">
+		<![CDATA[ and (stg_inbound_down_.finish_qty = 0 or s.sap_flag <> '1') ]]>	
+		<!-- and s.sap_flag is null or s.sap_flag != '1' -->
+		</if>
+
+		<if test="stgInboundDown.poNo != null">
+			and stg_inbound_down_.PO_NO like '%'||#{stgInboundDown.poNo}||'%' 
+		</if>
+
+		<if test="stgInboundDown.poItemNo != null and stgInboundDown.poItemNo != '' ">
+		<![CDATA[
+			and stg_inbound_down_.PO_ITEM_NO like %'||#{stgInboundDown.poItemNo}||'%' 
+			]]>
+		</if>
+		
+		<if test="stgInboundDown.inboundDeliveryNo != null">
+			and stg_inbound_down_.INBOUND_DELIVERY_NO like '%'||#{stgInboundDown.inboundDeliveryNo}||'%' 
+		</if>
+		<if test="stgInboundDown.indCreateDate != null">
+			and stg_inbound_down_.IND_CREATE_DATE like '%'||#{stgInboundDown.indCreateDate}||'%' 
+		</if>
+		<if test="stgInboundDown.indLastModifyDate != null">
+			and stg_inbound_down_.IND_LAST_MODIFY_DATE like '%'||#{stgInboundDown.indLastModifyDate}||'%' 
+		</if>
+
+		<if test="stgInboundDown.materialNo != null">
+			and stg_inbound_down_.MATERIAL_NO like '%'||#{stgInboundDown.materialNo}||'%' 
+		</if>
+
+		<if test="stgInboundDown.userType != null and stgInboundDown.userType != 1">
+		    and po.plant in 
+		    (
+		    	select distinct w.code 
+		    	from cd_user_wh_loc u, cd_wh_info w 
+				where w.row_id = u.wh_id and u.user_id=#{stgInboundDown.userId}
+			)
+			and stg_inbound_down_.INBOUND_LOCATION in 
+			(
+				select loc_code
+				from cd_user_wh_loc 
+				where user_id=#{stgInboundDown.userId}
+			)
+		</if>
+
+		<if test="stgInboundDown.begin != null and stgInboundDown.begin != ''">
+			<![CDATA[
+				and stg_inbound_down_.create_date >= TO_DATE(concat(#{stgInboundDown.begin},' 00:00:00'),'yyyy-mm-dd hh24:mi:ss') 
+			]]>
+		</if>
+		<if test="stgInboundDown.end != null and stgInboundDown.end != ''">
+			<![CDATA[
+				and stg_inbound_down_.create_date <= TO_DATE(concat(#{stgInboundDown.end},' 23:59:59'),'yyyy-mm-dd hh24:mi:ss') 
+			]]>
+		</if>
+		<if test="stgInboundDown.inboundLocation != null and stgInboundDown.inboundLocation != ''">
+			and stg_inbound_down_.INBOUND_LOCATION like '%'||#{stgInboundDown.inboundLocation}||'%' 
+		</if>
+		order by stg_inbound_down_.IND_CREATE_DATE
+	</sql>
+	<select id="searchStgInboundDowns" resultMap="stgInboundDownMap">
+		<include refid="pagination_Head" />
+		<include refid="searchStgInboundDown_fragement" />
+		<include refid="pagination_Tail" />
+	</select>
+	<select id="searchStgInboundDownsCount" resultType="long">
+		<include refid="count_Head" />
+		<include refid="searchStgInboundDown_fragement" />
+		<include refid="count_Tail" />
+	</select>
+	<select id="getStgInboundDownByParam" resultMap="stgInboundDownMap">
+		<include refid="searchStgInboundDown_fragement" />
+	</select>
+	<select id="getStgInboundDownsByParam" resultMap="stgInboundDownMap">
+		<include refid="searchStgInboundDown_fragement" />
+	</select>
+</mapper>

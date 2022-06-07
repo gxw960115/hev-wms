@@ -1,0 +1,349 @@
+{{#component "stocktaking js-comp"}}
+    <style type="text/css">
+        #addPdForm{
+            padding-top: 2px;
+            padding-left: 10px;
+            font-size: 14px;
+            color: #636E7B;
+        }
+        #addPdForm input{
+            height: 25px;
+            width: 155px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+        }
+        #addPdForm table tr{
+            height: 32px;;
+        }
+        #addPdForm table select{
+            width: 155px;
+            height: 25px;
+        }
+        .locTr td{
+            padding-top: 5px;
+        }
+    </style>
+    <div id="stockDeSumDiv" class="easyui-layout"  style="width:100%;">
+        <div class="searchDiv" region="north">
+            <table id="searchTab">
+                 <tr>
+                    <td style="text-align: right"> Order No:&nbsp;&nbsp;</td> 
+					<td class="leftCls"><input id="orderNo" type="text" /></td>
+                    <td class="rightCls">Material No:&nbsp;&nbsp;
+					<td class="leftCls"><input id="materialNo" type="text" /></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right">Create Date:&nbsp;&nbsp;</td>
+                    <td class="leftCls" colspan="3"><input id="begin" style="width:208px" onClick="WdatePicker({lang:'en',maxDate:'#F{$dp.$D(\'end\')}',dateFmt:'yyyy-MM-dd'})" readonly/>
+                        - <input id="end" style="width:208px" onClick="WdatePicker({lang:'en',minDate:'#F{$dp.$D(\'begin\')}',dateFmt:'yyyy-MM-dd'})" readonly/></td>
+                </tr>
+            </table>
+            <div id="toolbar">
+                <div class="btn-group">
+                    <a href="javascript:void(0)" class="btnStyle serchBtn" id="queryBtn">Query</a>
+                    <a href="javascript:void(0)" class="btnStyle exportBtn" onclick="exportDetailSum()">Export</a>
+                    <a href="javascript:void(0)" class="btnStyle resetBtn" onclick="resetData(this)">Reset</a>
+                </div>
+            </div>
+        </div>
+        <div region="center" style="border:0px;  overflow-y: hidden;  margin-top: -2px;">
+            <table id="odsPdInfoDtlGrid" style="width:100%;"></table>
+        </div>
+    </div>
+    <!-- 添加窗口 -->
+    <div id="addOrderWin" 
+         data-options="modal:true,closed:true,iconCls:'icon-add', top:25, left:($(window).width() - 500) * 0.5,collapsible:false,minimizable:false,maximizable:false,draggable:true,resizable:false"
+         style="width: 500px; height: 370px; display:none">
+        <div class="easyui-layout" data-options="fit : true">
+            <div data-options="region:'center',border:false"  style="overflow-y: hidden" >
+                <div class="formatStyle" data-options="region:'center',border:false" >
+                    
+
+                    <table id="dtlGrid"></table>
+                </div>
+            </div>
+            <div data-options="region:'south',border:false"
+                 style="text-align: right; padding: 1px; height: 37px">
+                <a href="javascript:void(0)" class="btnStyle closeBtn" id="cancelBtn" onclick="javascript:$('#addOrderWin').window('close');">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var totalWidth = $('#odsPdInfoDtlGrid').width();
+    
+    // set width of column 
+	function fixWidth(percent) { 
+    	return totalWidth * percent;   
+	}
+    $(function(){
+        $('#stockDeSumDiv').height(suitHeight);
+      	//初始化日期
+        var date=new Date();
+        var y=date.getFullYear();
+        var m=date.getMonth()+1;
+        var d=date.getDate();
+        date=y+"-"+( m< 10 ? '0' + m : m)+"-"+( d< 10 ? '0' + d : d);
+        $('#begin').val(getLastRq(date,-7));
+        $('#end').val(date);
+        var templateColumns = [ [ {
+            field : 'ck',
+            checkbox : true,
+            width: fixWidth(0.01),
+            align : 'center'
+        }, {
+            field : 'orderNo',
+            title : 'Order No',
+            width: fixWidth(0.08),
+            align : 'center',
+            sortable : true
+        }, {
+            field : 'plantName',
+            title : 'Warehouse',
+            align : 'center',
+            width: fixWidth(0.15),
+            sortable : true
+        }, {
+            field : 'location',
+            title : 'Location',
+            align : 'center',
+            width: fixWidth(0.08),
+            sortable : true
+        },
+       /* <s:if test="#parameters.showSubLoc">
+        , {
+            field : 'subLocation',
+            title : 'subLocation',
+            align : 'center',
+            sortable : true
+        }   
+        , {
+            field : 'qty',
+            title : 'Sub Physical Qty',
+            align : 'right',
+            sortable : true
+        },
+        </s:if>*/
+         {
+            field : 'locqty',
+            title : 'Location Physical Count QTY',
+            align : 'center',
+            width: fixWidth(0.18),
+            sortable : true
+        }, {
+            field : 'wmsqty',
+            title : 'WMS Qty',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        }, {
+            field : 'sapqty',
+            title : 'SAP Qty',
+            align : 'center',
+            width: fixWidth(0.07),
+            sortable : true
+        }, {
+            field : 'materialNo',
+            title : 'Material No',
+            align : 'center',
+            width: fixWidth(0.09),
+            sortable : true
+        }, {
+            field : 'materialDesp',
+            title : 'Material Description',
+            align : 'left',
+            hidden: true,
+            sortable : true
+        } ] ];
+        
+        var grid = $('#odsPdInfoDtlGrid').datagrid({
+            rownumbers:true,
+            columns:templateColumns,
+            pagination:true,
+            striped:true,
+            pageNumber : 1,
+            fit:true,
+            singleSelect:true,
+            //url:'/stocktakingOrderDtlSum/list',
+            method:'post',
+            queryParams : {
+                                'begin' : $('#begin').val(),
+                                'end' : $('#end').val()
+                            },
+            onLoadError:function(){
+               $.messager.alert('System Information','Network Abnormal!','warning');
+            },
+           /* onLoadSuccess:function(){
+            	 //添加合计行并合并该行3列
+	             $('#odsPdInfoDtlGrid').datagrid('appendRow', {
+	                orderNo:"Total Qty:",
+	                locqty:compute("locqty"),
+	                wmsqty:compute("wmsqty"),
+	                sapqty:compute("sapqty")    
+	            });
+				var rowLeng=$('#odsPdInfoDtlGrid').datagrid('getRows').length;
+				$('#odsPdInfoDtlGrid').datagrid('mergeCells', {
+						index : rowLeng-1,
+						field : "orderNo",
+						rowspan : null,
+						colspan : 2
+				});
+				$("input[type='checkbox']")[rowLeng].remove();//计算除标题行checkbox外
+				$(".datagrid-td-merged div").css("text-align","right");
+				$(this).datagrid("fixRownumber");
+            }*/
+        });
+        initPagination(grid);
+        gridScroll(grid);
+        $('#queryBtn').on('click',function(){
+            searchOdsPdInfoDtl();
+        })
+    });
+    function compute(colName) {
+            var rows = $('#odsPdInfoDtlGrid').datagrid('getRows');
+            var total = 0;
+            for (var i = 0; i < rows.length; i++) {
+                total += parseFloat(rows[i][colName]);
+            }
+            return total;
+    }
+     /*查询*/
+    function searchOdsPdInfoDtl() {
+        /*var orderNo=$('#orderNo').val();
+        if(orderNo==null||orderNo==''){
+            $.messager.alert('System Information',
+                             "Please Input The Order No !",
+                             'warning');
+            return;
+        }*/
+       var grid= $('#odsPdInfoDtlGrid')
+                .datagrid(
+                        {
+                            url : '/stocktakingOrderDtlSum/list',
+                            queryParams : {
+                                'orderNo' : $('#orderNo').val(),
+                                'materialNo' : $('#materialNo').val(),
+                                'flag' : '0',
+                                'begin':$('#begin').val(),
+                                'end':$('#end').val()
+                            },
+                            singleSelect:true,
+                            onLoadSuccess : function(data) {
+                                if (data.total == 0 && data.rows.length == 0) {
+                                    $.messager
+                                            .alert(
+                                                    'System Information',
+                                                    'No records found.',
+                                                    'warning');
+                                    gridScroll(grid);
+                                }
+                               /*  $('#odsPdInfoDtlGrid').datagrid('appendRow', {
+                                	     orderNo:"Total Qty:",
+						                 locqty:compute("locqty"),
+						                 wmsqty:compute("wmsqty"),
+						                 sapqty:compute("sapqty")    
+						            });
+						            var rowLeng=$('#odsPdInfoDtlGrid').datagrid('getRows').length;
+						            $('#odsPdInfoDtlGrid').datagrid('mergeCells', {
+										index : rowLeng-1,
+										field : "orderNo",
+										rowspan : null,
+										colspan : 2
+									});
+									$("input[type='checkbox']")[rowLeng].remove();
+									$(".datagrid-td-merged div").css("text-align","right");
+									$(this).datagrid("fixRownumber");*/
+                            }
+                           /* onClickCell:function(index,field,value){
+                            	
+                            		if(field=='materialNo'){
+                                        
+                                        url='/stocktakingOrderDtlSum/materialqtyDetail';
+                                        mateiralDetail($('#odsPdInfoDtlGrid').datagrid('getRows')[index].orderNo,$('#odsPdInfoDtlGrid').datagrid('getRows')[index].materialNo,$('#odsPdInfoDtlGrid').datagrid('getRows')[index].plant,url);
+	                                }
+                            	
+                               
+                            }*/
+                        });
+        initPagination(grid);
+    }
+    function mateiralDetail(orderNo,materialNo,plant,url){
+            var qtyDetailCol=[[{
+                    field:'location',
+                    title:'Location',
+                    align:'center',
+                    sortable:true,
+                    width:90
+                },{
+                    field : 'locqty',
+                    title : 'Location Physical Count QTY',
+                    align : 'center',
+                    sortable : true
+                }, {
+                    field : 'wmsqty',
+                    title : 'WMS Qty',
+                    align : 'center',
+                    sortable : true,
+                    width:90
+                }, {
+                    field : 'sapqty',
+                    title : 'SAP Qty',
+                    align : 'center',
+                    sortable : true,
+                    width:90
+                }]];
+            var dgrid=$('#dtlGrid').datagrid({
+                height:295,
+                columns:qtyDetailCol,
+                //pagination:true,
+                striped:true,
+                //pageNumber : 1,
+                url:url,
+                queryParams:{
+                    orderNo:orderNo,
+                    plant:plant,
+                    materialNo:materialNo
+                }
+            });
+            //initPagination(dgrid);
+            $('#addOrderWin').show();
+            $('#addOrderWin').window({
+                title:'Detail'
+            });
+            $('#addOrderWin').window('open');
+    }
+    
+    function exportDetailSum(){
+        /*var url='/stocktakingOrderDtl/exportSum?orderNo='+$('#orderNo').val()
+                    +'&materialNo='+$('#materialNo').val()
+                    +'&flag=0
+                    +'&begin='+$('#begin').val()
+                    +'&end='+$('#end').val();
+        window.location.href=url;*/
+        
+    	$.ajax({
+        	url:'/stocktakingOrderDtl/searchPdDetailSumAmount',
+        	type:'post',
+        	dataType:'json',
+        	data:{
+        		orderNo:$('#orderNo').val(),
+        		materialNo:$('#materialNo').val(),
+        		flag:0,
+        		begin:$('#begin').val(),
+        		end:$('#end').val()
+        	},
+        	success:function(data) {
+        		if (data == "success") {
+        			var url='/stocktakingOrderDtl/exportSum?orderNo='+$('#orderNo').val()
+                    +'&materialNo='+$('#materialNo').val()
+                    +'&flag=0
+                    +'&begin='+$('#begin').val()
+                    +'&end='+$('#end').val();
+        			window.location.href=url;
+        		}else {
+        			$.messager.alert('System Information',data,	'warning');
+        		}
+        	}
+        });
+    }
+    </script>
+{{/component}}
